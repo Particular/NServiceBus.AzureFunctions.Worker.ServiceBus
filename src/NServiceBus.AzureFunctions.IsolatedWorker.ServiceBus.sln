@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus", "NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus\NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus.csproj", "{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus", "NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus\NServiceBus.AzureFunctions.IsolatedWorker.ServiceBus.csproj", "{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{2E438257-CC58-44A6-8918-07AFDE140F36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "test", "test\test.csproj", "{2E438257-CC58-44A6-8918-07AFDE140F36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.AzureFunctions.SourceGenerator", "NServiceBus.AzureFunctions.SourceGenerator\NServiceBus.AzureFunctions.SourceGenerator.csproj", "{C846C538-ECA7-45F2-BE6E-C1A5EA954332}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{2E438257-CC58-44A6-8918-07AFDE140F36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E438257-CC58-44A6-8918-07AFDE140F36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E438257-CC58-44A6-8918-07AFDE140F36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
