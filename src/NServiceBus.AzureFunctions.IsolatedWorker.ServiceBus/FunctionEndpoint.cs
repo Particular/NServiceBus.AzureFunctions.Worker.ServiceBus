@@ -22,7 +22,7 @@
             endpointFactory = _ => externallyManagedContainerEndpoint.Start(serviceProvider);
         }
 
-
+        /// <inheritdoc />
         public async Task Process(byte[] body, IDictionary<string, string> headers, FunctionContext executionContext)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
@@ -38,7 +38,7 @@
 
         internal static async Task Process(byte[] body, IDictionary<string, string> headers, FunctionContext functionContext, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
         {
-            body = body ?? new byte[0]; // might be null
+            body ??= new byte[0]; // might be null
             var bindingContext = functionContext.BindingContext;
             var messageId = bindingContext.GetMessageId();
 
@@ -94,16 +94,11 @@
                     new ContextBag());
         }
 
-        /// <summary>
-        /// Allows to forcefully initialize the endpoint if it hasn't been initialized yet.
-        /// </summary>
-        /// <param name="executionContext">The execution context.</param>
-        /// <param name="token">The cancellation token or default cancellation token.</param>
-        async Task InitializeEndpointIfNecessary(FunctionExecutionContext executionContext, CancellationToken token = default)
+        async Task InitializeEndpointIfNecessary(FunctionExecutionContext executionContext, CancellationToken cancellationToken)
         {
             if (pipeline == null)
             {
-                await semaphoreLock.WaitAsync(token).ConfigureAwait(false);
+                await semaphoreLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     if (pipeline == null)
@@ -220,7 +215,7 @@
 
             var functionExecutionContext = new FunctionExecutionContext(executionContext);
 
-            await InitializeEndpointIfNecessary(functionExecutionContext).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionExecutionContext, CancellationToken.None).ConfigureAwait(false);
         }
 
         readonly Func<FunctionExecutionContext, Task<IEndpointInstance>> endpointFactory;
