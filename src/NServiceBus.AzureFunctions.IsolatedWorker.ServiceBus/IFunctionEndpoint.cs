@@ -14,7 +14,14 @@
         /// <summary>
         /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
         /// </summary>
-        Task Process(byte[] body, IDictionary<string, string> headers, FunctionContext executionContext);
+        Task Process(
+            byte[] body,
+            IDictionary<string, string> userProperties,
+            string messageId,
+            int deliveryCount,
+            string replyTo,
+            string correlationId,
+            FunctionContext functionContext);
 
         /// <summary>
         /// Sends the provided message.

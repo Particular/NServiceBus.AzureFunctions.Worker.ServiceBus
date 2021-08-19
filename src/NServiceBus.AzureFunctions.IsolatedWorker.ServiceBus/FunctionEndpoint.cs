@@ -23,24 +23,36 @@
         }
 
         /// <inheritdoc />
-        public async Task Process(byte[] body, IDictionary<string, string> headers, FunctionContext executionContext)
+        public async Task Process(
+            byte[] body,
+            IDictionary<string, string> userProperties,
+            string messageId,
+            int deliveryCount,
+            string replyTo,
+            string correlationId,
+            FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            var functionExecutionContext = new FunctionExecutionContext(executionContext);
-
-            await InitializeEndpointIfNecessary(functionExecutionContext, CancellationToken.None)
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, headers, executionContext, NoTransactionStrategy.Instance, pipeline)
+            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline)
                 .ConfigureAwait(false);
         }
 
-        internal static async Task Process(byte[] body, IDictionary<string, string> headers, FunctionContext functionContext, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
+        internal static async Task Process(
+            byte[] body,
+            IDictionary<string, string> userProperties,
+            string messageId,
+            int deliveryCount,
+            string replyTo,
+            string correlationId,
+            ITransactionStrategy transactionStrategy,
+            PipelineInvoker pipeline)
         {
             body ??= new byte[0]; // might be null
-            var bindingContext = functionContext.BindingContext;
-            var messageId = bindingContext.GetMessageId();
+            messageId ??= Guid.NewGuid().ToString("N");
 
             try
             {
@@ -63,11 +75,11 @@
                     var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
                     var errorContext = new ErrorContext(
                         exception,
-                        new Dictionary<string, string>(headers), //TODO need to enhance headers, see GetHeaders extension
+                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
                         messageId,
                         body,
                         transportTransaction,
-                        int.Parse(bindingContext.BindingData["DeliveryCount"] as string ?? "1"),
+                        deliveryCount,
                         new ContextBag());
 
                     var errorHandleResult = await pipeline.PushFailedMessage(errorContext).ConfigureAwait(false);
@@ -87,14 +99,14 @@
             MessageContext CreateMessageContext(TransportTransaction transportTransaction) =>
                 new MessageContext(
                     messageId,
-                    new Dictionary<string, string>(headers), //TODO need to enhance headers, see GetHeaders extension
+                    CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
                     body,
                     transportTransaction,
                     new CancellationTokenSource(),
                     new ContextBag());
         }
 
-        async Task InitializeEndpointIfNecessary(FunctionExecutionContext executionContext, CancellationToken cancellationToken)
+        async Task InitializeEndpointIfNecessary(FunctionContext functionContext, CancellationToken cancellationToken)
         {
             if (pipeline == null)
             {
@@ -103,7 +115,7 @@
                 {
                     if (pipeline == null)
                     {
-                        endpoint = await endpointFactory(executionContext).ConfigureAwait(false);
+                        endpoint = await endpointFactory(functionContext).ConfigureAwait(false);
 
                         pipeline = configuration.PipelineInvoker;
                     }
@@ -114,7 +126,6 @@
                 }
             }
         }
-
 
         /// <inheritdoc />
         public async Task Send(object message, SendOptions options, FunctionContext executionContext)
@@ -208,17 +219,33 @@
             await endpoint.Unsubscribe(eventType).ConfigureAwait(false);
         }
 
-        async Task InitializeEndpointUsedOutsideHandlerIfNecessary(FunctionContext executionContext)
+        async Task InitializeEndpointUsedOutsideHandlerIfNecessary(FunctionContext functionContext)
         {
             //TODO might also pass the logger factory instead of using a single logger category
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            var functionExecutionContext = new FunctionExecutionContext(executionContext);
-
-            await InitializeEndpointIfNecessary(functionExecutionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
         }
 
-        readonly Func<FunctionExecutionContext, Task<IEndpointInstance>> endpointFactory;
+        static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
+        {
+            var d = new Dictionary<string, string>(userProperties);
+            d.Remove("NServiceBus.Transport.Encoding");
+
+            if (!string.IsNullOrWhiteSpace(replyTo))
+            {
+                d.TryAdd(Headers.ReplyToAddress, replyTo);
+            }
+
+            if (!string.IsNullOrWhiteSpace(correlationId))
+            {
+                d.TryAdd(Headers.CorrelationId, correlationId);
+            }
+
+            return d;
+        }
+
+        readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;
 
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         ServiceBusTriggeredEndpointConfiguration configuration;
