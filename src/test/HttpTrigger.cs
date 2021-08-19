@@ -18,7 +18,7 @@
 
         [Function("HttpSender")]
         public async Task<HttpResponseData> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req, 
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req,
             FunctionContext executionContext)
         {
             var logger = executionContext.GetLogger<HttpTrigger>();

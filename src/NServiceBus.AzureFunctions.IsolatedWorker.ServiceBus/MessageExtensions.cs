@@ -18,7 +18,7 @@
 
             headers.Remove("NServiceBus.Transport.Encoding");
 
-            if(bindingContext.BindingData.TryGetValue("ReplyTo", out var replyTo)
+            if (bindingContext.BindingData.TryGetValue("ReplyTo", out var replyTo)
                && !string.IsNullOrWhiteSpace(replyTo as string))
             {
                 headers[Headers.ReplyToAddress] = (string)replyTo;

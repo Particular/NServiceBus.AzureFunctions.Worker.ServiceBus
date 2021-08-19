@@ -5,7 +5,7 @@
     using Microsoft.Extensions.Hosting;
 
     /// <summary>
-    /// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IFunctionsHostBuilder"/>.
+    /// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IHostBuilder"/>.
     /// </summary>
     public static class FunctionsHostBuilderExtensions
     {

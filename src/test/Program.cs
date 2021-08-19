@@ -1,7 +1,6 @@
-using Microsoft.Extensions.Hosting;
-
 namespace test
 {
+    using Microsoft.Extensions.Hosting;
     using NServiceBus;
 
     public class Program
