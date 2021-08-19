@@ -1,3 +1,7 @@
+using NServiceBus;
+
+[assembly: NServiceBusTriggerFunction("ASBTriggerQueue")]
+
 namespace test
 {
     using Microsoft.Extensions.Hosting;
