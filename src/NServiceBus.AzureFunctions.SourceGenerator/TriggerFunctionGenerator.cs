@@ -98,7 +98,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using NServiceBus;
 
-public class Function1
+public class FunctionEndpointTrigger
 {{
     IFunctionEndpoint endpoint;
 
