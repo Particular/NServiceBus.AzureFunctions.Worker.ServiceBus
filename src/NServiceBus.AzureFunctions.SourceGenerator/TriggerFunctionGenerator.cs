@@ -102,7 +102,7 @@ public class FunctionEndpointTrigger
 {{
     IFunctionEndpoint endpoint;
 
-        public Function1(IFunctionEndpoint endpoint)
+        public FunctionEndpointTrigger(IFunctionEndpoint endpoint)
         {{
             this.endpoint = endpoint;
         }}
