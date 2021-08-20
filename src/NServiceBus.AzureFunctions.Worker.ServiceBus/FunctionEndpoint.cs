@@ -222,7 +222,7 @@
         async Task InitializeEndpointUsedOutsideHandlerIfNecessary(FunctionContext functionContext)
         {
             //TODO might also pass the logger factory instead of using a single logger category
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
+            //FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
         }

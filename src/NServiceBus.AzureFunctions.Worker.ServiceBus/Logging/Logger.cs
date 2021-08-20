@@ -14,11 +14,16 @@
             this.logger = logger;
         }
 
-        public bool IsDebugEnabled => logger.Value?.IsEnabled(LogLevel.Debug) ?? true;
-        public bool IsInfoEnabled => logger.Value?.IsEnabled(LogLevel.Information) ?? true;
-        public bool IsWarnEnabled => logger.Value?.IsEnabled(LogLevel.Warning) ?? true;
-        public bool IsErrorEnabled => logger.Value?.IsEnabled(LogLevel.Error) ?? true;
-        public bool IsFatalEnabled => logger.Value?.IsEnabled(LogLevel.Critical) ?? true;
+        //public bool IsDebugEnabled => logger.Value?.IsEnabled(LogLevel.Debug) ?? true;
+        //public bool IsInfoEnabled => logger.Value?.IsEnabled(LogLevel.Information) ?? true;
+        //public bool IsWarnEnabled => logger.Value?.IsEnabled(LogLevel.Warning) ?? true;
+        //public bool IsErrorEnabled => logger.Value?.IsEnabled(LogLevel.Error) ?? true;
+        //public bool IsFatalEnabled => logger.Value?.IsEnabled(LogLevel.Critical) ?? true;
+        public bool IsDebugEnabled => true;
+        public bool IsInfoEnabled => true;
+        public bool IsWarnEnabled => true;
+        public bool IsErrorEnabled => true;
+        public bool IsFatalEnabled => true;
 
         void Log(LogLevel level, string message)
         {
