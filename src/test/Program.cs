@@ -1,4 +1,4 @@
-using NServiceBus;
+//using NServiceBus;
 
 //[assembly: NServiceBusTriggerFunction("ASBTriggerQueue", TriggerFunctionName = "TestFunction")]
 
