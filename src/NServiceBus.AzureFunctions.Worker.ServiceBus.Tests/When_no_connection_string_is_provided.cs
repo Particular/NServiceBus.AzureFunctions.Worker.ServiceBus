@@ -14,6 +14,7 @@
             var endpointConfiguration = new EndpointConfiguration("SampleEndpoint");
 
             endpointConfiguration.UseTransport<ServerlessTransport<AzureServiceBusTransport>>();
+            endpointConfiguration.AssemblyScanner().ThrowExceptions = false; // ignore R#/Rider assembly loading issue with nunit.engine.dll
 
             var exception = Assert.ThrowsAsync<Exception>(
                 () => Endpoint.Create(endpointConfiguration),
