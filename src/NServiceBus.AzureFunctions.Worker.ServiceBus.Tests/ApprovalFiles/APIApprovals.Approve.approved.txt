@@ -19,7 +19,9 @@ namespace NServiceBus
     }
     public static class FunctionsHostBuilderExtensions
     {
+        public static void UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder) { }
         public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Func<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+        public static void UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Func<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
     }
     public interface IFunctionEndpoint
     {
