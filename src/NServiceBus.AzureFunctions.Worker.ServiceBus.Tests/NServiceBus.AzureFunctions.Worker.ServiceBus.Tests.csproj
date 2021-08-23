@@ -22,12 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
-    <ProjectReference Include="..\Testing.Handlers\Testing.Handlers.csproj" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <None Include="..\Testing.Handlers\bin\$(Configuration)\netstandard2.0\Testing.Handlers.dll" Link="Testing.Handlers.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
