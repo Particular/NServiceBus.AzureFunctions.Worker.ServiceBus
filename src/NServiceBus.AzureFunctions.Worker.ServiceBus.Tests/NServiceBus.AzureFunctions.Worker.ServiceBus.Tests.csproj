@@ -27,7 +27,7 @@
 
 
   <ItemGroup>
-    <None Include="..\Testing.Handlers\bin\$(Configuration)\netstandard2.0\Testing.Handlers.dll" Link="ExternalHandlers\Testing.Handlers.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Testing.Handlers\bin\$(Configuration)\netstandard2.0\Testing.Handlers.dll" Link="Testing.Handlers.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
