@@ -13,10 +13,12 @@
         /// <summary>
         /// Use the IConfiguration to configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public static void UseNServiceBus(
+        public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder)
         {
             hostBuilder.UseNServiceBus(config => new ServiceBusTriggeredEndpointConfiguration(config));
+
+            return hostBuilder;
         }
 
         /// <summary>
@@ -34,10 +36,13 @@
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public static void UseNServiceBus(
+        public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
-            Func<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory) =>
+            Func<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        {
             RegisterEndpointFactory(hostBuilder, configurationFactory);
+            return hostBuilder;
+        }
 
         static void RegisterEndpointFactory(IHostBuilder hostBuilder,
             Func<IConfiguration, ServiceBusTriggeredEndpointConfiguration> serviceBusTriggeredEndpointConfigurationFactory)
