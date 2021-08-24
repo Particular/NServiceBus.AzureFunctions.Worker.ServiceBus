@@ -11,7 +11,6 @@
   <ItemGroup>
     <PackageReference Include="NServiceBus" Version="7.*" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="4.2.1" />
-    <!--<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.0.3" OutputItemType="Analyzer" />-->
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.4.0" />
     <PackageReference Include="NServiceBus.Extensions.DependencyInjection" Version="[1.0.1, 2.0.0)" />
     <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="[1.9.0, 2.0.0)" />
