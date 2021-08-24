@@ -131,7 +131,7 @@ using NServiceBus;
         {
             // For the unit tests to work, the compilation used by the source generator needs to know that NServiceBusTriggerFunction
             // is an attribute from NServiceBus namespace and its full name is NServiceBus.NServiceBusTriggerFunctionAttribute.
-            // By referencing NServiceBusTriggerFunctionAttribute here, NServiceBus.AzureFunctions.InProcess.ServiceBus is forced to load and participate in the compilation.
+            // By referencing NServiceBusTriggerFunctionAttribute here, NServiceBus.AzureFunctions.Worker.ServiceBus is forced to load and participate in the compilation.
             _ = new NServiceBusTriggerFunctionAttribute(endpointName: "test");
         }
 
