@@ -128,82 +128,82 @@
         }
 
         /// <inheritdoc />
-        public async Task Send(object message, SendOptions options, FunctionContext executionContext)
+        public async Task Send(object message, SendOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Send(message, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Send(object message, FunctionContext executionContext)
-            => Send(message, new SendOptions(), executionContext);
+        public Task Send(object message, FunctionContext functionContext)
+            => Send(message, new SendOptions(), functionContext);
 
         /// <inheritdoc />
-        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext executionContext)
+        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Send(messageConstructor, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Send<T>(Action<T> messageConstructor, FunctionContext executionContext)
-            => Send(messageConstructor, new SendOptions(), executionContext);
+        public Task Send<T>(Action<T> messageConstructor, FunctionContext functionContext)
+            => Send(messageConstructor, new SendOptions(), functionContext);
 
         /// <inheritdoc />
-        public async Task Publish(object message, PublishOptions options, FunctionContext executionContext)
+        public async Task Publish(object message, PublishOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Publish(message, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Publish(object message, FunctionContext executionContext)
-            => Publish(message, new PublishOptions(), executionContext);
+        public Task Publish(object message, FunctionContext functionContext)
+            => Publish(message, new PublishOptions(), functionContext);
 
         /// <inheritdoc />
-        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext executionContext)
+        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Publish(messageConstructor, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Publish<T>(Action<T> messageConstructor, FunctionContext executionContext)
-            => Publish(messageConstructor, new PublishOptions(), executionContext);
+        public Task Publish<T>(Action<T> messageConstructor, FunctionContext functionContext)
+            => Publish(messageConstructor, new PublishOptions(), functionContext);
 
         /// <inheritdoc />
-        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext executionContext)
+        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Subscribe(eventType, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Subscribe(Type eventType, FunctionContext executionContext)
-            => Subscribe(eventType, new SubscribeOptions(), executionContext);
+        public Task Subscribe(Type eventType, FunctionContext functionContext)
+            => Subscribe(eventType, new SubscribeOptions(), functionContext);
 
         /// <inheritdoc />
-        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext executionContext)
+        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext functionContext)
         {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Unsubscribe(eventType, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Unsubscribe(Type eventType, FunctionContext executionContext)
-            => Unsubscribe(eventType, new UnsubscribeOptions(), executionContext);
+        public Task Unsubscribe(Type eventType, FunctionContext functionContext)
+            => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext);
 
         static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
         {
