@@ -130,8 +130,9 @@
         /// <inheritdoc />
         public async Task Send(object message, SendOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Send(message, options).ConfigureAwait(false);
         }
 
@@ -142,8 +143,9 @@
         /// <inheritdoc />
         public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Send(messageConstructor, options).ConfigureAwait(false);
         }
 
@@ -154,8 +156,9 @@
         /// <inheritdoc />
         public async Task Publish(object message, PublishOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Publish(message, options).ConfigureAwait(false);
         }
 
@@ -166,8 +169,9 @@
         /// <inheritdoc />
         public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Publish(messageConstructor, options).ConfigureAwait(false);
         }
 
@@ -178,8 +182,9 @@
         /// <inheritdoc />
         public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Subscribe(eventType, options).ConfigureAwait(false);
         }
 
@@ -190,21 +195,15 @@
         /// <inheritdoc />
         public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext executionContext)
         {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(executionContext.GetLogger("NServiceBus"));
 
+            await InitializeEndpointIfNecessary(executionContext, CancellationToken.None).ConfigureAwait(false);
             await endpoint.Unsubscribe(eventType, options).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public Task Unsubscribe(Type eventType, FunctionContext executionContext)
             => Unsubscribe(eventType, new UnsubscribeOptions(), executionContext);
-
-        async Task InitializeEndpointUsedOutsideHandlerIfNecessary(FunctionContext functionContext)
-        {
-            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
-
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-        }
 
         static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
         {
