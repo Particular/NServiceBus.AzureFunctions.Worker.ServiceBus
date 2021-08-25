@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.ServiceBus", "NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj", "{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "test", "test\test.csproj", "{2E438257-CC58-44A6-8918-07AFDE140F36}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.SourceGenerator", "NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj", "{C846C538-ECA7-45F2-BE6E-C1A5EA954332}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests", "NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests\NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests.csproj", "{793A80ED-4B49-49C6-BBC9-DB1C31EC8E0C}"
@@ -23,10 +21,6 @@ Global
 		{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AD2504C-6FCC-4BDD-A718-AF047D5BBB14}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2E438257-CC58-44A6-8918-07AFDE140F36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E438257-CC58-44A6-8918-07AFDE140F36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E438257-CC58-44A6-8918-07AFDE140F36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E438257-CC58-44A6-8918-07AFDE140F36}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C846C538-ECA7-45F2-BE6E-C1A5EA954332}.Release|Any CPU.ActiveCfg = Release|Any CPU
