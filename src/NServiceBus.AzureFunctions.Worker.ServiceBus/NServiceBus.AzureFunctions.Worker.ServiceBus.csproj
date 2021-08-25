@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <NoWarn>$(NoWarn);PS0018</NoWarn>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NServiceBus" Version="7.*" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="4.2.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.4.0" />
+    <PackageReference Include="NServiceBus.Extensions.DependencyInjection" Version="[1.0.1, 2.0.0)" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="[1.9.0, 2.0.0)" />
+    <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="[2.3.0, 3.0.0)" />
+    <PackageReference Include="Particular.Packaging" Version="1.2.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="AddSourceGeneratorToPackage" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="00240000048000009400000006020000002400005253413100040000010001007f16e21368ff041183fab592d9e8ed37e7be355e93323147a1d29983d6e591b04282e4da0c9e18bd901e112c0033925eb7d7872c2f1706655891c5c9d57297994f707d16ee9a8f40d978f064ee1ffc73c0db3f4712691b23bf596f75130f4ec978cf78757ec034625a5f27e6bb50c618931ea49f6f628fd74271c32959efb1c5" />
+  </ItemGroup>
+
+</Project>
