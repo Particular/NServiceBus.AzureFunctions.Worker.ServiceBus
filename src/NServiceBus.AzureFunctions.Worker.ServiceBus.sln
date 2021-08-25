@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "test", "test\test.csproj", "{2E438257-CC58-44A6-8918-07AFDE140F36}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.SourceGenerator", "NServiceBus.AzureFunctions.SourceGenerator\NServiceBus.AzureFunctions.SourceGenerator.csproj", "{C846C538-ECA7-45F2-BE6E-C1A5EA954332}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.SourceGenerator", "NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj", "{C846C538-ECA7-45F2-BE6E-C1A5EA954332}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.SourceGenerator.Tests", "NServiceBus.AzureFunctions.SourceGenerator.Tests\NServiceBus.AzureFunctions.SourceGenerator.Tests.csproj", "{793A80ED-4B49-49C6-BBC9-DB1C31EC8E0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests", "NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests\NServiceBus.AzureFunctions.Worker.SourceGenerator.Tests.csproj", "{793A80ED-4B49-49C6-BBC9-DB1C31EC8E0C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.ServiceBus.Tests", "NServiceBus.AzureFunctions.Worker.ServiceBus.Tests\NServiceBus.AzureFunctions.Worker.ServiceBus.Tests.csproj", "{F633D697-A8E6-49E2-8ACE-28598B5839A8}"
 EndProject
