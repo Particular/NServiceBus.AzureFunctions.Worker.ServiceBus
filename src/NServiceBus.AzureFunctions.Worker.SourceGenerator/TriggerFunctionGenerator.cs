@@ -9,7 +9,7 @@
     public class TriggerFunctionGenerator : ISourceGenerator
     {
         internal static readonly DiagnosticDescriptor InvalidEndpointNameError = new DiagnosticDescriptor(
-            id: "NSBFUNC001",
+            id: "NSBWFUNC 001",
             title: "Invalid Endpoint Name",
             messageFormat: "Endpoint name is invalid and cannot be used to generate trigger function",
             category: "TriggerFunctionGenerator",
@@ -17,7 +17,7 @@
             isEnabledByDefault: true);
 
         internal static readonly DiagnosticDescriptor InvalidTriggerFunctionNameError = new DiagnosticDescriptor(
-            id: "NSBFUNC002",
+            id: "NSBWFUNC 002",
             title: "Invalid Trigger Function Name",
             messageFormat: "Trigger function name is invalid and cannot be used to generate trigger function",
             category: "TriggerFunctionGenerator",
