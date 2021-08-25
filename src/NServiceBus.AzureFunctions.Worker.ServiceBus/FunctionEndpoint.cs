@@ -137,9 +137,7 @@
 
         /// <inheritdoc />
         public Task Send(object message, FunctionContext executionContext)
-        {
-            return Send(message, new SendOptions(), executionContext);
-        }
+            => Send(message, new SendOptions(), executionContext);
 
         /// <inheritdoc />
         public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext executionContext)
@@ -151,9 +149,7 @@
 
         /// <inheritdoc />
         public Task Send<T>(Action<T> messageConstructor, FunctionContext executionContext)
-        {
-            return Send(messageConstructor, new SendOptions(), executionContext);
-        }
+            => Send(messageConstructor, new SendOptions(), executionContext);
 
         /// <inheritdoc />
         public async Task Publish(object message, PublishOptions options, FunctionContext executionContext)
@@ -164,6 +160,10 @@
         }
 
         /// <inheritdoc />
+        public Task Publish(object message, FunctionContext executionContext)
+            => Publish(message, new PublishOptions(), executionContext);
+
+        /// <inheritdoc />
         public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext executionContext)
         {
             await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
@@ -172,20 +172,8 @@
         }
 
         /// <inheritdoc />
-        public async Task Publish(object message, FunctionContext executionContext)
-        {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
-
-            await endpoint.Publish(message).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task Publish<T>(Action<T> messageConstructor, FunctionContext executionContext)
-        {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
-
-            await endpoint.Publish(messageConstructor).ConfigureAwait(false);
-        }
+        public Task Publish<T>(Action<T> messageConstructor, FunctionContext executionContext)
+            => Publish(messageConstructor, new PublishOptions(), executionContext);
 
         /// <inheritdoc />
         public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext executionContext)
@@ -196,12 +184,8 @@
         }
 
         /// <inheritdoc />
-        public async Task Subscribe(Type eventType, FunctionContext executionContext)
-        {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
-
-            await endpoint.Subscribe(eventType).ConfigureAwait(false);
-        }
+        public Task Subscribe(Type eventType, FunctionContext executionContext)
+            => Subscribe(eventType, new SubscribeOptions(), executionContext);
 
         /// <inheritdoc />
         public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext executionContext)
@@ -212,17 +196,12 @@
         }
 
         /// <inheritdoc />
-        public async Task Unsubscribe(Type eventType, FunctionContext executionContext)
-        {
-            await InitializeEndpointUsedOutsideHandlerIfNecessary(executionContext).ConfigureAwait(false);
-
-            await endpoint.Unsubscribe(eventType).ConfigureAwait(false);
-        }
+        public Task Unsubscribe(Type eventType, FunctionContext executionContext)
+            => Unsubscribe(eventType, new UnsubscribeOptions(), executionContext);
 
         async Task InitializeEndpointUsedOutsideHandlerIfNecessary(FunctionContext functionContext)
         {
-            //TODO might also pass the logger factory instead of using a single logger category
-            //FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
+            FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
         }
