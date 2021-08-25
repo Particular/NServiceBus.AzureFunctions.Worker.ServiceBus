@@ -5,7 +5,7 @@
 
     class ServerlessRecoverabilityPolicy
     {
-        public bool SendFailedMessagesToErrorQueue { get; set; }
+        public bool SendFailedMessagesToErrorQueue { get; set; } = true;
 
         public RecoverabilityAction Invoke(RecoverabilityConfig config, ErrorContext errorContext)
         {

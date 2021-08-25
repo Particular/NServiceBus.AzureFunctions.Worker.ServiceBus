@@ -15,7 +15,7 @@ namespace test
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices(collection => collection.AddLogging())
-                .UseNServiceBus(() => new ServiceBusTriggeredEndpointConfiguration("ASBTriggerQueue"))
+                .UseNServiceBus("ASBTriggerQueue")
                 .Build();
 
             host.Run();

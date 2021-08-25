@@ -19,9 +19,8 @@ namespace NServiceBus
     }
     public static class FunctionsHostBuilderExtensions
     {
-        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder) { }
-        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Func<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
-        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Func<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configuration = null) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, string endpointName, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configuration = null) { }
     }
     public interface IFunctionEndpoint
     {
@@ -48,17 +47,13 @@ namespace NServiceBus
     }
     public class ServiceBusTriggeredEndpointConfiguration
     {
-        public ServiceBusTriggeredEndpointConfiguration(Microsoft.Extensions.Configuration.IConfiguration configuration) { }
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName) { }
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName, Microsoft.Extensions.Configuration.IConfiguration configuration = null) { }
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName, string connectionStringName = null) { }
-        public NServiceBus.EndpointConfiguration AdvancedConfiguration { get; }
-        public NServiceBus.TransportExtensions<NServiceBus.AzureServiceBusTransport> Transport { get; }
+        public void Advanced(System.Action<NServiceBus.EndpointConfiguration> advancedConfiguration) { }
+        public void ConfigureTransport(System.Action<NServiceBus.TransportExtensions<NServiceBus.AzureServiceBusTransport>> configureTransport) { }
         public void DoNotSendMessagesToErrorQueue() { }
         public void LogDiagnostics() { }
-        public NServiceBus.Serialization.SerializationExtensions<T> UseSerialization<T>()
+        public void Routing(System.Action<NServiceBus.RoutingSettings> configureRouting) { }
+        public void ServiceBusConnectionString(string connectionString) { }
+        public void UseSerialization<T>(System.Action<NServiceBus.Serialization.SerializationExtensions<T>> advancedConfiguration = null)
             where T : NServiceBus.Serialization.SerializationDefinition, new () { }
-        protected NServiceBus.TransportExtensions<TTransport> UseTransport<TTransport>()
-            where TTransport : NServiceBus.Transport.TransportDefinition, new () { }
     }
 }

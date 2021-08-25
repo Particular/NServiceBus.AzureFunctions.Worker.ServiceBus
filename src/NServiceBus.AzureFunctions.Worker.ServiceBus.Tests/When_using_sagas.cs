@@ -29,7 +29,7 @@
             public SendingFunction()
             {
                 CustomizeConfiguration = configuration =>
-                    configuration.AdvancedConfiguration.UsePersistence<LearningPersistence>();
+                    configuration.Advanced(endpointConfiguration => endpointConfiguration.UsePersistence<LearningPersistence>());
 
                 var correlationProperty = Guid.NewGuid().ToString("N");
                 Messages.Add(new StartSagaMessage { CorrelationProperty = correlationProperty });

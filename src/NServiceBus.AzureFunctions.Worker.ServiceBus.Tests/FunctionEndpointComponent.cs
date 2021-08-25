@@ -57,7 +57,8 @@
             public override Task Start(CancellationToken token)
             {
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name);
-                var endpointConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
+                configurationCustomization(functionEndpointConfiguration);
+                var endpointConfiguration = functionEndpointConfiguration.CreateEndpointConfiguration();
 
                 endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
 
@@ -82,10 +83,8 @@
 
                 endpointConfiguration.RegisterComponents(c => c.RegisterSingleton(scenarioContext.GetType(), scenarioContext));
 
-                configurationCustomization(functionEndpointConfiguration);
-
                 var serviceCollection = new ServiceCollection();
-                var startableEndpointWithExternallyManagedContainer = EndpointWithExternallyManagedServiceProvider.Create(functionEndpointConfiguration.EndpointConfiguration, serviceCollection);
+                var startableEndpointWithExternallyManagedContainer = EndpointWithExternallyManagedServiceProvider.Create(endpointConfiguration, serviceCollection);
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 endpoint = new FunctionEndpoint(startableEndpointWithExternallyManagedContainer, functionEndpointConfiguration, serviceProvider);

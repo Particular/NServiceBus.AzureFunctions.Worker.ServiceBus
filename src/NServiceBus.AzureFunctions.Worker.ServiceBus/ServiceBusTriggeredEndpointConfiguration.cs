@@ -6,7 +6,6 @@
     using Logging;
     using Microsoft.Extensions.Configuration;
     using Serialization;
-    using Transport;
 
     /// <summary>
     /// Represents a serverless NServiceBus endpoint.
@@ -21,78 +20,110 @@
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
         /// </summary>
-        public ServiceBusTriggeredEndpointConfiguration(IConfiguration configuration)
-            : this(GetConfiguredValueOrFallback(configuration, "ENDPOINT_NAME", optional: false), configuration)
+        internal ServiceBusTriggeredEndpointConfiguration(string endpointName)
         {
+            this.endpointName = endpointName;
+        }
+
+        string endpointName;
+        string connectionString;
+        Action<EndpointConfiguration> advancedConfiguration;
+        Action<RoutingSettings> configureRouting;
+        Action<TransportExtensions<AzureServiceBusTransport>> configureTransport;
+        ISerializationStrategy serializationStrategy = new SerializationStrategy<NewtonsoftSerializer>();
+        Func<string, Task> customDiagnostics = _ => Task.CompletedTask;
+
+        /// <summary>
+        /// Configure the ServiceBus connection string used to send messages.
+        /// </summary>
+        public void ServiceBusConnectionString(string connectionString)
+        {
+            this.connectionString = connectionString;
         }
 
         /// <summary>
-        /// Creates a serverless NServiceBus endpoint.
+        /// Apply custom configuration to the NServiceBus Azure Service Bus transport.
         /// </summary>
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null)
-            : this(endpointName, null, configuration)
+        public void ConfigureTransport(Action<TransportExtensions<AzureServiceBusTransport>> configureTransport)
         {
+            this.configureTransport = configureTransport;
         }
 
         /// <summary>
-        /// Creates a serverless NServiceBus endpoint.
+        /// Configure message routing.
         /// </summary>
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName, string connectionStringName = null)
-            : this(endpointName, connectionStringName, null)
+        public void Routing(Action<RoutingSettings> configureRouting)
         {
+            this.configureRouting = configureRouting;
         }
 
         /// <summary>
-        /// Creates a serverless NServiceBus endpoint.
+        /// Define the serializer to be used.
         /// </summary>
-        public ServiceBusTriggeredEndpointConfiguration(string endpointName)
-            : this(endpointName, null, null)
+        public void UseSerialization<T>(Action<SerializationExtensions<T>> advancedConfiguration = null) where T : SerializationDefinition, new()
         {
+            serializationStrategy = new SerializationStrategy<T>(advancedConfiguration);
         }
 
         /// <summary>
-        /// Creates a serverless NServiceBus endpoint.
+        /// Configure the underlying Endpoint Configuration directly.
         /// </summary>
-        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, string connectionStringName = null, IConfiguration configuration = null)
+        public void Advanced(Action<EndpointConfiguration> advancedConfiguration)
         {
-            EndpointConfiguration = new EndpointConfiguration(endpointName);
+            this.advancedConfiguration = advancedConfiguration;
+        }
 
-            recoverabilityPolicy.SendFailedMessagesToErrorQueue = true;
-            EndpointConfiguration.Recoverability().CustomPolicy(recoverabilityPolicy.Invoke);
+        internal EndpointConfiguration CreateEndpointConfiguration(IConfiguration configuration = null)
+        {
+            var endpointConfiguration = new EndpointConfiguration(endpointName);
+
+            endpointConfiguration.Recoverability().CustomPolicy(recoverabilityPolicy.Invoke);
+
+            var recoverability = endpointConfiguration.Recoverability();
+            recoverability.Immediate(settings => settings.NumberOfRetries(5));
+            recoverability.Delayed(settings => settings.NumberOfRetries(3));
 
             // Disable diagnostics by default as it will fail to create the diagnostics file in the default path.
             // Can be overriden by ServerlessEndpointConfiguration.LogDiagnostics().
-            EndpointConfiguration.CustomDiagnosticsWriter(_ => Task.CompletedTask);
+            endpointConfiguration.CustomDiagnosticsWriter(customDiagnostics);
 
             // 'WEBSITE_SITE_NAME' represents an Azure Function App and the environment variable is set when hosting the function in Azure.
             var functionAppName = GetConfiguredValueOrFallback(configuration, "WEBSITE_SITE_NAME", true) ?? Environment.MachineName;
-            EndpointConfiguration.UniquelyIdentifyRunningInstance()
+            endpointConfiguration.UniquelyIdentifyRunningInstance()
                 .UsingCustomDisplayName(functionAppName)
                 .UsingCustomIdentifier(DeterministicGuid.Create(functionAppName));
 
             var licenseText = GetConfiguredValueOrFallback(configuration, "NSERVICEBUS_LICENSE", optional: true);
             if (!string.IsNullOrWhiteSpace(licenseText))
             {
-                EndpointConfiguration.License(licenseText);
+                endpointConfiguration.License(licenseText);
             }
 
-            Transport = UseTransport<AzureServiceBusTransport>();
+            var transport = endpointConfiguration.UseTransport<ServerlessTransport<AzureServiceBusTransport>>();
 
-            var connectionString = GetConfiguredValueOrFallback(configuration, connectionStringName ?? DefaultServiceBusConnectionName, optional: true);
-            if (!string.IsNullOrWhiteSpace(connectionString))
+            connectionString ??= GetConfiguredValueOrFallback(configuration, DefaultServiceBusConnectionName, optional: true);
+
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                Transport.ConnectionString(connectionString);
-            }
-            else if (!string.IsNullOrWhiteSpace(connectionStringName))
-            {
-                throw new Exception($"Azure Service Bus connection string named '{connectionStringName}' was provided but wasn't found in the environment variables. Make sure the connection string is stored in the environment variable named '{connectionStringName}'.");
+                throw new Exception($@"Azure Service Bus connection string has not been configured. Specify a connection string through IConfiguration, an environment variable named {DefaultServiceBusConnectionName} or using:
+  serviceBusTriggeredEndpointConfiguration.ServiceBusConnectionString(connectionString);");
             }
 
-            var recoverability = AdvancedConfiguration.Recoverability();
-            recoverability.Immediate(settings => settings.NumberOfRetries(5));
-            recoverability.Delayed(settings => settings.NumberOfRetries(3));
+            transport.ConnectionString(connectionString);
 
-            EndpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            PipelineInvoker = transport.PipelineAccess();
+
+            var baseTransportConfiguration = transport.BaseTransportConfiguration();
+            configureTransport?.Invoke(baseTransportConfiguration);
+
+            var routing = transport.Routing();
+            configureRouting?.Invoke(routing);
+
+            serializationStrategy.ApplyTo(endpointConfiguration);
+
+            advancedConfiguration?.Invoke(endpointConfiguration);
+
+            return endpointConfiguration;
         }
 
         static string GetConfiguredValueOrFallback(IConfiguration configuration, string key, bool optional)
@@ -114,38 +145,7 @@
             return environmentVariable;
         }
 
-        /// <summary>
-        /// Azure Service Bus transport
-        /// </summary>
-        public TransportExtensions<AzureServiceBusTransport> Transport { get; }
-
-        internal EndpointConfiguration EndpointConfiguration { get; }
         internal PipelineInvoker PipelineInvoker { get; private set; }
-
-        /// <summary>
-        /// Gives access to the underlying endpoint configuration for advanced configuration options.
-        /// </summary>
-        public EndpointConfiguration AdvancedConfiguration => EndpointConfiguration;
-
-        /// <summary>
-        /// Define a transport to be used when sending and publishing messages.
-        /// </summary>
-        protected TransportExtensions<TTransport> UseTransport<TTransport>()
-            where TTransport : TransportDefinition, new()
-        {
-            var serverlessTransport = EndpointConfiguration.UseTransport<ServerlessTransport<TTransport>>();
-
-            PipelineInvoker = serverlessTransport.PipelineAccess();
-            return serverlessTransport.BaseTransportConfiguration();
-        }
-
-        /// <summary>
-        /// Define the serializer to be used.
-        /// </summary>
-        public SerializationExtensions<T> UseSerialization<T>() where T : SerializationDefinition, new()
-        {
-            return EndpointConfiguration.UseSerialization<T>();
-        }
 
         /// <summary>
         /// Disables moving messages to the error queue even if an error queue name is configured.
@@ -160,11 +160,32 @@
         /// </summary>
         public void LogDiagnostics()
         {
-            EndpointConfiguration.CustomDiagnosticsWriter(diagnostics =>
+            customDiagnostics = diagnostics =>
             {
                 LogManager.GetLogger("StartupDiagnostics").Info(diagnostics);
                 return Task.CompletedTask;
-            });
+            };
+        }
+
+        interface ISerializationStrategy
+        {
+            void ApplyTo(EndpointConfiguration endpointConfiguration);
+        }
+
+        class SerializationStrategy<T> : ISerializationStrategy where T : SerializationDefinition, new()
+        {
+            Action<SerializationExtensions<T>> advancedConfiguration;
+
+            public SerializationStrategy(Action<SerializationExtensions<T>> advancedConfiguration = null)
+            {
+                this.advancedConfiguration = advancedConfiguration;
+            }
+
+            public void ApplyTo(EndpointConfiguration endpointConfiguration)
+            {
+                var settings = endpointConfiguration.UseSerialization<T>();
+                advancedConfiguration?.Invoke(settings);
+            }
         }
 
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();

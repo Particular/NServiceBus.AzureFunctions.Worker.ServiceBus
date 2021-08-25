@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Reflection;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -11,14 +12,23 @@
     public static class FunctionsHostBuilderExtensions
     {
         /// <summary>
-        /// Use the IConfiguration to configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
         /// </summary>
         public static IHostBuilder UseNServiceBus(
-            this IHostBuilder hostBuilder)
+            this IHostBuilder hostBuilder,
+            Action<ServiceBusTriggeredEndpointConfiguration> configuration = null)
         {
-            hostBuilder.UseNServiceBus(config => new ServiceBusTriggeredEndpointConfiguration(config));
+            var endpointName = Assembly.GetCallingAssembly()
+                                   .GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
+                                   ?.EndpointName;
 
-            return hostBuilder;
+            if (string.IsNullOrWhiteSpace(endpointName))
+            {
+                throw new Exception($@"Endpoint name cannot be determined automatically. Use one of the following options to specify endpoint name: 
+- Use `{nameof(NServiceBusTriggerFunctionAttribute)}(endpointName)` to generate a trigger
+- Use `functionsHostBuilder.UseNServiceBus(endpointName, configurationFactory)`");
+            }
+            return hostBuilder.UseNServiceBus(endpointName, configuration);
         }
 
         /// <summary>
@@ -26,31 +36,23 @@
         /// </summary>
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
-            Func<ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+            string endpointName,
+            Action<ServiceBusTriggeredEndpointConfiguration> configuration = null)
         {
-            RegisterEndpointFactory(hostBuilder, _ => configurationFactory());
+            var serviceBusTriggeredEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName);
+            configuration?.Invoke(serviceBusTriggeredEndpointConfiguration);
 
-            return hostBuilder;
-        }
-
-        /// <summary>
-        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
-        /// </summary>
-        public static IHostBuilder UseNServiceBus(
-            this IHostBuilder hostBuilder,
-            Func<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
-        {
-            RegisterEndpointFactory(hostBuilder, configurationFactory);
+            RegisterEndpointFactory(hostBuilder, serviceBusTriggeredEndpointConfiguration);
             return hostBuilder;
         }
 
         static void RegisterEndpointFactory(IHostBuilder hostBuilder,
-            Func<IConfiguration, ServiceBusTriggeredEndpointConfiguration> serviceBusTriggeredEndpointConfigurationFactory)
+            ServiceBusTriggeredEndpointConfiguration serviceBusTriggeredEndpointConfiguration)
         {
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
-                var serviceBusTriggeredEndpointConfiguration = serviceBusTriggeredEndpointConfigurationFactory(hostBuilderContext.Configuration);
-                var endpointFactory = Configure(serviceBusTriggeredEndpointConfiguration, serviceCollection);
+                var hostConfiguration = hostBuilderContext.Configuration;
+                var endpointFactory = Configure(serviceBusTriggeredEndpointConfiguration, hostConfiguration, serviceCollection);
 
                 // for backward compatibility
                 serviceCollection.AddSingleton(endpointFactory);
@@ -59,14 +61,18 @@
         }
 
         internal static Func<IServiceProvider, FunctionEndpoint> Configure(
-            ServiceBusTriggeredEndpointConfiguration configuration,
+            ServiceBusTriggeredEndpointConfiguration serviceBusTriggeredEndpointConfiguration,
+            IConfiguration hostConfiguration,
             IServiceCollection serviceCollection)
         {
+            var endpointConfiguration =
+                serviceBusTriggeredEndpointConfiguration.CreateEndpointConfiguration(hostConfiguration);
+
             var startableEndpoint = EndpointWithExternallyManagedServiceProvider.Create(
-                    configuration.EndpointConfiguration,
+                    endpointConfiguration,
                     serviceCollection);
 
-            return serviceProvider => new FunctionEndpoint(startableEndpoint, configuration, serviceProvider);
+            return serviceProvider => new FunctionEndpoint(startableEndpoint, serviceBusTriggeredEndpointConfiguration, serviceProvider);
         }
     }
 }
