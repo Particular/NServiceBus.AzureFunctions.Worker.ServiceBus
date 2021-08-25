@@ -1,4 +1,3 @@
-# Rename this file to ci.yml while the template is being added.
 name: CI
 on:
   push:
@@ -81,14 +80,6 @@ jobs:
           echo "::add-mask::$connectString"
 
           echo "AzureWebJobsServiceBus=$connectString" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-      - name: Run Windows tests
-        if: runner.os == 'Windows'
-        run: dotnet test src --configuration Release --no-build --logger "GitHubActions;report-warnings=false"
-      - name: Run Linux tests
-        if: runner.os == 'Linux'
-        run: |
-          dotnet test src --configuration Release --no-build --framework netcoreapp3.1 --logger "GitHubActions;report-warnings=false"
-          dotnet test src --configuration Release --no-build --framework net5.0 --logger "GitHubActions;report-warnings=false"
       - name: Run tests
         uses: Particular/run-tests-action@v1.0.0
       - name: Teardown infrastructure
