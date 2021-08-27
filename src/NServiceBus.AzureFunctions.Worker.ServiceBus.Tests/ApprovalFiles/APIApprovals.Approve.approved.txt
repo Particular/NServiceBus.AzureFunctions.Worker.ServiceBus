@@ -20,9 +20,9 @@ namespace NServiceBus
     public static class FunctionsHostBuilderExtensions
     {
         public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
-        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
         public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, string endpointName, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
-        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+        public static Microsoft.Extensions.Hosting.IHostBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostBuilder hostBuilder, string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
     }
     public interface IFunctionEndpoint
     {
