@@ -18,7 +18,8 @@
             this IHostBuilder hostBuilder,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
-            RegisterEndpointFactory(hostBuilder, null, (_, c) => configurationFactory?.Invoke(c));
+            var callingAssembly = Assembly.GetCallingAssembly();
+            RegisterEndpointFactory(hostBuilder, null, callingAssembly, (_, c) => configurationFactory?.Invoke(c));
 
             return hostBuilder;
         }
@@ -30,7 +31,8 @@
             this IHostBuilder hostBuilder,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
-            RegisterEndpointFactory(hostBuilder, null, configurationFactory);
+            var callingAssembly = Assembly.GetCallingAssembly();
+            RegisterEndpointFactory(hostBuilder, null, callingAssembly, configurationFactory);
             return hostBuilder;
         }
 
@@ -44,7 +46,7 @@
         {
             Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
 
-            RegisterEndpointFactory(hostBuilder, endpointName, (_, c) => configurationFactory?.Invoke(c));
+            RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c));
             return hostBuilder;
         }
 
@@ -58,21 +60,22 @@
         {
             Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
 
-            RegisterEndpointFactory(hostBuilder, endpointName, configurationFactory);
+            RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory);
             return hostBuilder;
         }
 
         static void RegisterEndpointFactory(
             IHostBuilder hostBuilder,
             string endpointName,
+            Assembly callingAssembly,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization)
         {
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;
                 endpointName ??= configuration.GetValue<string>("ENDPOINT_NAME")
-                               ?? Assembly.GetCallingAssembly()
-                                   .GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
+                               ?? callingAssembly
+                                   ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
                                    ?.EndpointName;
 
                 if (string.IsNullOrWhiteSpace(endpointName))
