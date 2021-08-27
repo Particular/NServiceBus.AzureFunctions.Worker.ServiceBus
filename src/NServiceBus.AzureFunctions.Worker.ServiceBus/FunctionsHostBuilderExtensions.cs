@@ -28,7 +28,7 @@
         /// </summary>
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
-            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             RegisterEndpointFactory(hostBuilder, null, configurationFactory);
             return hostBuilder;
@@ -54,7 +54,7 @@
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
             string endpointName,
-            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
 
