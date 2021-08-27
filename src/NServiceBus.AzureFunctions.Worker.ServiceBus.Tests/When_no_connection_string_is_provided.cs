@@ -1,8 +1,8 @@
 ﻿namespace ServiceBus.Tests
 {
     using System;
+    using Microsoft.Extensions.DependencyInjection;
     using NServiceBus;
-    using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NUnit.Framework;
 
     [TestFixture]
@@ -11,18 +11,32 @@
         [Test]
         public void Should_guide_user_towards_success()
         {
-            var endpointConfiguration = new EndpointConfiguration("SampleEndpoint");
+            var defaultConnectionStringKey = ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName;
+            var connectionString = Environment.GetEnvironmentVariable(defaultConnectionStringKey);
 
-            endpointConfiguration.UseTransport<ServerlessTransport<AzureServiceBusTransport>>();
-            endpointConfiguration.AssemblyScanner().ThrowExceptions = false; // ignore R#/Rider assembly loading issue with nunit.engine.dll
+            try
+            {
+                Environment.SetEnvironmentVariable(defaultConnectionStringKey, null, EnvironmentVariableTarget.Process);
+                var serviceBusTriggeredEndpointConfiguration =
+                    new ServiceBusTriggeredEndpointConfiguration("SampleEndpoint");
 
-            var exception = Assert.ThrowsAsync<Exception>(
-                () => Endpoint.Create(endpointConfiguration),
-                "Exception should be thrown at endpoint creation so that the error will be found during functions startup"
-            );
+                var serviceCollection = new ServiceCollection();
 
-            StringAssert.Contains(".Transport.ConnectionString(", exception?.Message, "Should mention the transport extension approach");
-            StringAssert.Contains("environment variable", exception?.Message, "Should mention the environment variable approach");
+                var exception = Assert.Throws<Exception>(
+                    () => FunctionsHostBuilderExtensions.Configure(
+                        serviceBusTriggeredEndpointConfiguration,
+                        serviceCollection),
+                    "Exception should be thrown at endpoint creation so that the error will be found during functions startup"
+                );
+
+                StringAssert.Contains(nameof(ServiceBusTriggeredEndpointConfiguration.ServiceBusConnectionString), exception?.Message, "Should mention the code-first approach");
+                StringAssert.Contains("environment variable", exception?.Message, "Should mention the environment variable approach");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(defaultConnectionStringKey, connectionString);
+            }
+
         }
     }
 }

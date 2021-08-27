@@ -101,8 +101,8 @@
             ServiceBusTriggeredEndpointConfiguration configuration,
             IServiceCollection serviceCollection)
         {
-            var startableEndpoint = EndpointWithExternallyManagedServiceProvider.Create(
-                    configuration.EndpointConfiguration,
+            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                    configuration.AdvancedConfiguration,
                     serviceCollection);
 
             return serviceProvider => new FunctionEndpoint(startableEndpoint, configuration, serviceProvider);

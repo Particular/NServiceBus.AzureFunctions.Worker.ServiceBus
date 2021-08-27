@@ -30,14 +30,15 @@
             int deliveryCount,
             string replyTo,
             string correlationId,
-            FunctionContext functionContext)
+            FunctionContext functionContext,
+            CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline)
+            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -49,7 +50,8 @@
             string replyTo,
             string correlationId,
             ITransactionStrategy transactionStrategy,
-            PipelineInvoker pipeline)
+            PipelineInvoker pipeline,
+            CancellationToken cancellationToken)
         {
             body ??= new byte[0]; // might be null
             messageId ??= Guid.NewGuid().ToString("N");
@@ -61,7 +63,7 @@
                     var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
                     var messageContext = CreateMessageContext(transportTransaction);
 
-                    await pipeline.PushMessage(messageContext).ConfigureAwait(false);
+                    await pipeline.PushMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
                     await transactionStrategy.Complete(transaction).ConfigureAwait(false);
 
@@ -82,7 +84,7 @@
                         deliveryCount,
                         new ContextBag());
 
-                    var errorHandleResult = await pipeline.PushFailedMessage(errorContext).ConfigureAwait(false);
+                    var errorHandleResult = await pipeline.PushFailedMessage(errorContext, cancellationToken).ConfigureAwait(false);
 
                     if (errorHandleResult == ErrorHandleResult.Handled)
                     {
@@ -102,7 +104,6 @@
                     CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
                     body,
                     transportTransaction,
-                    new CancellationTokenSource(),
                     new ContextBag());
         }
 
@@ -128,82 +129,82 @@
         }
 
         /// <inheritdoc />
-        public async Task Send(object message, SendOptions options, FunctionContext functionContext)
+        public async Task Send(object message, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Send(message, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Send(object message, FunctionContext functionContext)
-            => Send(message, new SendOptions(), functionContext);
+        public Task Send(object message, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Send(message, new SendOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext functionContext)
+        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Send(messageConstructor, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Send<T>(Action<T> messageConstructor, FunctionContext functionContext)
-            => Send(messageConstructor, new SendOptions(), functionContext);
+        public Task Send<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Send(messageConstructor, new SendOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Publish(object message, PublishOptions options, FunctionContext functionContext)
+        public async Task Publish(object message, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Publish(message, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Publish(message, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Publish(object message, FunctionContext functionContext)
-            => Publish(message, new PublishOptions(), functionContext);
+        public Task Publish(object message, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Publish(message, new PublishOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext functionContext)
+        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Publish(messageConstructor, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Publish(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Publish<T>(Action<T> messageConstructor, FunctionContext functionContext)
-            => Publish(messageConstructor, new PublishOptions(), functionContext);
+        public Task Publish<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Publish(messageConstructor, new PublishOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext functionContext)
+        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Subscribe(eventType, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Subscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Subscribe(Type eventType, FunctionContext functionContext)
-            => Subscribe(eventType, new SubscribeOptions(), functionContext);
+        public Task Subscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Subscribe(eventType, new SubscribeOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext functionContext)
+        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None).ConfigureAwait(false);
-            await endpoint.Unsubscribe(eventType, options).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await endpoint.Unsubscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public Task Unsubscribe(Type eventType, FunctionContext functionContext)
-            => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext);
+        public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
+            => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
         static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
         {
