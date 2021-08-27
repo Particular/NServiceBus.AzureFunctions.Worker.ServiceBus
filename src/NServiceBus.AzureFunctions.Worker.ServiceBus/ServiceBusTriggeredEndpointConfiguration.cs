@@ -56,7 +56,7 @@
         {
             var endpointConfiguration = new EndpointConfiguration(endpointName);
 
-            var recoverability = AdvancedConfiguration.Recoverability();
+            var recoverability = endpointConfiguration.Recoverability();
             recoverability.Immediate(settings => settings.NumberOfRetries(5));
             recoverability.Delayed(settings => settings.NumberOfRetries(3));
             recoverabilityPolicy.SendFailedMessagesToErrorQueue = true;
