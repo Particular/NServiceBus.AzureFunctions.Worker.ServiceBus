@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.AzureFunctions.InProcess.ServiceBus
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
     using System;
     using System.Threading;

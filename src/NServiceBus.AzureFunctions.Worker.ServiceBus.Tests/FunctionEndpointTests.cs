@@ -6,7 +6,7 @@
     using System.Threading.Tasks;
     using System.Transactions;
     using NServiceBus;
-    using NServiceBus.AzureFunctions.InProcess.ServiceBus;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NServiceBus.Transport;
     using NUnit.Framework;
 

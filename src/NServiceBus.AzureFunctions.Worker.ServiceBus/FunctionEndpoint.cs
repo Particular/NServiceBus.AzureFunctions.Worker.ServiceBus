@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using AzureFunctions.InProcess.ServiceBus;
+    using AzureFunctions.Worker.ServiceBus;
     using Extensibility;
     using Microsoft.Azure.Functions.Worker;
     using Transport;

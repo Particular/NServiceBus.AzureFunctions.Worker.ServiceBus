@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using AzureFunctions.InProcess.ServiceBus;
+    using AzureFunctions.Worker.ServiceBus;
     using Logging;
     using Microsoft.Extensions.Configuration;
     using Serialization;

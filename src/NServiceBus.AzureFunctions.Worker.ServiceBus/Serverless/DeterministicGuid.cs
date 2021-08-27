@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.AzureFunctions.InProcess.ServiceBus
+﻿namespace NServiceBus
 {
     using System;
     using System.Security.Cryptography;
