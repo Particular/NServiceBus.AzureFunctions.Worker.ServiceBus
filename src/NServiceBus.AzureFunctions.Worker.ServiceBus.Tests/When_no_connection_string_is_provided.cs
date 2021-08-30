@@ -1,6 +1,7 @@
 ﻿namespace ServiceBus.Tests
 {
     using System;
+    using System.Reflection;
     using Microsoft.Extensions.DependencyInjection;
     using NServiceBus;
     using NUnit.Framework;
@@ -19,6 +20,8 @@
                 Environment.SetEnvironmentVariable(defaultConnectionStringKey, null, EnvironmentVariableTarget.Process);
                 var serviceBusTriggeredEndpointConfiguration =
                     new ServiceBusTriggeredEndpointConfiguration("SampleEndpoint");
+                serviceBusTriggeredEndpointConfiguration.AdvancedConfiguration.AssemblyScanner()
+                    .ExcludeAssemblies(Assembly.GetExecutingAssembly().GetName().Name);
 
                 var serviceCollection = new ServiceCollection();
 
