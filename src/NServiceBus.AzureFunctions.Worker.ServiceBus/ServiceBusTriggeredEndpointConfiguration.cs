@@ -80,8 +80,7 @@
 
             connectionString = GetConfiguredValueOrFallback(configuration, DefaultServiceBusConnectionName, optional: true);
             var azureTransport = new AzureServiceBusTransport(connectionString ?? "missing");
-            var serverlessTransport = new ServerlessTransport(azureTransport);
-            PipelineInvoker = serverlessTransport.PipelineInvoker;
+            serverlessTransport = new ServerlessTransport(azureTransport);
             Transport = azureTransport;
             var routing = endpointConfiguration.UseTransport(serverlessTransport);
             // "repack" settings to expected transport type settings:
@@ -111,7 +110,7 @@
             return environmentVariable;
         }
 
-        internal PipelineInvoker PipelineInvoker { get; private set; }
+        internal PipelineInvoker PipelineInvoker => serverlessTransport.PipelineInvoker;
 
 
         /// <summary>
@@ -142,6 +141,7 @@
             });
         }
 
+        ServerlessTransport serverlessTransport;
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
     }
