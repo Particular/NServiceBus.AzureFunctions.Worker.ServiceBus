@@ -10,6 +10,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {
@@ -49,7 +50,7 @@
                 this.configurationCustomization = configurationCustomization;
                 this.scenarioContext = scenarioContext;
                 this.functionComponentType = functionComponentType;
-                Name = functionComponentType.FullName;
+                Name = Conventions.EndpointNamingConvention(functionComponentType);
             }
 
             public override string Name { get; }
@@ -81,6 +82,10 @@
                         }));
 
                 endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
+
+                // enable installers to auto-create the input queue for tests
+                // in real Azure functions the input queue is assumed to exist
+                endpointConfiguration.EnableInstallers();
 
                 configurationCustomization(functionEndpointConfiguration);
 
