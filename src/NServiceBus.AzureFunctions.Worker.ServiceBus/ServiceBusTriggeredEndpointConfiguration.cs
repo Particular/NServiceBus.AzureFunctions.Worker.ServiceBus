@@ -21,7 +21,7 @@
         /// <summary>
         /// The Azure Service Bus transport configuration.
         /// </summary>
-        public AzureServiceBusTransport Transport { get; }
+        public AzureServiceBusTransport Transport => transport;
 
         /// <summary>
         /// The routing configuration.
@@ -38,16 +38,13 @@
         /// </summary>
         public string ServiceBusConnectionString
         {
-            get => connectionString;
+            get => transport.ReadConnectionString();
             set
             {
                 Guard.AgainstNullAndEmpty(nameof(value), value);
-                connectionString = value;
-                Transport.ChangeConnectionString(value);
+                transport.ChangeConnectionString(value);
             }
         }
-
-        string connectionString;
 
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
@@ -78,10 +75,14 @@
                 endpointConfiguration.License(licenseText);
             }
 
-            connectionString = GetConfiguredValueOrFallback(configuration, DefaultServiceBusConnectionName, optional: true);
-            var azureTransport = new AzureServiceBusTransport(connectionString ?? "missing");
-            serverlessTransport = new ServerlessTransport(azureTransport);
-            Transport = azureTransport;
+            transport = new ServerlessAzureServiceBusTransport();
+            var connectionString = GetConfiguredValueOrFallback(configuration, DefaultServiceBusConnectionName, optional: true);
+            if (!string.IsNullOrWhiteSpace(connectionString))
+            {
+                transport.ChangeConnectionString(connectionString);
+            }
+
+            serverlessTransport = new ServerlessTransport(transport);
             var routing = endpointConfiguration.UseTransport(serverlessTransport);
             // "repack" settings to expected transport type settings:
             Routing = new RoutingSettings<AzureServiceBusTransport>(routing.GetSettings());
@@ -142,6 +143,7 @@
         }
 
         ServerlessTransport serverlessTransport;
+        readonly ServerlessAzureServiceBusTransport transport;
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
     }
