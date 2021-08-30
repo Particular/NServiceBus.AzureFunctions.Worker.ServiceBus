@@ -4,7 +4,7 @@
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
-    using NServiceBus.AzureFunctions.InProcess.ServiceBus;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NServiceBus.Logging;
     using NUnit.Framework;
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;

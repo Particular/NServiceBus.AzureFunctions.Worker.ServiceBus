@@ -2,7 +2,7 @@
 {
     using System;
     using NServiceBus;
-    using NServiceBus.AzureFunctions.InProcess.ServiceBus;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NUnit.Framework;
 
     [TestFixture]

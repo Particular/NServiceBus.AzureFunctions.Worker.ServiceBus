@@ -2,11 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using AzureFunctions.InProcess.ServiceBus;
+    using AzureFunctions.Worker.ServiceBus;
     using Logging;
     using Microsoft.Extensions.Configuration;
     using Serialization;
-    using Transport;
 
     /// <summary>
     /// Represents a serverless NServiceBus endpoint.
@@ -76,7 +75,10 @@
                 EndpointConfiguration.License(licenseText);
             }
 
-            Transport = UseTransport<AzureServiceBusTransport>();
+            var serverlessTransport = EndpointConfiguration.UseTransport<ServerlessTransport<AzureServiceBusTransport>>();
+            PipelineInvoker = serverlessTransport.PipelineAccess();
+            Transport = serverlessTransport.BaseTransportConfiguration();
+            Routing = Transport.Routing();
 
             var connectionString = GetConfiguredValueOrFallback(configuration, connectionStringName ?? DefaultServiceBusConnectionName, optional: true);
             if (!string.IsNullOrWhiteSpace(connectionString))
@@ -115,9 +117,14 @@
         }
 
         /// <summary>
-        /// Azure Service Bus transport
+        /// The Azure Service Bus transport configuration.
         /// </summary>
         public TransportExtensions<AzureServiceBusTransport> Transport { get; }
+
+        /// <summary>
+        /// The routing configuration.
+        /// </summary>
+        public RoutingSettings<AzureServiceBusTransport> Routing { get; }
 
         internal EndpointConfiguration EndpointConfiguration { get; }
         internal PipelineInvoker PipelineInvoker { get; private set; }
@@ -126,18 +133,6 @@
         /// Gives access to the underlying endpoint configuration for advanced configuration options.
         /// </summary>
         public EndpointConfiguration AdvancedConfiguration => EndpointConfiguration;
-
-        /// <summary>
-        /// Define a transport to be used when sending and publishing messages.
-        /// </summary>
-        protected TransportExtensions<TTransport> UseTransport<TTransport>()
-            where TTransport : TransportDefinition, new()
-        {
-            var serverlessTransport = EndpointConfiguration.UseTransport<ServerlessTransport<TTransport>>();
-
-            PipelineInvoker = serverlessTransport.PipelineAccess();
-            return serverlessTransport.BaseTransportConfiguration();
-        }
 
         /// <summary>
         /// Define the serializer to be used.
