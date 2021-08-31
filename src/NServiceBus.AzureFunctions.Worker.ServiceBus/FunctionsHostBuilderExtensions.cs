@@ -101,8 +101,14 @@
             ServiceBusTriggeredEndpointConfiguration configuration,
             IServiceCollection serviceCollection)
         {
-            var startableEndpoint = EndpointWithExternallyManagedServiceProvider.Create(
-                    configuration.EndpointConfiguration,
+            if (string.IsNullOrWhiteSpace(configuration.ServiceBusConnectionString))
+            {
+                throw new Exception($@"Azure Service Bus connection string has not been configured. Specify a connection string through IConfiguration, an environment variable named {ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName} or using:
+            `serviceBusTriggeredEndpointConfiguration.{nameof(ServiceBusTriggeredEndpointConfiguration.ServiceBusConnectionString)}");
+            }
+
+            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                    configuration.AdvancedConfiguration,
                     serviceCollection);
 
             return serviceProvider => new FunctionEndpoint(startableEndpoint, configuration, serviceProvider);

@@ -10,6 +10,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {
@@ -49,7 +50,7 @@
                 this.configurationCustomization = configurationCustomization;
                 this.scenarioContext = scenarioContext;
                 this.functionComponentType = functionComponentType;
-                Name = functionComponentType.FullName;
+                Name = Conventions.EndpointNamingConvention(functionComponentType);
             }
 
             public override string Name { get; }
@@ -66,7 +67,7 @@
                     .Delayed(d => d.NumberOfRetries(0))
                     .Failed(c => c
                         // track messages sent to the error queue to fail the test
-                        .OnMessageSentToErrorQueue(failedMessage =>
+                        .OnMessageSentToErrorQueue((failedMessage, ct) =>
                         {
                             scenarioContext.FailedMessages.AddOrUpdate(
                                 Name,
@@ -80,12 +81,16 @@
                             return Task.CompletedTask;
                         }));
 
-                endpointConfiguration.RegisterComponents(c => c.RegisterSingleton(scenarioContext.GetType(), scenarioContext));
+                endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
+
+                // enable installers to auto-create the input queue for tests
+                // in real Azure functions the input queue is assumed to exist
+                endpointConfiguration.EnableInstallers();
 
                 configurationCustomization(functionEndpointConfiguration);
 
                 var serviceCollection = new ServiceCollection();
-                var startableEndpointWithExternallyManagedContainer = EndpointWithExternallyManagedServiceProvider.Create(functionEndpointConfiguration.EndpointConfiguration, serviceCollection);
+                var startableEndpointWithExternallyManagedContainer = EndpointWithExternallyManagedContainer.Create(functionEndpointConfiguration.AdvancedConfiguration, serviceCollection);
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 endpoint = new FunctionEndpoint(startableEndpointWithExternallyManagedContainer, functionEndpointConfiguration, serviceProvider);
@@ -105,7 +110,8 @@
                         1,
                         null,
                         string.Empty,
-                        functionContext);
+                        functionContext,
+                        token);
                 }
             }
 

@@ -1,33 +1,52 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
-    using System;
-    using Settings;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Transport;
 
-    class ServerlessTransport<TBaseTransport> : TransportDefinition
-        where TBaseTransport : TransportDefinition, new()
+    class ServerlessTransport : TransportDefinition
     {
-        public ServerlessTransport()
+        // HINT: This constant is defined in NServiceBus but is not exposed
+        const string MainReceiverId = "Main";
+
+        public PipelineInvoker PipelineInvoker { get; private set; }
+
+        public ServerlessTransport(TransportDefinition baseTransport) : base(
+            baseTransport.TransportTransactionMode,
+            baseTransport.SupportsDelayedDelivery,
+            baseTransport.SupportsPublishSubscribe,
+            baseTransport.SupportsTTBR)
         {
-            baseTransport = new TBaseTransport();
+            this.baseTransport = baseTransport;
         }
 
-        public override string ExampleConnectionStringForErrorMessage { get; } = string.Empty;
+        readonly TransportDefinition baseTransport;
 
-        // HINT: Prevent core from throwing a generic exception
-        public override bool RequiresConnectionString => false;
-
-        public override TransportInfrastructure Initialize(SettingsHolder settings, string connectionString)
+        public override async Task<TransportInfrastructure> Initialize(
+            HostSettings hostSettings,
+            ReceiveSettings[] receivers,
+            string[] sendingAddresses,
+            CancellationToken cancellationToken = new CancellationToken())
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new Exception($@"Azure Service Bus connection string has not been configured. Specify a connection string through IConfiguration, an environment variable named {ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName} or using:
-  serviceBusTriggeredEndpointConfiguration.Transport.ConnectionString(connectionString);");
-            }
-            var baseTransportInfrastructure = baseTransport.Initialize(settings, connectionString);
-            return new ServerlessTransportInfrastructure(baseTransportInfrastructure, settings);
+            var baseTransportInfrastructure = await baseTransport.Initialize(
+                    hostSettings,
+                    receivers,
+                    sendingAddresses,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            var serverlessTransportInfrastructure = new ServerlessTransportInfrastructure(baseTransportInfrastructure);
+            PipelineInvoker = (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
+            return serverlessTransportInfrastructure;
         }
 
-        readonly TBaseTransport baseTransport;
+        public override string ToTransportAddress(QueueAddress address) => baseTransport.ToTransportAddress(address);
+
+        public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
+        readonly TransportTransactionMode[] supportedTransactionModes =
+        {
+            TransportTransactionMode.ReceiveOnly
+        };
     }
 }
