@@ -5,5 +5,6 @@ Process messages in AzureFunctions using the Azure Service Bus trigger and the N
 ## Running tests locally
 
 Requirements:
-* Have the Microsoft Storage Emulator installed
-* Configure an environment variable named `AzureWebJobsServiceBus` with an Azure Service Bus connection string
+
+- Have the Microsoft Storage Emulator installed
+- Configure an environment variable named `AzureWebJobsServiceBus` with an Azure Service Bus connection string
