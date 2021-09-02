@@ -1,6 +1,6 @@
 assembly-versioning-scheme: Major
 branches:
-  master:
+  main:
     mode: ContinuousDeployment
     tag: alpha
     increment: Minor
