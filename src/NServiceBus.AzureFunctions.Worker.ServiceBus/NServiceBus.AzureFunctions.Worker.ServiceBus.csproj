@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <NoWarn>$(NoWarn);PS0018</NoWarn>
-    <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
