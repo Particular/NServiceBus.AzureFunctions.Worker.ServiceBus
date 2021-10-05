@@ -7,21 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="NServiceBus.AcceptanceTesting" Version="8.0.0-alpha.1897" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NServiceBus.AcceptanceTesting" Version="8.0.0-alpha.1897" />
     <PackageReference Include="Particular.Approvals" Version="0.3.0" />
     <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
   </ItemGroup>
 
 </Project>
