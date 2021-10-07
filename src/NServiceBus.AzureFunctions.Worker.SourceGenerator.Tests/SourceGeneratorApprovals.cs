@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.Extensions.Logging;
@@ -162,7 +162,7 @@ using NServiceBus;
             // add necessary references for the generated trigger
             references.Add(MetadataReference.CreateFromFile(typeof(ServiceBusTriggerAttribute).Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(FunctionContext).Assembly.Location));
-            references.Add(MetadataReference.CreateFromFile(typeof(Message).Assembly.Location));
+            references.Add(MetadataReference.CreateFromFile(typeof(ServiceBusReceivedMessage).Assembly.Location));
             references.Add(MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location));
             Compile(outputCompilation.SyntaxTrees, references);
 
