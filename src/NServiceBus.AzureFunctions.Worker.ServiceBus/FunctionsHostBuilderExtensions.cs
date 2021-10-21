@@ -42,11 +42,12 @@
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
             string endpointName,
+            string connectionString = default,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
             Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
 
-            RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c));
+            RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c), connectionString);
             return hostBuilder;
         }
 
@@ -64,11 +65,27 @@
             return hostBuilder;
         }
 
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public static IHostBuilder UseNServiceBus(
+            this IHostBuilder hostBuilder,
+            string endpointName,
+            string connectionString,
+            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        {
+            Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
+
+            RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory, connectionString);
+            return hostBuilder;
+        }
+
         static void RegisterEndpointFactory(
             IHostBuilder hostBuilder,
             string endpointName,
             Assembly callingAssembly,
-            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization)
+            Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+            string connectionString = default)
         {
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
@@ -86,7 +103,7 @@
 - Add a configuration or environment variable with the key ENDPOINT_NAME");
                 }
 
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration);
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
                 var endpointFactory = Configure(functionEndpointConfiguration, serviceCollection);
