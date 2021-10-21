@@ -75,6 +75,7 @@
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
+            Guard.AgainstNullAndEmpty(nameof(connectionString), connectionString);
 
             RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory, connectionString);
             return hostBuilder;
