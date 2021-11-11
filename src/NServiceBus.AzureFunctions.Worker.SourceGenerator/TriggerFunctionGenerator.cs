@@ -111,13 +111,23 @@ public class FunctionEndpointTrigger
         [Function(""{syntaxReceiver.triggerFunctionName}"")]
         public async Task Run(
             [ServiceBusTrigger(""{syntaxReceiver.endpointName}"")] byte[] messageBody,
-            IDictionary<string, string> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
             string correlationId,
             FunctionContext context)
         {{
+            Dictionary<string, string> userProperties;
+
+            if (context.BindingContext.BindingData.TryGetValue(""UserProperties"", out var userProperties) && userProperties != null)
+            {{
+                userProperties = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(userProperties.ToString());
+            }}
+            else
+            {{
+                userProperties = new Dictionary<string, string>();
+            }}
+
             await endpoint.Process(messageBody, userProperties, messageId, deliveryCount, replyTo, correlationId, context);
         }}
 }}";
