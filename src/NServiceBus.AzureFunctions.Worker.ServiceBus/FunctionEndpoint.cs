@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using AzureFunctions.Worker.ServiceBus;
@@ -59,7 +60,7 @@
 
             if (functionContext.BindingContext.BindingData.TryGetValue("UserProperties", out var userPropertiesData))
             {
-                userProperties = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(userPropertiesData.ToString());
+                userProperties = JsonSerializer.Deserialize<Dictionary<string, string>>(userPropertiesData.ToString());
             }
 
             var headers = CreateNServiceBusHeaders(userProperties, replyTo, correlationId);

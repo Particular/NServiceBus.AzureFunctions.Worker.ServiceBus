@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.Json;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -66,7 +67,7 @@
         {
             BindingData = new Dictionary<string, object>
             {
-                { "UserProperties", System.Text.Json.JsonSerializer.Serialize(userProperties ?? new Dictionary<string,string>())}
+                { "UserProperties", JsonSerializer.Serialize(userProperties ?? new Dictionary<string,string>())}
         };
         }
         public override IReadOnlyDictionary<string, object> BindingData { get; }
