@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Worker;
@@ -17,7 +16,6 @@
         /// </summary>
         Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,

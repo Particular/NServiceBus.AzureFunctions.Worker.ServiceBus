@@ -25,7 +25,6 @@
         /// <inheritdoc />
         public async Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
@@ -38,30 +37,44 @@
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, cancellationToken)
+            await Process(body, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, functionContext, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         internal static async Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
             string correlationId,
             ITransactionStrategy transactionStrategy,
             PipelineInvoker pipeline,
+            FunctionContext functionContext,
             CancellationToken cancellationToken)
         {
             body ??= new byte[0]; // might be null
             messageId ??= Guid.NewGuid().ToString("N");
+
+            var userProperties = new Dictionary<string, string>();
+
+            if (functionContext.BindingContext.BindingData.TryGetValue("UserProperties", out var userPropertiesData))
+            {
+                userProperties = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(userPropertiesData.ToString());
+            }
+
+            var headers = CreateNServiceBusHeaders(userProperties, replyTo, correlationId);
 
             try
             {
                 using (var transaction = transactionStrategy.CreateTransaction())
                 {
                     var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var messageContext = CreateMessageContext(transportTransaction);
+                    var messageContext = new MessageContext(
+                        messageId,
+                        headers,
+                        body,
+                        transportTransaction,
+                        new ContextBag());
 
                     await pipeline.PushMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
@@ -75,9 +88,10 @@
                 using (var transaction = transactionStrategy.CreateTransaction())
                 {
                     var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
+
                     var errorContext = new ErrorContext(
                         exception,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
+                        headers,
                         messageId,
                         body,
                         transportTransaction,
@@ -97,14 +111,6 @@
                     throw;
                 }
             }
-
-            MessageContext CreateMessageContext(TransportTransaction transportTransaction) =>
-                new MessageContext(
-                    messageId,
-                    CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                    body,
-                    transportTransaction,
-                    new ContextBag());
         }
 
         async Task InitializeEndpointIfNecessary(FunctionContext functionContext, CancellationToken cancellationToken)

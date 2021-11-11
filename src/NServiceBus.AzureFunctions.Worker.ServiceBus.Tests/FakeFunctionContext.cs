@@ -8,12 +8,13 @@
 
     sealed class FakeFunctionContext : FunctionContext
     {
-        public FakeFunctionContext()
+        public FakeFunctionContext(IDictionary<string, string> userProperties = default) : base()
         {
             var sc = new ServiceCollection();
             sc.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
 
             InstanceServices = sc.BuildServiceProvider();
+            BindingContext = new FakeBindingContext(userProperties);
         }
 
         public override string InvocationId { get; }
@@ -57,5 +58,17 @@
         {
             throw new NotImplementedException();
         }
+    }
+
+    class FakeBindingContext : BindingContext
+    {
+        public FakeBindingContext(IDictionary<string, string> userProperties)
+        {
+            BindingData = new Dictionary<string, object>
+            {
+                { "UserProperties", System.Text.Json.JsonSerializer.Serialize(userProperties ?? new Dictionary<string,string>())}
+        };
+        }
+        public override IReadOnlyDictionary<string, object> BindingData { get; }
     }
 }

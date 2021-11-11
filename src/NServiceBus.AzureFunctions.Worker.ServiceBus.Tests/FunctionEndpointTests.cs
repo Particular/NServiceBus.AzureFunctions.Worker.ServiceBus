@@ -18,13 +18,13 @@
         {
             return FunctionEndpoint.Process(
                 MessageHelper.GetBody(message),
-                MessageHelper.GetUserProperties(message),
                 Guid.NewGuid().ToString("N"),
                 1,
                 null,
                 null,
                 transactionStrategy,
                 pipeline,
+                new FakeFunctionContext(),
                 CancellationToken.None);
         }
 
@@ -47,13 +47,13 @@
             var userProperties = MessageHelper.GetUserProperties(message);
             await FunctionEndpoint.Process(
                 body,
-                userProperties,
                 messageId,
                 1,
                 null,
                 null,
                 transactionStrategy,
                 pipelineInvoker,
+                new FakeFunctionContext(userProperties),
                 CancellationToken.None);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
@@ -85,13 +85,13 @@
             var userProperties = MessageHelper.GetUserProperties(message);
             await FunctionEndpoint.Process(
                 body,
-                userProperties,
                 messageId,
                 1,
                 null,
                 null,
                 transactionStrategy,
                 pipelineInvoker,
+                new FakeFunctionContext(userProperties),
                 CancellationToken.None);
 
             Assert.AreSame(pipelineException, errorContext.Exception);

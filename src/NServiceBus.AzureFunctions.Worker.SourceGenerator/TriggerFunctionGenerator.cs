@@ -117,18 +117,7 @@ public class FunctionEndpointTrigger
             string correlationId,
             FunctionContext context)
         {{
-            Dictionary<string, string> userProperties;
-
-            if (context.BindingContext.BindingData.TryGetValue(""UserProperties"", out var userProperties) && userProperties != null)
-            {{
-                userProperties = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(userProperties.ToString());
-            }}
-            else
-            {{
-                userProperties = new Dictionary<string, string>();
-            }}
-
-            await endpoint.Process(messageBody, userProperties, messageId, deliveryCount, replyTo, correlationId, context);
+            await endpoint.Process(messageBody, messageId, deliveryCount, replyTo, correlationId, context);
         }}
 }}";
             context.AddSource("NServiceBus__FunctionEndpointTrigger", SourceText.From(source, Encoding.UTF8));

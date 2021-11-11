@@ -102,15 +102,13 @@
             {
                 foreach (var message in messages)
                 {
-                    var functionContext = new FakeFunctionContext();
                     await endpoint.Process(
                         MessageHelper.GetBody(message),
-                        MessageHelper.GetUserProperties(message),
                         Guid.NewGuid().ToString("N"),
                         1,
                         null,
                         string.Empty,
-                        functionContext,
+                        new FakeFunctionContext(MessageHelper.GetUserProperties(message)),
                         token);
                 }
             }
