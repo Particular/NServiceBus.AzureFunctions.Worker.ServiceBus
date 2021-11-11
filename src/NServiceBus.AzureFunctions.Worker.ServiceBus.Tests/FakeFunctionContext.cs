@@ -9,7 +9,7 @@
 
     sealed class FakeFunctionContext : FunctionContext
     {
-        public FakeFunctionContext(IDictionary<string, string> userProperties = default) : base()
+        public FakeFunctionContext(IDictionary<string, string> userProperties) : base()
         {
             var sc = new ServiceCollection();
             sc.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
@@ -68,8 +68,9 @@
             BindingData = new Dictionary<string, object>
             {
                 { "UserProperties", JsonSerializer.Serialize(userProperties ?? new Dictionary<string,string>())}
-        };
+            };
         }
+
         public override IReadOnlyDictionary<string, object> BindingData { get; }
     }
 }

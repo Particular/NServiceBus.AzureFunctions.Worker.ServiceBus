@@ -24,7 +24,7 @@
                 null,
                 transactionStrategy,
                 pipeline,
-                new FakeFunctionContext(),
+                new FakeFunctionContext(MessageHelper.GetUserProperties(message)),
                 CancellationToken.None);
         }
 
