@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.Json;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using AzureFunctions.Worker.ServiceBus;
     using Extensibility;
     using Microsoft.Azure.Functions.Worker;
@@ -24,12 +25,7 @@
         }
 
         /// <inheritdoc />
-        public async Task Process(
-            byte[] body,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
+        public async Task Process(ServiceBusReceivedMessage message,
             FunctionContext functionContext,
             CancellationToken cancellationToken)
         {
@@ -38,32 +34,19 @@
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, functionContext, cancellationToken)
+            await Process(message, NoTransactionStrategy.Instance, pipeline, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        internal static async Task Process(
-            byte[] body,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
+        internal static async Task Process(ServiceBusReceivedMessage message,
             ITransactionStrategy transactionStrategy,
             PipelineInvoker pipeline,
-            FunctionContext functionContext,
             CancellationToken cancellationToken)
         {
-            body ??= new byte[0]; // might be null
-            messageId ??= Guid.NewGuid().ToString("N");
+            var body = message.Body.ToArray() ?? new byte[0]; // might be null
+            var messageId = message.MessageId ?? Guid.NewGuid().ToString("N");
 
-            var userProperties = new Dictionary<string, string>();
-
-            if (functionContext.BindingContext.BindingData.TryGetValue("UserProperties", out var userPropertiesData))
-            {
-                userProperties = JsonSerializer.Deserialize<Dictionary<string, string>>(userPropertiesData.ToString());
-            }
-
-            var headers = CreateNServiceBusHeaders(userProperties, replyTo, correlationId);
+            var headers = CreateNServiceBusHeaders(message);
 
             try
             {
@@ -96,7 +79,7 @@
                         messageId,
                         body,
                         transportTransaction,
-                        deliveryCount,
+                        message.DeliveryCount,
                         new ContextBag());
 
                     var errorHandleResult = await pipeline.PushFailedMessage(errorContext, cancellationToken).ConfigureAwait(false);
@@ -213,22 +196,22 @@
         public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
             => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
-        static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
+        static Dictionary<string, string> CreateNServiceBusHeaders(ServiceBusReceivedMessage message)
         {
-            var d = new Dictionary<string, string>(userProperties);
-            d.Remove("NServiceBus.Transport.Encoding");
+            var headers = message.ApplicationProperties.ToDictionary(k => k.Key, k => k.Value.ToString());
+            headers.Remove("NServiceBus.Transport.Encoding");
 
-            if (!string.IsNullOrWhiteSpace(replyTo))
+            if (!string.IsNullOrWhiteSpace(message.ReplyTo))
             {
-                d.TryAdd(Headers.ReplyToAddress, replyTo);
+                headers.TryAdd(Headers.ReplyToAddress, message.ReplyTo);
             }
 
-            if (!string.IsNullOrWhiteSpace(correlationId))
+            if (!string.IsNullOrWhiteSpace(message.CorrelationId))
             {
-                d.TryAdd(Headers.CorrelationId, correlationId);
+                headers.TryAdd(Headers.CorrelationId, message.CorrelationId);
             }
 
-            return d;
+            return headers;
         }
 
         readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;

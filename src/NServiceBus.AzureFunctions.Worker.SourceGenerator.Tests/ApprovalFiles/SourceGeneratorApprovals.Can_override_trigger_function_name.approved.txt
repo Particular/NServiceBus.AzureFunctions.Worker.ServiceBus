@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
+using Azure.Messaging.ServiceBus;
 using NServiceBus;
 
 public class FunctionEndpointTrigger
@@ -16,13 +17,9 @@ public class FunctionEndpointTrigger
 
         [Function("trigger")]
         public async Task Run(
-            [ServiceBusTrigger("endpoint")] byte[] messageBody,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
+            [ServiceBusTrigger("endpoint")] ServiceBusReceivedMessage message,
             FunctionContext context)
         {
-            await endpoint.Process(messageBody, messageId, deliveryCount, replyTo, correlationId, context);
+            await endpoint.Process(message, context);
         }
 }

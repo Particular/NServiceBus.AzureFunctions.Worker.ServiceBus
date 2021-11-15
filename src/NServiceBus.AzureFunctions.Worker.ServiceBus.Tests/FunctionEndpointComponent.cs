@@ -102,14 +102,7 @@
             {
                 foreach (var message in messages)
                 {
-                    await endpoint.Process(
-                        MessageHelper.GetBody(message),
-                        Guid.NewGuid().ToString("N"),
-                        1,
-                        null,
-                        string.Empty,
-                        new FakeFunctionContext(MessageHelper.GetUserProperties(message)),
-                        token);
+                    await endpoint.Process(MessageHelper.CreateServiceBusReceivedMessage(message), new FakeFunctionContext(), token);
                 }
             }
 

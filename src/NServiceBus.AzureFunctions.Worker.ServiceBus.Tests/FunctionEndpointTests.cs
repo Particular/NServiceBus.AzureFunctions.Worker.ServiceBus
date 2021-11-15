@@ -14,20 +14,6 @@
     [TestFixture]
     public class FunctionEndpointTests
     {
-        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
-        {
-            return FunctionEndpoint.Process(
-                MessageHelper.GetBody(message),
-                Guid.NewGuid().ToString("N"),
-                1,
-                null,
-                null,
-                transactionStrategy,
-                pipeline,
-                new FakeFunctionContext(MessageHelper.GetUserProperties(message)),
-                CancellationToken.None);
-        }
-
         [Test]
         public async Task When_processing_successful_should_complete_message()
         {
@@ -42,24 +28,18 @@
             var transactionStrategy = new TestableFunctionTransactionStrategy();
 
             var message = new TestMessage();
-            var messageId = Guid.NewGuid().ToString("N");
-            var body = MessageHelper.GetBody(message);
-            var userProperties = MessageHelper.GetUserProperties(message);
+            var serviceBusReceivedMessage = MessageHelper.CreateServiceBusReceivedMessage(message);
+
             await FunctionEndpoint.Process(
-                body,
-                messageId,
-                1,
-                null,
-                null,
+                serviceBusReceivedMessage,
                 transactionStrategy,
                 pipelineInvoker,
-                new FakeFunctionContext(userProperties),
                 CancellationToken.None);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
-            Assert.AreEqual(body, messageContext.Body.ToArray());
-            Assert.AreSame(messageId, messageContext.NativeMessageId);
-            CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
+            Assert.AreEqual(serviceBusReceivedMessage.Body.ToArray(), messageContext.Body.ToArray());
+            Assert.AreSame(serviceBusReceivedMessage.MessageId, messageContext.NativeMessageId);
+            CollectionAssert.IsSubsetOf(serviceBusReceivedMessage.ApplicationProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
             Assert.AreEqual(1, transactionStrategy.CreatedTransportTransactions.Count);
             Assert.AreSame(transactionStrategy.CreatedTransportTransactions[0], messageContext.TransportTransaction);
         }
@@ -80,24 +60,18 @@
             var transactionStrategy = new TestableFunctionTransactionStrategy();
 
             var message = new TestMessage();
-            var messageId = Guid.NewGuid().ToString("N");
-            var body = MessageHelper.GetBody(message);
-            var userProperties = MessageHelper.GetUserProperties(message);
+            var serviceBusReceivedMessage = MessageHelper.CreateServiceBusReceivedMessage(message);
+
             await FunctionEndpoint.Process(
-                body,
-                messageId,
-                1,
-                null,
-                null,
+                serviceBusReceivedMessage,
                 transactionStrategy,
                 pipelineInvoker,
-                new FakeFunctionContext(userProperties),
                 CancellationToken.None);
 
             Assert.AreSame(pipelineException, errorContext.Exception);
-            Assert.AreSame(messageId, errorContext.Message.NativeMessageId);
-            Assert.AreEqual(body, errorContext.Message.Body.ToArray());
-            CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
+            Assert.AreSame(serviceBusReceivedMessage.MessageId, errorContext.Message.NativeMessageId);
+            Assert.AreEqual(serviceBusReceivedMessage.Body.ToArray(), errorContext.Message.Body.ToArray());
+            CollectionAssert.IsSubsetOf(serviceBusReceivedMessage.ApplicationProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
             Assert.AreSame(transactionStrategy.CreatedTransportTransactions.Last(), errorContext.TransportTransaction); // verify usage of the correct transport transaction instance
             Assert.AreEqual(2, transactionStrategy.CreatedTransportTransactions.Count); // verify that a new transport transaction has been created for the error handling
         }
@@ -148,6 +122,15 @@
 
             Assert.IsFalse(transactionStrategy.OnCompleteCalled);
             Assert.AreSame(mainPipelineException, exception);
+        }
+
+        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
+        {
+            return FunctionEndpoint.Process(
+                MessageHelper.CreateServiceBusReceivedMessage(message),
+                transactionStrategy,
+                pipeline,
+                CancellationToken.None);
         }
 
         static async Task<PipelineInvoker> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)

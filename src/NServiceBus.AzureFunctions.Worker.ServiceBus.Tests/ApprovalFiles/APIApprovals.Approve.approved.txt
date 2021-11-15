@@ -3,7 +3,7 @@ namespace NServiceBus
 {
     public class FunctionEndpoint : NServiceBus.IFunctionEndpoint
     {
-        public System.Threading.Tasks.Task Process(byte[] body, string messageId, int deliveryCount, string replyTo, string correlationId, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task Process(Azure.Messaging.ServiceBus.ServiceBusReceivedMessage message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task Publish(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task Publish(object message, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
@@ -27,7 +27,7 @@ namespace NServiceBus
     }
     public interface IFunctionEndpoint
     {
-        System.Threading.Tasks.Task Process(byte[] body, string messageId, int deliveryCount, string replyTo, string correlationId, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task Process(Azure.Messaging.ServiceBus.ServiceBusReceivedMessage message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task Publish(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task Publish(object message, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default);
