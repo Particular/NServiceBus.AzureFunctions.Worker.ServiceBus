@@ -46,8 +46,6 @@
             var body = message.Body.ToArray() ?? new byte[0]; // might be null
             var messageId = message.MessageId ?? Guid.NewGuid().ToString("N");
 
-            var headers = CreateNServiceBusHeaders(message);
-
             try
             {
                 using (var transaction = transactionStrategy.CreateTransaction())
@@ -55,7 +53,7 @@
                     var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
                     var messageContext = new MessageContext(
                         messageId,
-                        headers,
+                        CreateNServiceBusHeaders(message),
                         body,
                         transportTransaction,
                         new ContextBag());
@@ -75,7 +73,7 @@
 
                     var errorContext = new ErrorContext(
                         exception,
-                        headers,
+                        CreateNServiceBusHeaders(message), // recreate headers to prevent modifications from the processing attempt to leak 
                         messageId,
                         body,
                         transportTransaction,
