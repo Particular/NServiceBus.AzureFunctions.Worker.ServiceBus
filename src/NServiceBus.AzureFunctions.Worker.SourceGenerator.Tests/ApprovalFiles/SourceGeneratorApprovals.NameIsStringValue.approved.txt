@@ -17,7 +17,7 @@ public class FunctionEndpointTrigger
         [Function("NServiceBusFunctionEndpointTrigger-endpoint")]
         public async Task Run(
             [ServiceBusTrigger("endpoint")] byte[] messageBody,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,

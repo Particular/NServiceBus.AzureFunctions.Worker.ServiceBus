@@ -111,7 +111,7 @@ public class FunctionEndpointTrigger
         [Function(""{syntaxReceiver.triggerFunctionName}"")]
         public async Task Run(
             [ServiceBusTrigger(""{syntaxReceiver.endpointName}"")] byte[] messageBody,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
