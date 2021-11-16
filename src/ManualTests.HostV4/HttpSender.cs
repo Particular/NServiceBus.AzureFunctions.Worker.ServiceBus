@@ -15,7 +15,7 @@ class HttpSender
         this.functionEndpoint = functionEndpoint;
     }
 
-    [Function("HttpSenderV3")]
+    [Function("HttpSenderV4")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req,
         FunctionContext executionContext)
