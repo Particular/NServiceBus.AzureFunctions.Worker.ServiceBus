@@ -17,7 +17,7 @@
         /// </summary>
         Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,

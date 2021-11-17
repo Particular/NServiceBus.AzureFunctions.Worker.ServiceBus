@@ -21,9 +21,9 @@
             }
         }
 
-        public static IDictionary<string, string> GetUserProperties(object message)
+        public static IDictionary<string, object> GetUserProperties(object message)
         {
-            var dictionary = new Dictionary<string, string>
+            var dictionary = new Dictionary<string, object>
             {
                 { Headers.EnclosedMessageTypes, message.GetType().FullName }
             };

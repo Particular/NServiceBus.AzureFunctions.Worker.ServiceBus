@@ -25,7 +25,7 @@
         /// <inheritdoc />
         public async Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
@@ -44,7 +44,7 @@
 
         internal static async Task Process(
             byte[] body,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
@@ -206,22 +206,28 @@
         public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
             => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
-        static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, string> userProperties, string replyTo, string correlationId)
+        static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, object> userProperties, string replyTo, string correlationId)
         {
-            var d = new Dictionary<string, string>(userProperties);
-            d.Remove("NServiceBus.Transport.Encoding");
+            var headers = new Dictionary<string, string>(userProperties.Count);
+
+            foreach (var userProperty in userProperties)
+            {
+                headers[userProperty.Key] = userProperty.Value.ToString();
+            }
+
+            headers.Remove("NServiceBus.Transport.Encoding");
 
             if (!string.IsNullOrWhiteSpace(replyTo))
             {
-                d.TryAdd(Headers.ReplyToAddress, replyTo);
+                headers.TryAdd(Headers.ReplyToAddress, replyTo);
             }
 
             if (!string.IsNullOrWhiteSpace(correlationId))
             {
-                d.TryAdd(Headers.CorrelationId, correlationId);
+                headers.TryAdd(Headers.CorrelationId, correlationId);
             }
 
-            return d;
+            return headers;
         }
 
         readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;
