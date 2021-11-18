@@ -42,10 +42,6 @@ jobs:
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
           fetch-depth: 0
-      - name: Setup .NET 5 SDK
-        uses: actions/setup-dotnet@v1.8.2
-        with:
-          dotnet-version: 5.0.x
       - name: Setup .NET 6 SDK
         uses: actions/setup-dotnet@v1.8.2
         with:
