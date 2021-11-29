@@ -152,12 +152,25 @@
 
         static async Task<PipelineInvoker> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
         {
-            var pipelineInvoker = new PipelineInvoker(null);
+            var pipelineInvoker = new PipelineInvoker(new FakeMessageReceiver());
             await pipelineInvoker.Initialize(null,
                 mainPipeline ?? ((_, __) => Task.CompletedTask),
                 errorPipeline ?? ((_, __) => Task.FromResult(ErrorHandleResult.Handled)),
                 default);
             return pipelineInvoker;
+        }
+
+        class FakeMessageReceiver : IMessageReceiver
+        {
+            public ISubscriptionManager Subscriptions => throw new NotImplementedException();
+
+            public string Id => "FakeId";
+
+            public string ReceiveAddress => "FakeAddress";
+
+            public Task Initialize(PushRuntimeSettings limitations, OnMessage onMessage, OnError onError, CancellationToken cancellationToken = default) => Task.CompletedTask;
+            public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
+            public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
         }
 
         class TestMessage

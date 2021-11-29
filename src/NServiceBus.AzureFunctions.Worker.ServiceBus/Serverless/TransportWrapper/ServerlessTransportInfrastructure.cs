@@ -21,5 +21,8 @@
 
         public override Task Shutdown(CancellationToken cancellationToken = default)
             => baseTransportInfrastructure.Shutdown(cancellationToken);
+
+        public override string ToTransportAddress(QueueAddress address)
+            => baseTransportInfrastructure.ToTransportAddress(address);
     }
 }
