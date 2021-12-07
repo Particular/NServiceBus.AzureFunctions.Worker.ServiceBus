@@ -10,8 +10,6 @@ public class TriggerMessageHandler : IHandleMessages<TriggerMessage>
     {
         Log.Warn($"Handling {nameof(TriggerMessage)} in {nameof(TriggerMessageHandler)}");
 
-        //return Task.CompletedTask;
-
-        throw new System.Exception("boom");
+        return Task.CompletedTask;
     }
 }
