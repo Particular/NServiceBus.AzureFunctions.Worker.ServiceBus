@@ -111,14 +111,21 @@ public class FunctionEndpointTrigger
         [Function(""{syntaxReceiver.triggerFunctionName}"")]
         public async Task Run(
             [ServiceBusTrigger(""{syntaxReceiver.endpointName}"")] byte[] messageBody,
-            IDictionary<string, string> userProperties,
+            IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
             string replyTo,
             string correlationId,
             FunctionContext context)
         {{
-            await endpoint.Process(messageBody, userProperties, messageId, deliveryCount, replyTo, correlationId, context);
+            var legacyUserProperties = new Dictionary<string, string>(userProperties.Count);
+
+            foreach (var userProperty in userProperties)
+            {{
+                legacyUserProperties[userProperty.Key] = userProperty.Value.ToString();
+            }}
+
+            await endpoint.Process(messageBody, legacyUserProperties, messageId, deliveryCount, replyTo, correlationId, context);
         }}
 }}";
             context.AddSource("NServiceBus__FunctionEndpointTrigger", SourceText.From(source, Encoding.UTF8));
