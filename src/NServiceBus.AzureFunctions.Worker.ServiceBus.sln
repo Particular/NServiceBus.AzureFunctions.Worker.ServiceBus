@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.ServiceBus.Tests", "NServiceBus.AzureFunctions.Worker.ServiceBus.Tests\NServiceBus.AzureFunctions.Worker.ServiceBus.Tests.csproj", "{F633D697-A8E6-49E2-8ACE-28598B5839A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManualTests.HostV3", "ManualTests.HostV3\ManualTests.HostV3.csproj", "{40C99F59-69B7-4000-8268-D382307F2139}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManualTests.HostV4", "ManualTests.HostV4\ManualTests.HostV4.csproj", "{11E171FA-AC8B-48D8-B573-E7394072AFA3}"
 EndProject
 Global
@@ -37,10 +35,6 @@ Global
 		{F633D697-A8E6-49E2-8ACE-28598B5839A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F633D697-A8E6-49E2-8ACE-28598B5839A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F633D697-A8E6-49E2-8ACE-28598B5839A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40C99F59-69B7-4000-8268-D382307F2139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40C99F59-69B7-4000-8268-D382307F2139}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40C99F59-69B7-4000-8268-D382307F2139}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40C99F59-69B7-4000-8268-D382307F2139}.Release|Any CPU.Build.0 = Release|Any CPU
 		{11E171FA-AC8B-48D8-B573-E7394072AFA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{11E171FA-AC8B-48D8-B573-E7394072AFA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11E171FA-AC8B-48D8-B573-E7394072AFA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
