@@ -53,7 +53,7 @@ namespace NServiceBus
         public NServiceBus.EndpointConfiguration AdvancedConfiguration { get; }
         public NServiceBus.RoutingSettings<NServiceBus.AzureServiceBusTransport> Routing { get; }
         [System.Obsolete("Use `UseNServiceBus(ENDPOINTNAME, CONNECTIONSTRING)` instead. Will be removed in " +
-            "version 4.0.0.", true)]
+            "version 5.0.0.", true)]
         public string ServiceBusConnectionString { get; set; }
         public NServiceBus.AzureServiceBusTransport Transport { get; }
         public void DoNotSendMessagesToErrorQueue() { }
