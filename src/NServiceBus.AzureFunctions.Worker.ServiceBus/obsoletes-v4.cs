@@ -5,8 +5,8 @@ namespace NServiceBus
     public partial class ServiceBusTriggeredEndpointConfiguration
     {
         [ObsoleteEx(ReplacementTypeOrMember = "UseNServiceBus(ENDPOINTNAME, CONNECTIONSTRING)",
-                    TreatAsErrorFromVersion = "3",
-                    RemoveInVersion = "4")]
+                    TreatAsErrorFromVersion = "4",
+                    RemoveInVersion = "5")]
         public string ServiceBusConnectionString { get; set; }
     }
 }
