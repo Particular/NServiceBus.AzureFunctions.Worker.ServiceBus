@@ -2,7 +2,9 @@
 
 namespace NServiceBus
 {
+    using System;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
 
     //using Microsoft.Extensions.Configuration;
 
@@ -20,8 +22,7 @@ namespace NServiceBus
             TreatAsErrorFromVersion = "4",
             RemoveInVersion = "5")]
         public ServiceBusTriggeredEndpointConfiguration(IConfiguration configuration)
-        {
-        }
+            => throw new NotImplementedException();
 
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
@@ -30,8 +31,7 @@ namespace NServiceBus
             TreatAsErrorFromVersion = "4",
             RemoveInVersion = "5")]
         public ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null)
-        {
-        }
+            => throw new NotImplementedException();
 
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
@@ -40,8 +40,7 @@ namespace NServiceBus
             TreatAsErrorFromVersion = "4",
             RemoveInVersion = "5")]
         public ServiceBusTriggeredEndpointConfiguration(string endpointName, string connectionStringName = null)
-        {
-        }
+            => throw new NotImplementedException();
 
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
@@ -50,7 +49,18 @@ namespace NServiceBus
             TreatAsErrorFromVersion = "4",
             RemoveInVersion = "5")]
         public ServiceBusTriggeredEndpointConfiguration(string endpointName)
-        {
-        }
+            => throw new NotImplementedException();
+    }
+
+    public static partial class FunctionsHostBuilderExtensions
+    {
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public static IHostBuilder UseNServiceBus(
+            this IHostBuilder hostBuilder,
+            string endpointName,
+            Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+            => throw new NotImplementedException();
     }
 }
