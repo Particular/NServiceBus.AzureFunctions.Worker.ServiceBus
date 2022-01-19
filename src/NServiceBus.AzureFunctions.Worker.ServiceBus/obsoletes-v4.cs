@@ -55,6 +55,9 @@ namespace NServiceBus
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
         /// </summary>
+        [ObsoleteEx(
+            TreatAsErrorFromVersion = "4",
+            RemoveInVersion = "5")]
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
             string endpointName,
