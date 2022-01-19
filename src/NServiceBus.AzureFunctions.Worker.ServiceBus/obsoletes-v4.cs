@@ -6,8 +6,6 @@ namespace NServiceBus
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
 
-    //using Microsoft.Extensions.Configuration;
-
     public partial class ServiceBusTriggeredEndpointConfiguration
     {
         [ObsoleteEx(ReplacementTypeOrMember = "UseNServiceBus(ENDPOINTNAME, CONNECTIONSTRING)",
