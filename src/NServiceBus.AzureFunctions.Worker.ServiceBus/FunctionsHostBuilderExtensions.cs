@@ -9,7 +9,7 @@
     /// <summary>
     /// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IHostBuilder"/>.
     /// </summary>
-    public static class FunctionsHostBuilderExtensions
+    public static partial class FunctionsHostBuilderExtensions
     {
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.

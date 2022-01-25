@@ -57,7 +57,7 @@
 
             public override Task Start(CancellationToken token)
             {
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name);
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name, null, default);
                 var endpointConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
 
                 endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
