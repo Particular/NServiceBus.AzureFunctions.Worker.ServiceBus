@@ -170,6 +170,7 @@
 
             public Task Initialize(PushRuntimeSettings limitations, OnMessage onMessage, OnError onError, CancellationToken cancellationToken = default) => Task.CompletedTask;
             public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
+            public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
             public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
         }
 
