@@ -49,12 +49,11 @@
                     this.testContext = testContext;
                 }
 
-                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<DemoSagaData> mapper)
-                {
-                    mapper.ConfigureMapping<StartSagaMessage>(m => m.CorrelationProperty).ToSaga(s => s.CorrelationProperty);
-                    mapper.ConfigureMapping<UpdateSagaMessage>(m => m.CorrelationProperty).ToSaga(s => s.CorrelationProperty);
-                    mapper.ConfigureMapping<ReadSagaDataValueMessage>(m => m.CorrelationProperty).ToSaga(s => s.CorrelationProperty);
-                }
+                protected override void ConfigureHowToFindSaga(SagaPropertyMapper<DemoSagaData> mapper) =>
+                    mapper.MapSaga(s => s.CorrelationProperty)
+                        .ToMessage<StartSagaMessage>(m => m.CorrelationProperty)
+                        .ToMessage<UpdateSagaMessage>(m => m.CorrelationProperty)
+                        .ToMessage<ReadSagaDataValueMessage>(m => m.CorrelationProperty);
 
                 public Task Handle(StartSagaMessage message, IMessageHandlerContext context)
                 {
