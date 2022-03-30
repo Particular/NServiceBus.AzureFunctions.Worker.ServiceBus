@@ -1,7 +1,12 @@
 <Project>
 
-    <PropertyGroup>
-        <ParticularAnalyzersVersion>0.9.0</ParticularAnalyzersVersion>
-    </PropertyGroup>
-    
+  <PropertyGroup>
+    <ParticularAnalyzersVersion>0.9.0</ParticularAnalyzersVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MinVerMinimumMajorMinor>2.0</MinVerMinimumMajorMinor>
+    <MinVerAutoIncrement>patch</MinVerAutoIncrement>
+  </PropertyGroup>
+
 </Project>
