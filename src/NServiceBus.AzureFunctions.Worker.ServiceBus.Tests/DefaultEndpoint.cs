@@ -9,10 +9,10 @@
 
     class DefaultEndpoint : IEndpointSetupTemplate
     {
-        public Task<EndpointConfiguration> GetConfiguration(
+        public async Task<EndpointConfiguration> GetConfiguration(
             RunDescriptor runDescriptor,
             EndpointCustomizationConfiguration endpointConfiguration,
-            Action<EndpointConfiguration> configurationBuilderCustomization)
+            Func<EndpointConfiguration, Task> configurationBuilderCustomization)
         {
             var configuration = new EndpointConfiguration(endpointConfiguration.EndpointName);
 
@@ -45,9 +45,9 @@
 
             configuration.UseSerialization<NewtonsoftSerializer>();
 
-            configurationBuilderCustomization(configuration);
+            await configurationBuilderCustomization(configuration);
 
-            return Task.FromResult(configuration);
+            return configuration;
         }
     }
 }
