@@ -9,7 +9,7 @@
 
     public class MessageHelper
     {
-        static NewtonsoftSerializer serializer = new NewtonsoftSerializer();
+        static NewtonsoftJsonSerializer serializer = new NewtonsoftJsonSerializer();
         static IMessageSerializer messageSerializer = serializer.Configure(new SettingsHolder())(new MessageMapper());
 
         public static byte[] GetBody(object message)

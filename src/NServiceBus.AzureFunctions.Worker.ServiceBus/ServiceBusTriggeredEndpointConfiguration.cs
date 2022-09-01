@@ -79,7 +79,7 @@
             // "repack" settings to expected transport type settings:
             Routing = new RoutingSettings<AzureServiceBusTransport>(routing.GetSettings());
 
-            endpointConfiguration.UseSerialization<NewtonsoftSerializer>();
+            endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
 
             AdvancedConfiguration = endpointConfiguration;
         }
