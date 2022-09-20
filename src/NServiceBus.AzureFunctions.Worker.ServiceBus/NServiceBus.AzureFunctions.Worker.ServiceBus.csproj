@@ -28,5 +28,10 @@
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />
   </ItemGroup>
+  
+<ItemGroup>
+    <None Remove="build*\*" />
+    <Content Include="build\*" PackagePath="build" />
+  </ItemGroup>
 
 </Project>
