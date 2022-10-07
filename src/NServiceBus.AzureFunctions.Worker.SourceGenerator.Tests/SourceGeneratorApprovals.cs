@@ -123,15 +123,27 @@ using NServiceBus;
             Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidEndpointNameError.Id));
         }
 
-        [TestCase(null)]
         [TestCase("")]
         [TestCase(" ")]
-        public void Invalid_trigger_function_name_should_cause_an_error(string triggerFunctionName)
+        public void Empty_trigger_function_name_should_cause_an_error(string triggerFunctionName)
         {
             var source = @"
 using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(""endpoint"", TriggerFunctionName = """ + triggerFunctionName + @""")]
+";
+            var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+
+            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidTriggerFunctionNameError.Id));
+        }
+
+        [Test]
+        public void Invalid_trigger_function_name_should_cause_an_error()
+        {
+            var source = @"
+using NServiceBus;
+
+[assembly: NServiceBusTriggerFunction(""endpoint"", TriggerFunctionName = null)]
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
