@@ -91,17 +91,19 @@
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;
-                endpointName ??= configuration.GetValue<string>("ENDPOINT_NAME")
-                               ?? callingAssembly
-                                   ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
-                                   ?.EndpointName;
+                var endpointNameValue = callingAssembly
+                    ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
+                    ?.EndpointName;
+
+                endpointName ??= configuration.GetValue<string>(endpointNameValue?.Trim('%') ?? string.Empty)
+                                 ?? endpointNameValue;
 
                 if (string.IsNullOrWhiteSpace(endpointName))
                 {
                     throw new Exception($@"Endpoint name cannot be determined automatically. Use one of the following options to specify endpoint name: 
 - Use `{nameof(NServiceBusTriggerFunctionAttribute)}(endpointName)` to generate a trigger
-- Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)` 
-- Add a configuration or environment variable with the key ENDPOINT_NAME");
+- Use `{nameof(NServiceBusTriggerFunctionAttribute)}(%ENDPOINT_NAME%, TriggerFunctionName = triggerName)` to use a setting or environment variable
+- Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
