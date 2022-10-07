@@ -96,15 +96,27 @@ public class Startup
             Approver.Verify(output);
         }
 
-        [TestCase(null)]
         [TestCase("")]
         [TestCase(" ")]
-        public void Invalid_name_should_cause_an_error(string endpointName)
+        public void Empty_name_should_cause_an_error(string endpointName)
         {
             var source = @"
 using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(""" + endpointName + @""")]
+";
+            var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+
+            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidEndpointNameError.Id));
+        }
+
+        [Test]
+        public void Invalid_name_should_cause_an_error()
+        {
+            var source = @"
+using NServiceBus;
+
+[assembly: NServiceBusTriggerFunction(null)]
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
