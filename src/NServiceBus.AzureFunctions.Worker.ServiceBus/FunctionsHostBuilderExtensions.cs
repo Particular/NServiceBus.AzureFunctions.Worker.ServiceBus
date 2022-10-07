@@ -95,7 +95,8 @@
                     ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
                     ?.EndpointName;
 
-                endpointName ??= configuration.GetValue<string>(endpointNameValue?.Trim('%') ?? string.Empty)
+                endpointName ??= configuration.GetValue<string>("ENDPOINT_NAME")
+                                 ?? TryResolveBindingExpression()
                                  ?? endpointNameValue;
 
                 if (string.IsNullOrWhiteSpace(endpointName))
@@ -114,7 +115,19 @@
                 // for backward compatibility
                 serviceCollection.AddSingleton(endpointFactory);
                 serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
+
+                string TryResolveBindingExpression()
+                {
+                    if (endpointNameValue != null && endpointNameValue[0] == '%' && endpointNameValue[0] == endpointNameValue[^1])
+                    {
+                        return configuration.GetValue<string>(endpointNameValue.Trim('%'));
+                    }
+
+                    return null;
+                }
             });
+
+
         }
 
         internal static Func<IServiceProvider, FunctionEndpoint> Configure(

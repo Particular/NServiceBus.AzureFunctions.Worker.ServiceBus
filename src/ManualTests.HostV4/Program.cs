@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
-[assembly: NServiceBusTriggerFunction("ManualTestsV4Host")]
+[assembly: NServiceBusTriggerFunction("%MY_ENDPOINT_NAME%", TriggerFunctionName = "MyFunctionName")]
 
 public class Program
 {
@@ -9,7 +9,7 @@ public class Program
     {
         var host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
-            .UseNServiceBus()
+            .UseNServiceBus("yolo3", (configuration, endpointConfiguration) => { })
             .Build();
 
         host.Run();

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ManualTests.HostV4": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ENV_ENDPOINT_NAME": "ValueFromEnvironmentVariable"
+      }
+    }
+  }
+}
