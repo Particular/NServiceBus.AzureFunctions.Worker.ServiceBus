@@ -93,16 +93,17 @@
                 return;
             }
 
-            if (syntaxReceiver.isInvalidBindingExpression)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
-                return;
-            }
-
             // Generate an error if empty/null/space is used as endpoint name
             if (string.IsNullOrWhiteSpace(syntaxReceiver.endpointName))
             {
                 context.ReportDiagnostic(Diagnostic.Create(InvalidEndpointNameError, Location.None, syntaxReceiver.endpointName));
+                return;
+            }
+
+            // Generate an error if a binding expression is provided with no trigger function name
+            if (syntaxReceiver.isInvalidBindingExpression)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
                 return;
             }
 
