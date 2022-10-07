@@ -60,7 +60,6 @@ namespace Foo
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
             Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidBindingExpression.Id));
-
         }
 
 
