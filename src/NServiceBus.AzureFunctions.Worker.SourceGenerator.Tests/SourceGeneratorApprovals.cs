@@ -62,6 +62,14 @@ namespace Foo
             Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidBindingExpression.Id));
         }
 
+        [Test]
+        public void Binding_expression_with_trigger_function_should_not_generate_error()
+        {
+            var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"", TriggerFunctionName = ""trigger"")]";
+            var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+
+            Assert.False(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
+        }
 
         [Test]
         public void NameIsStringValue()
