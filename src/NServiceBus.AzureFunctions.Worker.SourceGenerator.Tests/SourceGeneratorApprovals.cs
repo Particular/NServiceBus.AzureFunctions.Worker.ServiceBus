@@ -54,7 +54,7 @@ namespace Foo
         }
 
         [Test]
-        public void Endpoint_name_using_binding_expression_should_generate_compilation_error()
+        public void Endpoint_name_using_binding_expression_should_generate_compilation_error_when_no_trigger_function_is_given()
         {
             var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"")]";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
