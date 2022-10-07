@@ -75,7 +75,7 @@
                 bool IsNServiceBusEndpointNameAttribute(string value) => value?.Equals("NServiceBus.NServiceBusTriggerFunctionAttribute") ?? false;
                 string AttributeParameterAtPosition(int position) => context.SemanticModel.GetConstantValue(attributeSyntax.ArgumentList.Arguments[position].Expression).ToString();
                 int AttributeParametersCount() => attributeSyntax.ArgumentList.Arguments.Count;
-                bool IsBindingExpression(string endpointName) => endpointName != null && endpointName[0] == '%' && endpointName[0] == endpointName[endpointName.Length - 1]);
+                bool IsBindingExpression(string endpointName) => endpointName != null && endpointName[0] == '%' && endpointName[0] == endpointName[endpointName.Length - 1];
             }
         }
 
