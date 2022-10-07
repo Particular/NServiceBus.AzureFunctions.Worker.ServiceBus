@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.AzureFunctions.SourceGenerator
 {
+    using System;
     using System.Text;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +25,15 @@
             DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
+        internal static readonly DiagnosticDescriptor InvalidBindingExpression = new DiagnosticDescriptor(
+            id: "NSBWFUNC 003",
+            title: "Invalid binding expression pattern use",
+            messageFormat: "Binding expression patterns require that a TriggerFunctionName be specified",
+            category: "TriggerFunctionGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
@@ -34,6 +44,7 @@
             internal string endpointName;
             internal string triggerFunctionName;
             internal bool attributeFound;
+            internal bool isInvalidBindingExpression = false;
 
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
@@ -50,6 +61,10 @@
 
                     if (attributeParametersCount == 1)
                     {
+                        if (IsBindingExpression(endpointName))
+                        {
+                            isInvalidBindingExpression = true;
+                        }
                         return;
                     }
 
@@ -60,6 +75,7 @@
                 bool IsNServiceBusEndpointNameAttribute(string value) => value?.Equals("NServiceBus.NServiceBusTriggerFunctionAttribute") ?? false;
                 string AttributeParameterAtPosition(int position) => context.SemanticModel.GetConstantValue(attributeSyntax.ArgumentList.Arguments[position].Expression).ToString();
                 int AttributeParametersCount() => attributeSyntax.ArgumentList.Arguments.Count;
+                bool IsBindingExpression(string endpointName) => !string.IsNullOrWhiteSpace(endpointName) && endpointName[0] == '%' && endpointName[0] == endpointName[endpointName.Length - 1];
             }
         }
 
@@ -81,6 +97,13 @@
             if (string.IsNullOrWhiteSpace(syntaxReceiver.endpointName))
             {
                 context.ReportDiagnostic(Diagnostic.Create(InvalidEndpointNameError, Location.None, syntaxReceiver.endpointName));
+                return;
+            }
+
+            // Generate an error if a binding expression is provided with no trigger function name
+            if (syntaxReceiver.isInvalidBindingExpression)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
                 return;
             }
 

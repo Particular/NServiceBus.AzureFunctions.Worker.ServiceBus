@@ -54,6 +54,24 @@ namespace Foo
         }
 
         [Test]
+        public void Endpoint_name_using_binding_expression_should_generate_compilation_error_when_no_trigger_function_is_given()
+        {
+            var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"")]";
+            var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+
+            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == TriggerFunctionGenerator.InvalidBindingExpression.Id));
+        }
+
+        [Test]
+        public void Binding_expression_with_trigger_function_should_not_generate_error()
+        {
+            var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"", TriggerFunctionName = ""trigger"")]";
+            var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+
+            Assert.False(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
+        }
+
+        [Test]
         public void NameIsStringValue()
         {
             var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""endpoint"")]";
