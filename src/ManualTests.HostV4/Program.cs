@@ -9,7 +9,7 @@ public class Program
     {
         var host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
-            .UseNServiceBus("yolo3", (configuration, endpointConfiguration) => { })
+            .UseNServiceBus()
             .Build();
 
         host.Run();
