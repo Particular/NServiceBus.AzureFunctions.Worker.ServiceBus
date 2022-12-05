@@ -8,6 +8,7 @@
     using Extensibility;
     using Microsoft.Azure.Functions.Worker;
     using Transport;
+    using Transport.AzureServiceBus;
 
     /// <summary>
     /// An NServiceBus endpoint hosted in Azure Function which does not receive messages automatically but only handles
@@ -38,7 +39,7 @@
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, cancellationToken)
+            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, pipeline, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -49,60 +50,51 @@
             int deliveryCount,
             string replyTo,
             string correlationId,
-            ITransactionStrategy transactionStrategy,
             PipelineInvoker pipeline,
             CancellationToken cancellationToken)
         {
-            body ??= new byte[0]; // might be null
+            body ??= Array.Empty<byte>(); // might be null
             messageId ??= Guid.NewGuid().ToString("N");
 
             try
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
-                {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var messageContext = new MessageContext(
-                        messageId,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        body,
-                        transportTransaction,
-                        pipeline.ReceiveAddress,
-                        new ContextBag());
+                using var azureServiceBusTransaction = new AzureServiceBusTransportTransaction();
+                var messageContext = new MessageContext(
+                    messageId,
+                    CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
+                    body,
+                    azureServiceBusTransaction.TransportTransaction,
+                    pipeline.ReceiveAddress,
+                    new ContextBag());
 
-                    await pipeline.PushMessage(messageContext, cancellationToken).ConfigureAwait(false);
+                await pipeline.PushMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
-                    await transactionStrategy.Complete(transaction).ConfigureAwait(false);
-
-                    transaction?.Commit();
-                }
+                azureServiceBusTransaction.Commit();
             }
             catch (Exception exception)
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
+                using var azureServiceBusTransaction = new AzureServiceBusTransportTransaction();
+                var errorContext = new ErrorContext(
+                    exception,
+                    CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
+                    messageId,
+                    body,
+                    azureServiceBusTransaction.TransportTransaction,
+                    deliveryCount,
+                    pipeline.ReceiveAddress,
+                    new ContextBag());
+
+                ErrorHandleResult errorHandleResult = await pipeline.PushFailedMessage(errorContext, cancellationToken)
+                    .ConfigureAwait(false);
+
+                azureServiceBusTransaction.Commit();
+
+                if (errorHandleResult == ErrorHandleResult.Handled)
                 {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var errorContext = new ErrorContext(
-                        exception,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        messageId,
-                        body,
-                        transportTransaction,
-                        deliveryCount,
-                        pipeline.ReceiveAddress,
-                        new ContextBag());
-
-                    var errorHandleResult = await pipeline.PushFailedMessage(errorContext, cancellationToken).ConfigureAwait(false);
-
-                    if (errorHandleResult == ErrorHandleResult.Handled)
-                    {
-                        await transactionStrategy.Complete(transaction).ConfigureAwait(false);
-
-                        transaction?.Commit();
-                        return;
-                    }
-
-                    throw;
+                    return;
                 }
+
+                throw;
             }
         }
 
