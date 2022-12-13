@@ -14,34 +14,33 @@
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {
-        public FunctionEndpointComponent()
-        {
-        }
-
-        public FunctionEndpointComponent(object triggerMessage)
-        {
-            Messages.Add(triggerMessage);
-        }
-
         public Task<ComponentRunner> CreateRunner(RunDescriptor runDescriptor)
         {
             return Task.FromResult<ComponentRunner>(
                 new FunctionRunner(
-                    Messages,
+                    testMessages,
                     CustomizeConfiguration,
                     runDescriptor.ScenarioContext,
                     GetType()));
         }
 
-        public IList<object> Messages { get; } = new List<object>();
-
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
 
+        public void AddTestMessage(object body, IDictionary<string, object> userProperties = null)
+        {
+            testMessages.Add(new TestMessage
+            {
+                Body = body,
+                UserProperties = userProperties ?? new Dictionary<string, object>()
+            });
+        }
+
+        IList<TestMessage> testMessages = new List<TestMessage>();
 
         class FunctionRunner : ComponentRunner
         {
             public FunctionRunner(
-                IList<object> messages,
+                IList<TestMessage> messages,
                 Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
                 ScenarioContext scenarioContext,
                 Type functionComponentType)
@@ -102,10 +101,17 @@
             {
                 foreach (var message in messages)
                 {
+                    var userProperties = MessageHelper.GetUserProperties(message.Body);
+
+                    foreach (var customUserProperty in message.UserProperties)
+                    {
+                        userProperties[customUserProperty.Key] = customUserProperty.Value;
+                    }
+
                     var functionContext = new FakeFunctionContext();
                     await endpoint.Process(
-                        MessageHelper.GetBody(message),
-                        MessageHelper.GetUserProperties(message),
+                        MessageHelper.GetBody(message.Body),
+                        userProperties,
                         Guid.NewGuid().ToString("N"),
                         1,
                         null,
@@ -128,8 +134,14 @@
             readonly Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization;
             readonly ScenarioContext scenarioContext;
             readonly Type functionComponentType;
-            IList<object> messages;
+            IList<TestMessage> messages;
             FunctionEndpoint endpoint;
+        }
+
+        class TestMessage
+        {
+            public object Body;
+            public IDictionary<string, object> UserProperties;
         }
     }
 }

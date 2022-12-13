@@ -52,7 +52,7 @@
         {
             public PublishingFunction()
             {
-                Messages.Add(new TriggerMessage());
+                AddTestMessage(new TriggerMessage());
             }
 
             public class PublishingHandler : IHandleMessages<TriggerMessage>

@@ -1,27 +1,34 @@
 ﻿namespace ServiceBus.Tests
 {
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
 
-    public class When_function_receives_a_message
+    public class When_function_receives_a_message_with_a_null_header_value
     {
         [Test]
-        public async Task Should_invoke_the_handler_to_process_it()
+        public async Task Should_process_the_message()
         {
+            var headerKey = "MyNullHeader";
+
             var context = await Scenario.Define<Context>()
-                .WithComponent(new FunctionHandler(new HappyDayMessage()))
+                .WithComponent(new FunctionHandler(headerKey))
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
             Assert.AreEqual(1, context.HandlerInvocationCount);
+            Assert.True(context.Headers.ContainsKey(headerKey));
+            Assert.Null(context.Headers[headerKey]);
         }
 
         public class Context : ScenarioContext
         {
             public int HandlerInvocationCount => count;
+
+            public IReadOnlyDictionary<string, string> Headers { get; set; }
 
             public void HandlerInvoked() => Interlocked.Increment(ref count);
 
@@ -30,29 +37,30 @@
 
         class FunctionHandler : FunctionEndpointComponent
         {
-            public FunctionHandler(object triggerMessage)
+            public FunctionHandler(string headerKey)
             {
-                AddTestMessage(triggerMessage);
+                AddTestMessage(new MessageWithNullHeader(), new Dictionary<string, object> { { headerKey, null } });
             }
 
-            public class HappyDayMessageHandler : IHandleMessages<HappyDayMessage>
+            public class MessageWithNullHeaderHandler : IHandleMessages<MessageWithNullHeader>
             {
                 Context testContext;
 
-                public HappyDayMessageHandler(Context testContext)
+                public MessageWithNullHeaderHandler(Context testContext)
                 {
                     this.testContext = testContext;
                 }
 
-                public Task Handle(HappyDayMessage message, IMessageHandlerContext context)
+                public Task Handle(MessageWithNullHeader message, IMessageHandlerContext context)
                 {
+                    testContext.Headers = context.MessageHeaders;
                     testContext.HandlerInvoked();
                     return Task.CompletedTask;
                 }
             }
         }
 
-        class HappyDayMessage : IMessage
+        class MessageWithNullHeader : IMessage
         {
         }
     }
