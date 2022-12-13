@@ -211,7 +211,7 @@
 
             foreach (var userProperty in userProperties)
             {
-                headers[userProperty.Key] = userProperty.Value.ToString();
+                headers[userProperty.Key] = userProperty.Value?.ToString();
             }
 
             headers.Remove("NServiceBus.Transport.Encoding");

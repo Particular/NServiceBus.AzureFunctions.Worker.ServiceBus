@@ -49,8 +49,9 @@
 
         class SendingFunction : FunctionEndpointComponent
         {
-            public SendingFunction(object triggerMessage) : base(triggerMessage)
+            public SendingFunction(object triggerMessage)
             {
+                AddTestMessage(triggerMessage);
             }
 
             public class TriggerMessageHandler : IHandleMessages<TriggerMessage>

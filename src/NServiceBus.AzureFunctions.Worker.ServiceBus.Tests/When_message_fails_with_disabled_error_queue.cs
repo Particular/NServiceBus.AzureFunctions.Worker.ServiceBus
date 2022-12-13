@@ -29,7 +29,7 @@
             {
                 CustomizeConfiguration = c => c.DoNotSendMessagesToErrorQueue();
 
-                Messages.Add(new TriggerMessage());
+                AddTestMessage(new TriggerMessage());
             }
 
             public class FailingHandler : IHandleMessages<TriggerMessage>

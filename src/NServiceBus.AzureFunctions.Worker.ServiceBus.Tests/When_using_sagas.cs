@@ -32,9 +32,9 @@
                     configuration.AdvancedConfiguration.UsePersistence<LearningPersistence>();
 
                 var correlationProperty = Guid.NewGuid().ToString("N");
-                Messages.Add(new StartSagaMessage { CorrelationProperty = correlationProperty });
-                Messages.Add(new UpdateSagaMessage { CorrelationProperty = correlationProperty, UpdateValue = 42 });
-                Messages.Add(new ReadSagaDataValueMessage { CorrelationProperty = correlationProperty });
+                AddTestMessage(new StartSagaMessage { CorrelationProperty = correlationProperty });
+                AddTestMessage(new UpdateSagaMessage { CorrelationProperty = correlationProperty, UpdateValue = 42 });
+                AddTestMessage(new ReadSagaDataValueMessage { CorrelationProperty = correlationProperty });
             }
 
             public class DemoSaga : Saga<DemoSagaData>,

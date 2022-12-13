@@ -33,8 +33,9 @@
 
         class FailingFunction : FunctionEndpointComponent
         {
-            public FailingFunction(object triggerMessage) : base(triggerMessage)
+            public FailingFunction(object triggerMessage)
             {
+                AddTestMessage(triggerMessage);
             }
 
             public class FailingHandler : IHandleMessages<TriggerMessage>
