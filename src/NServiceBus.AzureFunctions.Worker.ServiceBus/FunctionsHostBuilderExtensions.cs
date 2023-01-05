@@ -109,6 +109,7 @@
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
+                functionEndpointConfiguration.MakeServerless();
 
                 var endpointFactory = Configure(functionEndpointConfiguration, serviceCollection);
 
@@ -138,7 +139,9 @@
                     configuration.AdvancedConfiguration,
                     serviceCollection);
 
-            return serviceProvider => new FunctionEndpoint(startableEndpoint, configuration, serviceProvider);
+            var serverless = configuration.MakeServerless();
+
+            return serviceProvider => new FunctionEndpoint(startableEndpoint, serverless, serviceProvider);
         }
     }
 }
