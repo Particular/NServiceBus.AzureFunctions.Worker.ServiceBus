@@ -109,7 +109,6 @@
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
-                functionEndpointConfiguration.MakeServerless();
 
                 var endpointFactory = Configure(functionEndpointConfiguration, serviceCollection);
 
