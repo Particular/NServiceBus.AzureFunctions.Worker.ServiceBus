@@ -16,9 +16,9 @@
     public class FunctionEndpoint : IFunctionEndpoint
     {
         // This ctor is used for the FunctionsHostBuilder scenario where the endpoint is created already during configuration time using the function host's container.
-        internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServiceBusTriggeredEndpointConfiguration configuration, IServiceProvider serviceProvider)
+        internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessInterceptor serverless, IServiceProvider serviceProvider)
         {
-            this.configuration = configuration;
+            this.serverless = serverless;
             endpointFactory = _ => externallyManagedContainerEndpoint.Start(serviceProvider);
         }
 
@@ -117,7 +117,7 @@
                     {
                         endpoint = await endpointFactory(functionContext).ConfigureAwait(false);
 
-                        pipeline = configuration.PipelineInvoker;
+                        pipeline = serverless.PipelineInvoker;
                     }
                 }
                 finally
@@ -232,7 +232,7 @@
         readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;
 
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-        ServiceBusTriggeredEndpointConfiguration configuration;
+        readonly ServerlessInterceptor serverless;
 
         PipelineInvoker pipeline;
         IEndpointInstance endpoint;

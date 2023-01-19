@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using AzureFunctions.Worker.ServiceBus;
-    using Configuration.AdvancedExtensibility;
     using Logging;
     using Microsoft.Extensions.Configuration;
     using Serialization;
@@ -73,15 +72,18 @@
             }
 
             Transport = new AzureServiceBusTransport(connectionString);
-
-            serverlessTransport = new ServerlessTransport(Transport);
-            var routing = endpointConfiguration.UseTransport(serverlessTransport);
-            // "repack" settings to expected transport type settings:
-            Routing = new RoutingSettings<AzureServiceBusTransport>(routing.GetSettings());
+            Routing = endpointConfiguration.UseTransport(Transport);
 
             endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
 
             AdvancedConfiguration = endpointConfiguration;
+        }
+
+        internal ServerlessInterceptor MakeServerless()
+        {
+            var serverlessTransport = new ServerlessTransport(Transport);
+            AdvancedConfiguration.UseTransport(serverlessTransport);
+            return new ServerlessInterceptor(serverlessTransport);
         }
 
         static string GetConfiguredValueOrFallback(IConfiguration configuration, string key, bool optional)
@@ -102,9 +104,6 @@
             }
             return environmentVariable;
         }
-
-        internal PipelineInvoker PipelineInvoker => serverlessTransport.PipelineInvoker;
-
 
         /// <summary>
         /// Define the serializer to be used.
@@ -134,7 +133,6 @@
             });
         }
 
-        ServerlessTransport serverlessTransport;
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
     }
