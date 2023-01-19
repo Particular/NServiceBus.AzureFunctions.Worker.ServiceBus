@@ -88,11 +88,13 @@
 
                 configurationCustomization(functionEndpointConfiguration);
 
+                var serverless = functionEndpointConfiguration.MakeServerless();
+
                 var serviceCollection = new ServiceCollection();
                 var startableEndpointWithExternallyManagedContainer = EndpointWithExternallyManagedContainer.Create(functionEndpointConfiguration.AdvancedConfiguration, serviceCollection);
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
-                endpoint = new FunctionEndpoint(startableEndpointWithExternallyManagedContainer, functionEndpointConfiguration, serviceProvider);
+                endpoint = new FunctionEndpoint(startableEndpointWithExternallyManagedContainer, serverless, serviceProvider);
 
                 return Task.CompletedTask;
             }
