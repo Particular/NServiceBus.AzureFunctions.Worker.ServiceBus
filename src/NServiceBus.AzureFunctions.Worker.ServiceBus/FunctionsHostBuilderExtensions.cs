@@ -123,7 +123,9 @@
                     configuration.AdvancedConfiguration,
                     serviceCollection);
 
-            return serviceProvider => new FunctionEndpoint(startableEndpoint, configuration, serviceProvider);
+            var serverless = configuration.MakeServerless();
+
+            return serviceProvider => new FunctionEndpoint(startableEndpoint, serverless, serviceProvider);
         }
     }
 }
