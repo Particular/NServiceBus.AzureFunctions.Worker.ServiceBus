@@ -5,6 +5,7 @@
     using AzureFunctions.Worker.ServiceBus;
     using Logging;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Serialization;
 
     /// <summary>
@@ -79,11 +80,18 @@
             AdvancedConfiguration = endpointConfiguration;
         }
 
-        internal ServerlessInterceptor MakeServerless()
+        internal Func<IServiceProvider, FunctionEndpoint> CreateEndpointFactory(IServiceCollection serviceCollection)
         {
+            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                AdvancedConfiguration,
+                serviceCollection);
+
+            // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
             var serverlessTransport = new ServerlessTransport(Transport);
             AdvancedConfiguration.UseTransport(serverlessTransport);
-            return new ServerlessInterceptor(serverlessTransport);
+            var serverless = new ServerlessInterceptor(serverlessTransport);
+
+            return serviceProvider => new FunctionEndpoint(startableEndpoint, serverless, serviceProvider);
         }
 
         static string GetConfiguredValueOrFallback(IConfiguration configuration, string key, bool optional)

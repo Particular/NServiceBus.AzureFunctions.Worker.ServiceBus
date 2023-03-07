@@ -108,9 +108,10 @@
                 }
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
+
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
-                var endpointFactory = Configure(functionEndpointConfiguration, serviceCollection);
+                var endpointFactory = functionEndpointConfiguration.CreateEndpointFactory(serviceCollection);
 
                 // for backward compatibility
                 serviceCollection.AddSingleton(endpointFactory);
@@ -128,19 +129,6 @@
             });
 
 
-        }
-
-        internal static Func<IServiceProvider, FunctionEndpoint> Configure(
-            ServiceBusTriggeredEndpointConfiguration configuration,
-            IServiceCollection serviceCollection)
-        {
-            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
-                    configuration.AdvancedConfiguration,
-                    serviceCollection);
-
-            var serverless = configuration.MakeServerless();
-
-            return serviceProvider => new FunctionEndpoint(startableEndpoint, serverless, serviceProvider);
         }
     }
 }
