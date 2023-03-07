@@ -82,14 +82,14 @@
 
         internal Func<IServiceProvider, FunctionEndpoint> CreateEndpointFactory(IServiceCollection serviceCollection)
         {
-            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
-                AdvancedConfiguration,
-                serviceCollection);
-
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
             var serverlessTransport = new ServerlessTransport(Transport);
             AdvancedConfiguration.UseTransport(serverlessTransport);
             var serverless = new ServerlessInterceptor(serverlessTransport);
+
+            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                AdvancedConfiguration,
+                serviceCollection);
 
             return serviceProvider => new FunctionEndpoint(startableEndpoint, serverless, serviceProvider);
         }
