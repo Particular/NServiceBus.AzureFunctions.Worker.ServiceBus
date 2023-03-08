@@ -15,7 +15,6 @@
     /// </summary>
     public class FunctionEndpoint : IFunctionEndpoint
     {
-        // This ctor is used for the FunctionsHostBuilder scenario where the endpoint is created already during configuration time using the function host's container.
         internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessInterceptor serverless, IServiceProvider serviceProvider)
         {
             this.serverless = serverless;
