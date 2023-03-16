@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
@@ -10,8 +13,36 @@ public class Program
         var host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
             .UseNServiceBus()
+            //.ConfigureFunctionsWorker((context, builder) =>
+            //{
+            //    return;
+            //}, options =>
+            //{
+            //    return;
+            //})
+            .ConfigureServices(s => s.AddHostedService<MyHostedService>())
             .Build();
 
         host.Run();
+    }
+
+    class MyHostedService : IHostedService
+    {
+        IFunctionEndpoint functionEndpoint;
+
+        public MyHostedService(IFunctionEndpoint functionEndpoint)
+        {
+            this.functionEndpoint = functionEndpoint;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

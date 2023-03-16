@@ -1,4 +1,7 @@
-﻿namespace NServiceBus
+﻿using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Installation;
+
+namespace NServiceBus
 {
     using System;
     using System.Reflection;
@@ -106,6 +109,12 @@
 - Use `{nameof(NServiceBusTriggerFunctionAttribute)}(%ENDPOINT_NAME%, TriggerFunctionName = triggerName)` to use a setting or environment variable
 - Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
+
+                var installerConfig = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
+                configurationCustomization?.Invoke(configuration, installerConfig);
+                // necessary because this happens in `CreateEndpointFactory` to prevent users overriding it. Might not be necessary when the API isn't accessible to users anymore.
+                installerConfig.AdvancedConfiguration.UseTransport(new ServerlessTransport(installerConfig.Transport));
+                Installer.Setup(installerConfig.AdvancedConfiguration).GetAwaiter().GetResult();
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
 
