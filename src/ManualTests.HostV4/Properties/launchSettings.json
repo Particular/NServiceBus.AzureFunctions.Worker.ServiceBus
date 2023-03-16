@@ -1,10 +1,7 @@
 {
   "profiles": {
     "ManualTests.HostV4": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "MY_ENDPOINT_NAME": "EndpointNameFromBindingExpression"
-      }
+      "commandName": "Project"
     }
   }
 }

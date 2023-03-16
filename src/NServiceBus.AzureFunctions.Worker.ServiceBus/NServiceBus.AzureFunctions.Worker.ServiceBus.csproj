@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="[5.4.0, 6.0.0)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="[1.8.0, 2.0.0)" />
+    <PackageReference Include="NServiceBus" Version="8.1.0-alpha.0.66" />
     <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="[3.0.0, 4.0.0)" />
     <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="[3.0.0, 4.0.0)" />
     <PackageReference Include="Particular.Packaging" Version="3.0.0" PrivateAssets="All" />
