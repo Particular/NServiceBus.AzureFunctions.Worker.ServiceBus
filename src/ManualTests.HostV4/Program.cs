@@ -14,7 +14,7 @@ public class Program
             .ConfigureFunctionsWorkerDefaults()            
             .UseNServiceBus(c =>
             {
-                c.AdvancedConfiguration.SendOnly();
+                //c.AdvancedConfiguration.SendOnly();
 
                 c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
             })
@@ -24,23 +24,4 @@ public class Program
         host.Run();
     }
 
-    class MyHostedService : IHostedService
-    {
-        IFunctionEndpoint functionEndpoint;
-
-        public MyHostedService(IFunctionEndpoint functionEndpoint)
-        {
-            this.functionEndpoint = functionEndpoint;
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-    }
 }
