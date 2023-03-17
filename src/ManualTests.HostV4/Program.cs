@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
-[assembly: NServiceBusTriggerFunction("%MY_ENDPOINT_NAME%", TriggerFunctionName = "MyFunctionName")]
+[assembly: NServiceBusTriggerFunction("FunctionsTestEndpoint2", TriggerFunctionName = "MyFunctionName")]
 
 public class Program
 {
@@ -15,8 +15,8 @@ public class Program
             .UseNServiceBus(c =>
             {
                 //c.AdvancedConfiguration.SendOnly();
-
-                c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
+                //c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
+                c.AdvancedConfiguration.EnableInstallers();
             })
             .ConfigureServices(s => s.AddHostedService<MyHostedService>())
             .Build();
