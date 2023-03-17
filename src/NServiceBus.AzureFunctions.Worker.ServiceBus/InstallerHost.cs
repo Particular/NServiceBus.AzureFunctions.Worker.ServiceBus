@@ -1,30 +1,29 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using NServiceBus.Installation;
-
-namespace NServiceBus;
-
-class InstallerHost : IHostedService
+﻿namespace NServiceBus
 {
-    InstallerWithExternallyManagedContainer installer;
-    IServiceProvider serviceProvider;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.Extensions.Hosting;
+    using Installation;
 
-    public InstallerHost(InstallerWithExternallyManagedContainer installer, IServiceProvider serviceProvider)
+    class InstallerHost : IHostedService
     {
-        this.installer = installer;
-        this.serviceProvider = serviceProvider;
-    }
+        readonly FunctionEndpoint functionEndpoint;
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return installer.Setup(serviceProvider, cancellationToken);
-        //return Task.CompletedTask;
-    }
+        public InstallerHost(IFunctionEndpoint functionEndpoint)
+        {
+            this.functionEndpoint = functionEndpoint as FunctionEndpoint;
+        }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return functionEndpoint.InitializeEndpointIfNecessary(cancellationToken);
+            //return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

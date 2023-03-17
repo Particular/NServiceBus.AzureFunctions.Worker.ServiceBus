@@ -110,14 +110,7 @@ namespace NServiceBus
 - Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
 
-                var installerConfig = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
-                configurationCustomization?.Invoke(configuration, installerConfig);
-                // necessary because this happens in `CreateEndpointFactory` to prevent users overriding it. Might not be necessary when the API isn't accessible to users anymore.
-                installerConfig.AdvancedConfiguration.UseTransport(new ServerlessTransport(installerConfig.Transport));
-                var sc2 = new ServiceCollection(); // TODO!
-                var installer = Installer.CreateInstallerWithExternallyManagedContainer(installerConfig.AdvancedConfiguration,
-                    sc2);
-                serviceCollection.AddHostedService(sp => new InstallerHost(installer, sc2.BuildServiceProvider()));
+                serviceCollection.AddHostedService<InstallerHost>();
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
 

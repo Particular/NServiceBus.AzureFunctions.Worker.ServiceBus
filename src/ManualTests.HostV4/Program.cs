@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
-[assembly: NServiceBusTriggerFunction("%MY_ENDPOINT_NAME%", TriggerFunctionName = "MyFunctionName")]
+[assembly: NServiceBusTriggerFunction("FunctionsTestEndpoint2", TriggerFunctionName = "MyFunctionName")]
 
 public class Program
 {
@@ -12,7 +12,10 @@ public class Program
     {
         var host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
-            .UseNServiceBus()
+            .UseNServiceBus(c =>
+            {
+                c.AdvancedConfiguration.EnableInstallers();
+            })
             .Build();
 
         host.Run();

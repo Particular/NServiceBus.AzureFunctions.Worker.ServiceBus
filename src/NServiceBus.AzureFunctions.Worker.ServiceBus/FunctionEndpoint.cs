@@ -18,7 +18,7 @@
         internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessInterceptor serverless, IServiceProvider serviceProvider)
         {
             this.serverless = serverless;
-            endpointFactory = _ => externallyManagedContainerEndpoint.Start(serviceProvider);
+            endpointFactory = () => externallyManagedContainerEndpoint.Start(serviceProvider);
         }
 
         /// <inheritdoc />
@@ -34,7 +34,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
+            await InitializeEndpointIfNecessary(CancellationToken.None)
                 .ConfigureAwait(false);
 
             await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, cancellationToken)
@@ -105,7 +105,7 @@
             }
         }
 
-        async Task InitializeEndpointIfNecessary(FunctionContext functionContext, CancellationToken cancellationToken)
+        internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
         {
             if (pipeline == null)
             {
@@ -114,7 +114,7 @@
                 {
                     if (pipeline == null)
                     {
-                        endpoint = await endpointFactory(functionContext).ConfigureAwait(false);
+                        endpoint = await endpointFactory().ConfigureAwait(false);
 
                         pipeline = serverless.PipelineInvoker;
                     }
@@ -131,7 +131,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Send(message, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -144,7 +144,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Send(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -157,7 +157,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Publish(message, cancellationToken).ConfigureAwait(false);
         }
 
@@ -170,7 +170,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Publish(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -183,7 +183,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Subscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -196,7 +196,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Unsubscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -228,7 +228,7 @@
             return headers;
         }
 
-        readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;
+        readonly Func<Task<IEndpointInstance>> endpointFactory;
 
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         readonly ServerlessInterceptor serverless;
