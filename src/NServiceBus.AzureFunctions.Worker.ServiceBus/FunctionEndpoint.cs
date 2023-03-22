@@ -52,7 +52,7 @@
             PipelineInvoker pipeline,
             CancellationToken cancellationToken)
         {
-            body ??= new byte[0]; // might be null
+            body ??= Array.Empty<byte>(); // might be null
             messageId ??= Guid.NewGuid().ToString("N");
 
             try
