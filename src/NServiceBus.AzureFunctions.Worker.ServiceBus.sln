@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManualTests.HostV4", "Manua
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{64AAFF8B-A595-448B-9F43-418AC30E5AC9}"
 	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		Custom.Build.props = Custom.Build.props
+		..\.github\workflows\release.yml = ..\.github\workflows\release.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Analyzer", "NServiceBus.AzureFunctions.Analyzer\NServiceBus.AzureFunctions.Analyzer.csproj", "{26F862DA-3146-4699-9512-F39C66087678}"

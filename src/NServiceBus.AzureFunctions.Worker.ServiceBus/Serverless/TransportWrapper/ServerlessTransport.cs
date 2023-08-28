@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -49,9 +50,7 @@
         }
 
 #pragma warning disable CS0672 // Member overrides obsolete member
-#pragma warning disable CS0618 // Type or member is obsolete
-        public override string ToTransportAddress(QueueAddress address) => baseTransport.ToTransportAddress(address);
-#pragma warning restore CS0618 // Type or member is obsolete
+        public override string ToTransportAddress(QueueAddress address) => throw new NotImplementedException();
 #pragma warning restore CS0672 // Member overrides obsolete member
 
         public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
