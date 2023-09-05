@@ -43,7 +43,7 @@
 
             MessageProcessor = isSendOnly
                 ? new SendOnlyMessageProcessor()
-                : (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
+                : (IMessageProcessor)serverlessTransportInfrastructure.Receivers[MainReceiverId];
 
             return serverlessTransportInfrastructure;
         }
