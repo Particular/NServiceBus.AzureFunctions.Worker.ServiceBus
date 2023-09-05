@@ -42,7 +42,7 @@
             var isSendOnly = hostSettings.CoreSettings.GetOrDefault<bool>(SendOnlyConfigKey);
 
             MessageProcessor = isSendOnly
-                ? new PipelineInvoker(new SendOnlyReceiver())
+                ? new SendOnlyMessageProcessor()
                 : (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
 
             return serverlessTransportInfrastructure;
