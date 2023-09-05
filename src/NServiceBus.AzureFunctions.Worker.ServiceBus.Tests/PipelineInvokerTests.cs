@@ -12,11 +12,11 @@
     using NUnit.Framework;
 
     [TestFixture]
-    public class FunctionEndpointTests
+    public class PipelineInvokerTests
     {
         static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
         {
-            return FunctionEndpoint.Process(
+            return pipeline.Process(
                 MessageHelper.GetBody(message),
                 MessageHelper.GetUserProperties(message),
                 Guid.NewGuid().ToString("N"),
@@ -24,7 +24,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipeline,
                 CancellationToken.None);
         }
 
@@ -45,7 +44,7 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await FunctionEndpoint.Process(
+            await pipelineInvoker.Process(
                 body,
                 userProperties,
                 messageId,
@@ -53,7 +52,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipelineInvoker,
                 CancellationToken.None);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
@@ -83,7 +81,7 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await FunctionEndpoint.Process(
+            await pipelineInvoker.Process(
                 body,
                 userProperties,
                 messageId,
@@ -91,7 +89,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipelineInvoker,
                 CancellationToken.None);
 
             Assert.AreSame(pipelineException, errorContext.Exception);
