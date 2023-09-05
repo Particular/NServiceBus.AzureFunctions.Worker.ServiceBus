@@ -8,5 +8,5 @@ class ServerlessInterceptor
 
     public ServerlessInterceptor(ServerlessTransport transport) => this.transport = transport;
 
-    public PipelineInvoker PipelineInvoker => transport.PipelineInvoker;
+    public IMessageProcessor MessageProcessor => transport.MessageProcessor;
 }

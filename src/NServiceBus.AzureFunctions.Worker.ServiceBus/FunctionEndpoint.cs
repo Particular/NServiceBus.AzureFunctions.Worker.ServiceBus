@@ -35,22 +35,22 @@
             await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await pipeline.Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, cancellationToken)
+            await messageProcessor.Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         async Task InitializeEndpointIfNecessary(FunctionContext functionContext, CancellationToken cancellationToken)
         {
-            if (pipeline == null)
+            if (messageProcessor == null)
             {
                 await semaphoreLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    if (pipeline == null)
+                    if (messageProcessor == null)
                     {
                         endpoint = await endpointFactory(functionContext).ConfigureAwait(false);
 
-                        pipeline = serverless.PipelineInvoker;
+                        messageProcessor = serverless.MessageProcessor;
                     }
                 }
                 finally
@@ -143,7 +143,7 @@
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         readonly ServerlessInterceptor serverless;
 
-        PipelineInvoker pipeline;
+        IMessageProcessor messageProcessor;
         IEndpointInstance endpoint;
     }
 }

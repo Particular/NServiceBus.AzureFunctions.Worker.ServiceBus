@@ -7,7 +7,7 @@
     using NServiceBus.Extensibility;
     using Transport;
 
-    class PipelineInvoker : IMessageReceiver
+    class PipelineInvoker : IMessageReceiver, IMessageProcessor
     {
         public PipelineInvoker(IMessageReceiver baseTransportReceiver)
         {

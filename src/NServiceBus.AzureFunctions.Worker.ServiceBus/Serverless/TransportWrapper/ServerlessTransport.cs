@@ -11,7 +11,7 @@
         const string MainReceiverId = "Main";
         const string SendOnlyConfigKey = "Endpoint.SendOnly";
 
-        public PipelineInvoker PipelineInvoker { get; private set; }
+        public IMessageProcessor MessageProcessor { get; private set; }
 
         public ServerlessTransport(TransportDefinition baseTransport) : base(
             baseTransport.TransportTransactionMode,
@@ -41,7 +41,7 @@
 
             var isSendOnly = hostSettings.CoreSettings.GetOrDefault<bool>(SendOnlyConfigKey);
 
-            PipelineInvoker = isSendOnly
+            MessageProcessor = isSendOnly
                 ? new PipelineInvoker(new SendOnlyReceiver())
                 : (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
 
