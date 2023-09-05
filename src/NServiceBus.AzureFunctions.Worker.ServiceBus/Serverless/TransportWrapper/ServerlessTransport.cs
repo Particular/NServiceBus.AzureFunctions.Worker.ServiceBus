@@ -9,6 +9,7 @@
     {
         // HINT: This constant is defined in NServiceBus but is not exposed
         const string MainReceiverId = "Main";
+        const string SendOnlyConfigKey = "Endpoint.SendOnly";
 
         public PipelineInvoker PipelineInvoker { get; private set; }
 
@@ -38,11 +39,12 @@
 
             var serverlessTransportInfrastructure = new ServerlessTransportInfrastructure(baseTransportInfrastructure);
 
-            PipelineInvoker = receivers.Length > 0
-                ? (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId]
-                : new PipelineInvoker(new SendOnlyReceiver()); // send-only endpoint
+            var isSendOnly = hostSettings.CoreSettings.GetOrDefault<bool>(SendOnlyConfigKey);
 
-            //PipelineInvoker = (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
+            PipelineInvoker = isSendOnly
+                ? new PipelineInvoker(new SendOnlyReceiver())
+                : (PipelineInvoker)serverlessTransportInfrastructure.Receivers[MainReceiverId];
+
             return serverlessTransportInfrastructure;
         }
 
