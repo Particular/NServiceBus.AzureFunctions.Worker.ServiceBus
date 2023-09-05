@@ -1,7 +1,6 @@
 ﻿namespace ServiceBus.Tests
 {
     using System;
-    using System.Collections.Generic;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus;
     using NUnit.Framework;
@@ -27,12 +26,12 @@
             {
                 CustomizeConfiguration = configuration => configuration.AdvancedConfiguration.SendOnly();
 
-                TestMessages.Add(new TestMessage { Body = new ATestMessage(), UserProperties = new Dictionary<string, object>() });
+                AddTestMessage(new ATestMessage());
             }
 
-            public class TestMessageHandler : IHandleMessages<TestMessage>
+            public class TestMessageHandler : IHandleMessages<ATestMessage>
             {
-                public Task Handle(TestMessage message, IMessageHandlerContext context) => Task.CompletedTask;
+                public Task Handle(ATestMessage message, IMessageHandlerContext context) => Task.CompletedTask;
             }
         }
 

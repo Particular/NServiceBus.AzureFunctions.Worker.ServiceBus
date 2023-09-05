@@ -18,7 +18,7 @@
         {
             return Task.FromResult<ComponentRunner>(
                 new FunctionRunner(
-                    TestMessages,
+                    testMessages,
                     CustomizeConfiguration,
                     runDescriptor.ScenarioContext,
                     GetType()));
@@ -28,14 +28,14 @@
 
         public void AddTestMessage(object body, IDictionary<string, object> userProperties = null)
         {
-            TestMessages.Add(new TestMessage
+            testMessages.Add(new TestMessage
             {
                 Body = body,
                 UserProperties = userProperties ?? new Dictionary<string, object>()
             });
         }
 
-        public IList<TestMessage> TestMessages = new List<TestMessage>();
+        IList<TestMessage> testMessages = new List<TestMessage>();
 
         class FunctionRunner : ComponentRunner
         {
@@ -138,7 +138,7 @@
             FunctionEndpoint endpoint;
         }
 
-        public class TestMessage
+        class TestMessage
         {
             public object Body;
             public IDictionary<string, object> UserProperties;
