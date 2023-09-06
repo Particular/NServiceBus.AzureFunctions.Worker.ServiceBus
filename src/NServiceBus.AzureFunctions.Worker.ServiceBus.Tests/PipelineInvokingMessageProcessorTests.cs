@@ -12,9 +12,10 @@
     using NUnit.Framework;
 
     [TestFixture]
-    public class PipelineInvokerTests
+    public class PipelineInvokingMessageProcessorTests
+
     {
-        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
+        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvokingMessageProcessor pipeline)
         {
             return pipeline.Process(
                 MessageHelper.GetBody(message),
@@ -147,9 +148,9 @@
             Assert.AreSame(mainPipelineException, exception);
         }
 
-        static async Task<PipelineInvoker> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
+        static async Task<PipelineInvokingMessageProcessor> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
         {
-            var pipelineInvoker = new PipelineInvoker(new FakeMessageReceiver());
+            var pipelineInvoker = new PipelineInvokingMessageProcessor(new FakeMessageReceiver());
             await pipelineInvoker.Initialize(null,
                 mainPipeline ?? ((_, __) => Task.CompletedTask),
                 errorPipeline ?? ((_, __) => Task.FromResult(ErrorHandleResult.Handled)),
