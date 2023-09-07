@@ -23,10 +23,7 @@ class HttpSender
         var logger = executionContext.GetLogger<HttpSender>();
         logger.LogInformation("C# HTTP trigger function received a request.");
 
-        var sendOptions = new SendOptions();
-        sendOptions.RouteToThisEndpoint();
-
-        await functionEndpoint.Send(new TriggerMessage(), sendOptions, executionContext)
+        await functionEndpoint.Send(new TriggerMessage(), executionContext)
             .ConfigureAwait(false);
 
         var r = req.CreateResponse(HttpStatusCode.OK);

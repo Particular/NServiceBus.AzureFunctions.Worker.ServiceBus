@@ -5,9 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AzureFunctions.Worker.ServiceBus;
-    using Extensibility;
     using Microsoft.Azure.Functions.Worker;
-    using Transport;
 
     /// <summary>
     /// An NServiceBus endpoint hosted in Azure Function which does not receive messages automatically but only handles
@@ -18,7 +16,7 @@
         internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessInterceptor serverless, IServiceProvider serviceProvider)
         {
             this.serverless = serverless;
-            endpointFactory = _ => externallyManagedContainerEndpoint.Start(serviceProvider);
+            endpointFactory = () => externallyManagedContainerEndpoint.Start(serviceProvider);
         }
 
         /// <inheritdoc />
@@ -34,89 +32,25 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, CancellationToken.None)
+            await InitializeEndpointIfNecessary(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, pipeline, cancellationToken)
+            await messageProcessor.Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        internal static async Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            ITransactionStrategy transactionStrategy,
-            PipelineInvoker pipeline,
-            CancellationToken cancellationToken)
+        async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
         {
-            body ??= Array.Empty<byte>(); // might be null
-            messageId ??= Guid.NewGuid().ToString("N");
-
-            try
-            {
-                using (var transaction = transactionStrategy.CreateTransaction())
-                {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var messageContext = new MessageContext(
-                        messageId,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        body,
-                        transportTransaction,
-                        pipeline.ReceiveAddress,
-                        new ContextBag());
-
-                    await pipeline.PushMessage(messageContext, cancellationToken).ConfigureAwait(false);
-
-                    await transactionStrategy.Complete(transaction).ConfigureAwait(false);
-
-                    transaction?.Commit();
-                }
-            }
-            catch (Exception exception)
-            {
-                using (var transaction = transactionStrategy.CreateTransaction())
-                {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var errorContext = new ErrorContext(
-                        exception,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        messageId,
-                        body,
-                        transportTransaction,
-                        deliveryCount,
-                        pipeline.ReceiveAddress,
-                        new ContextBag());
-
-                    var errorHandleResult = await pipeline.PushFailedMessage(errorContext, cancellationToken).ConfigureAwait(false);
-
-                    if (errorHandleResult == ErrorHandleResult.Handled)
-                    {
-                        await transactionStrategy.Complete(transaction).ConfigureAwait(false);
-
-                        transaction?.Commit();
-                        return;
-                    }
-
-                    throw;
-                }
-            }
-        }
-
-        async Task InitializeEndpointIfNecessary(FunctionContext functionContext, CancellationToken cancellationToken)
-        {
-            if (pipeline == null)
+            if (messageProcessor == null)
             {
                 await semaphoreLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    if (pipeline == null)
+                    if (messageProcessor == null)
                     {
-                        endpoint = await endpointFactory(functionContext).ConfigureAwait(false);
+                        endpoint = await endpointFactory().ConfigureAwait(false);
 
-                        pipeline = serverless.PipelineInvoker;
+                        messageProcessor = serverless.MessageProcessor;
                     }
                 }
                 finally
@@ -131,7 +65,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Send(message, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -144,7 +78,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Send(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -157,7 +91,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Publish(message, cancellationToken).ConfigureAwait(false);
         }
 
@@ -170,7 +104,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Publish(messageConstructor, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -183,7 +117,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Subscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -196,7 +130,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(functionContext, cancellationToken).ConfigureAwait(false);
+            await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
             await endpoint.Unsubscribe(eventType, options, cancellationToken).ConfigureAwait(false);
         }
 
@@ -204,36 +138,12 @@
         public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
             => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
-        static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, object> userProperties, string replyTo, string correlationId)
-        {
-            var headers = new Dictionary<string, string>(userProperties.Count);
-
-            foreach (var userProperty in userProperties)
-            {
-                headers[userProperty.Key] = userProperty.Value?.ToString();
-            }
-
-            headers.Remove("NServiceBus.Transport.Encoding");
-
-            if (!string.IsNullOrWhiteSpace(replyTo))
-            {
-                headers.TryAdd(Headers.ReplyToAddress, replyTo);
-            }
-
-            if (!string.IsNullOrWhiteSpace(correlationId))
-            {
-                headers.TryAdd(Headers.CorrelationId, correlationId);
-            }
-
-            return headers;
-        }
-
-        readonly Func<FunctionContext, Task<IEndpointInstance>> endpointFactory;
+        readonly Func<Task<IEndpointInstance>> endpointFactory;
 
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         readonly ServerlessInterceptor serverless;
 
-        PipelineInvoker pipeline;
+        IMessageProcessor messageProcessor;
         IEndpointInstance endpoint;
     }
 }

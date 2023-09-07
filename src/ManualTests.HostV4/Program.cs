@@ -9,7 +9,12 @@ public class Program
     {
         var host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
-            .UseNServiceBus()
+            .UseNServiceBus(c =>
+            {
+                c.AdvancedConfiguration.SendOnly();
+
+                c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
+            })
             .Build();
 
         host.Run();

@@ -12,11 +12,12 @@
     using NUnit.Framework;
 
     [TestFixture]
-    public class FunctionEndpointTests
+    public class PipelineInvokingMessageProcessorTests
+
     {
-        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvoker pipeline)
+        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvokingMessageProcessor pipeline)
         {
-            return FunctionEndpoint.Process(
+            return pipeline.Process(
                 MessageHelper.GetBody(message),
                 MessageHelper.GetUserProperties(message),
                 Guid.NewGuid().ToString("N"),
@@ -24,7 +25,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipeline,
                 CancellationToken.None);
         }
 
@@ -45,7 +45,7 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await FunctionEndpoint.Process(
+            await pipelineInvoker.Process(
                 body,
                 userProperties,
                 messageId,
@@ -53,7 +53,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipelineInvoker,
                 CancellationToken.None);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
@@ -83,7 +82,7 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await FunctionEndpoint.Process(
+            await pipelineInvoker.Process(
                 body,
                 userProperties,
                 messageId,
@@ -91,7 +90,6 @@
                 null,
                 null,
                 transactionStrategy,
-                pipelineInvoker,
                 CancellationToken.None);
 
             Assert.AreSame(pipelineException, errorContext.Exception);
@@ -150,9 +148,9 @@
             Assert.AreSame(mainPipelineException, exception);
         }
 
-        static async Task<PipelineInvoker> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
+        static async Task<PipelineInvokingMessageProcessor> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
         {
-            var pipelineInvoker = new PipelineInvoker(new FakeMessageReceiver());
+            var pipelineInvoker = new PipelineInvokingMessageProcessor(new FakeMessageReceiver());
             await pipelineInvoker.Initialize(null,
                 mainPipeline ?? ((_, __) => Task.CompletedTask),
                 errorPipeline ?? ((_, __) => Task.FromResult(ErrorHandleResult.Handled)),
