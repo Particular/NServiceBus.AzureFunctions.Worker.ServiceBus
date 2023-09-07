@@ -1,6 +1,5 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -49,11 +48,8 @@
             return serverlessTransportInfrastructure;
         }
 
-#pragma warning disable CS0672 // Member overrides obsolete member
-        public override string ToTransportAddress(QueueAddress address) => throw new NotImplementedException();
-#pragma warning restore CS0672 // Member overrides obsolete member
-
         public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
+
         readonly TransportTransactionMode[] supportedTransactionModes =
         {
             TransportTransactionMode.ReceiveOnly

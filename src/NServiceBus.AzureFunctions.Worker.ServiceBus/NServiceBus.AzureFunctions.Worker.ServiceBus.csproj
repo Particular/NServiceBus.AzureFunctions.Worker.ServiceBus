@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="[5.13.0, 6.0.0)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="[1.19.0, 2.0.0)" />
-    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="4.0.0-alpha.1" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="4.0.0-alpha.2" />
     <PackageReference Include="NServiceBus.Newtonsoft.Json" Version="4.0.0-alpha.1" />
     <PackageReference Include="Particular.Packaging" Version="3.0.0" PrivateAssets="All" />
     <PackageReference Include="Obsolete.Fody" Version="5.3.0" PrivateAssets="All" />
@@ -29,8 +29,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />
   </ItemGroup>
-  
-<ItemGroup>
+
+  <ItemGroup>
     <None Remove="build*\*" />
     <Content Include="build\*" PackagePath="build" />
   </ItemGroup>
