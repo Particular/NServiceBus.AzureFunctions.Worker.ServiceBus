@@ -15,10 +15,9 @@ public class Program
             .UseNServiceBus(c =>
             {
                 //c.AdvancedConfiguration.SendOnly();
-                //c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
+                c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
                 c.AdvancedConfiguration.EnableInstallers();
             })
-            .ConfigureServices(s => s.AddHostedService<MyHostedService>())
             .Build();
 
         host.Run();

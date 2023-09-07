@@ -15,15 +15,8 @@
             this.functionEndpoint = functionEndpoint as FunctionEndpoint;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            return functionEndpoint.InitializeEndpointIfNecessary(cancellationToken);
-            //return Task.CompletedTask;
-        }
+        public Task StartAsync(CancellationToken cancellationToken) => functionEndpoint.InitializeEndpointIfNecessary(cancellationToken);
 
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
