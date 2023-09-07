@@ -1,7 +1,4 @@
-﻿using NServiceBus.AzureFunctions.Worker.ServiceBus;
-using NServiceBus.Installation;
-
-namespace NServiceBus
+﻿namespace NServiceBus
 {
     using System;
     using System.Reflection;
