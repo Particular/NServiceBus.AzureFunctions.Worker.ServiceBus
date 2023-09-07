@@ -1,11 +1,9 @@
 ﻿namespace ServiceBus.Tests
 {
     using System;
-    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus.Administration;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using NServiceBus;
     using NServiceBus.Features;
@@ -33,14 +31,8 @@
             Thread.Sleep(5000);
             await host.StopAsync();
 
-            var configBuilder = new ConfigurationBuilder();
-            configBuilder.SetBasePath(Directory.GetCurrentDirectory());
-            configBuilder.AddEnvironmentVariables();
-            configBuilder.AddJsonFile("local.settings.json", true);
-            var config = configBuilder.Build();
-
-            var connectionString = config.GetValue<string>("AzureWebJobsServiceBus") ?? config.GetValue<string>("Values:AzureWebJobsServiceBus");
-            Assert.IsNotNull(connectionString, "Environment variable 'AzureWebJobsServiceBus' should be defined to run tests.");
+            var connectionString = Environment.GetEnvironmentVariable(ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName);
+            Assert.IsNotNull(connectionString, $"Environment variable '{ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName}' should be defined to run tests.");
 
             var client = new ServiceBusAdministrationClient(connectionString);
 
