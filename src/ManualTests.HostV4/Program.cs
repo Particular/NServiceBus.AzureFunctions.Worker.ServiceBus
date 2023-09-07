@@ -1,6 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
@@ -11,7 +8,7 @@ public class Program
     public static void Main()
     {
         var host = new HostBuilder()
-            .ConfigureFunctionsWorkerDefaults()            
+            .ConfigureFunctionsWorkerDefaults()
             .UseNServiceBus(c =>
             {
                 //c.AdvancedConfiguration.SendOnly();
