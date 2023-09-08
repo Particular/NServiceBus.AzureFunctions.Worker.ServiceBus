@@ -1,7 +1,7 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using NServiceBus.Extensibility;
@@ -15,7 +15,7 @@
         }
 
         public Task Initialize(PushRuntimeSettings limitations, OnMessage onMessage, OnError onError,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             this.onMessage = onMessage;
             this.onError = onError;
@@ -33,7 +33,7 @@
             string replyTo,
             string correlationId,
             ITransactionStrategy transactionStrategy,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             body ??= Array.Empty<byte>(); // might be null
             messageId ??= Guid.NewGuid().ToString("N");
@@ -53,10 +53,14 @@
 
                     await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
-                    await transactionStrategy.Complete(transaction).ConfigureAwait(false);
+                    await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
 
                     transaction?.Commit();
                 }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch (Exception exception)
             {
@@ -77,7 +81,7 @@
 
                     if (errorHandleResult == ErrorHandleResult.Handled)
                     {
-                        await transactionStrategy.Complete(transaction).ConfigureAwait(false);
+                        await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
 
                         transaction?.Commit();
                         return;
@@ -112,12 +116,12 @@
             }
         }
 
-        public Task StartReceive(CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         // No-op because the rate at which Azure Functions pushes messages to the pipeline can't be controlled.
         public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
 
-        public Task StopReceive(CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public ISubscriptionManager Subscriptions => baseTransportReceiver.Subscriptions;
         public string Id => baseTransportReceiver.Id;

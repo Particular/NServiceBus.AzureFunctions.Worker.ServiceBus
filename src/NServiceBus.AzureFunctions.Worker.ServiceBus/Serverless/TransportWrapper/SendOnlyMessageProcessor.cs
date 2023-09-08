@@ -15,7 +15,7 @@
             string replyTo,
             string correlationId,
             ITransactionStrategy transactionStrategy,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
                 => throw new InvalidOperationException(
                     $"This endpoint cannot process messages because it is configured in send-only mode. Remove the '{nameof(EndpointConfiguration)}.{nameof(EndpointConfiguration.SendOnly)}' configuration.'"
                     );

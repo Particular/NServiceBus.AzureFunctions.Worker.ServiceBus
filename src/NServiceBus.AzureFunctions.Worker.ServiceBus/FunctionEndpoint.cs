@@ -39,16 +39,7 @@
                 .ConfigureAwait(false);
         }
 
-        internal static async Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            ITransactionStrategy transactionStrategy,
-            PipelineInvoker pipeline,
-            CancellationToken cancellationToken)
+        async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
         {
             if (messageProcessor == null)
             {
