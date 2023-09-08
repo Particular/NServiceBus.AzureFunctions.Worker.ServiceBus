@@ -154,7 +154,7 @@
             await pipelineInvoker.Initialize(null,
                 mainPipeline ?? ((_, __) => Task.CompletedTask),
                 errorPipeline ?? ((_, __) => Task.FromResult(ErrorHandleResult.Handled)),
-                default);
+                CancellationToken.None);
             return pipelineInvoker;
         }
 
@@ -183,7 +183,7 @@
             public CommittableTransaction CreatedTransaction { get; private set; }
             public List<TransportTransaction> CreatedTransportTransactions { get; } = new List<TransportTransaction>();
 
-            public Task Complete(CommittableTransaction transaction)
+            public Task Complete(CommittableTransaction transaction, CancellationToken cancellationToken = default)
             {
                 OnCompleteCalled = true;
                 CompletedTransaction = transaction;

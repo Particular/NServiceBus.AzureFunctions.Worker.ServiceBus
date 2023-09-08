@@ -54,7 +54,7 @@
 
             public override string Name { get; }
 
-            public override Task Start(CancellationToken token)
+            public override Task Start(CancellationToken cancellationToken = default)
             {
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name, null, default);
                 var endpointConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
@@ -97,7 +97,7 @@
                 return Task.CompletedTask;
             }
 
-            public override async Task ComponentsStarted(CancellationToken token)
+            public override async Task ComponentsStarted(CancellationToken cancellationToken = default)
             {
                 foreach (var message in messages)
                 {
@@ -117,7 +117,7 @@
                         null,
                         string.Empty,
                         functionContext,
-                        token);
+                        cancellationToken);
                 }
             }
 

@@ -3,19 +3,19 @@ namespace NServiceBus
 {
     public class FunctionEndpoint : NServiceBus.IFunctionEndpoint
     {
-        public System.Threading.Tasks.Task Process(byte[] body, System.Collections.Generic.IDictionary<string, object> userProperties, string messageId, int deliveryCount, string replyTo, string correlationId, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Publish(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Publish(object message, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Send(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Send(object message, NServiceBus.SendOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Send<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Send<T>(System.Action<T> messageConstructor, NServiceBus.SendOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Subscribe(System.Type eventType, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Subscribe(System.Type eventType, NServiceBus.SubscribeOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Unsubscribe(System.Type eventType, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task Unsubscribe(System.Type eventType, NServiceBus.UnsubscribeOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task Process(byte[] body, System.Collections.Generic.IDictionary<string, object> userProperties, string messageId, int deliveryCount, string replyTo, string correlationId, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Publish(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Publish(object message, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Publish<T>(System.Action<T> messageConstructor, NServiceBus.PublishOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Send(object message, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Send(object message, NServiceBus.SendOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Send<T>(System.Action<T> messageConstructor, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Send<T>(System.Action<T> messageConstructor, NServiceBus.SendOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Subscribe(System.Type eventType, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Subscribe(System.Type eventType, NServiceBus.SubscribeOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Unsubscribe(System.Type eventType, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task Unsubscribe(System.Type eventType, NServiceBus.UnsubscribeOptions options, Microsoft.Azure.Functions.Worker.FunctionContext functionContext, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class FunctionsHostBuilderExtensions
     {
