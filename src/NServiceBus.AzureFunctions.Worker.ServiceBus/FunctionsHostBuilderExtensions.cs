@@ -107,6 +107,8 @@
 - Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
 
+                serviceCollection.AddHostedService<InstallerHost>();
+
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);

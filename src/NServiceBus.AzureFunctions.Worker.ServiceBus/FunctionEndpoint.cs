@@ -39,7 +39,7 @@
                 .ConfigureAwait(false);
         }
 
-        async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
+        internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
         {
             if (messageProcessor == null)
             {
