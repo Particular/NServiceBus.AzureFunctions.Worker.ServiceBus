@@ -11,6 +11,9 @@ public class Program
             .ConfigureFunctionsWorkerDefaults()
             .UseNServiceBus(c =>
             {
+                c.AdvancedConfiguration.EnableOutbox();
+                c.AdvancedConfiguration.UsePersistence<NonDurablePersistence>();
+
                 //c.AdvancedConfiguration.SendOnly();
                 c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
                 c.AdvancedConfiguration.EnableInstallers();
