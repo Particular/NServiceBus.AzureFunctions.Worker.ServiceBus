@@ -14,7 +14,7 @@
         public IMessageProcessor MessageProcessor { get; private set; }
 
         public ServerlessTransport(TransportDefinition baseTransport) : base(
-            baseTransport.TransportTransactionMode,
+            TransportTransactionMode.ReceiveOnly,
             baseTransport.SupportsDelayedDelivery,
             baseTransport.SupportsPublishSubscribe,
             baseTransport.SupportsTTBR)
