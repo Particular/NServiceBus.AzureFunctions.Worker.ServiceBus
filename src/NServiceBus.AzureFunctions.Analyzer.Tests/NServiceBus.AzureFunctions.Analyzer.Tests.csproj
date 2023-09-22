@@ -20,8 +20,4 @@
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Particular.Analyzers" Version="1.8.0" />
-  </ItemGroup>
-  
 </Project>
