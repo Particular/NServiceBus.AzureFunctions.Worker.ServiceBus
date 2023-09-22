@@ -18,23 +18,20 @@
     <PackageReference Include="Obsolete.Fody" Version="5.3.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\NServiceBus.AzureFunctions.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" Link="NServiceBus.AzureFunctions.Analyzer.dll" Visible="false" />
-  </ItemGroup>
-
-  <Target Name="AddSourceGeneratorToPackage" BeforeTargets="_GetPackageFiles">
+  <Target Name="AddAnalyzersToPackage" BeforeTargets="_GetPackageFiles">
     <ItemGroup>
+      <None Include="..\NServiceBus.AzureFunctions.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" />
       <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
     </ItemGroup>
   </Target>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />
+    <None Remove="build*\*" />
+    <Content Include="build\*" PackagePath="build" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="build*\*" />
-    <Content Include="build\*" PackagePath="build" />
+    <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />
   </ItemGroup>
 
 </Project>
