@@ -75,7 +75,7 @@
             Transport = new AzureServiceBusTransport(connectionString);
             Routing = endpointConfiguration.UseTransport(Transport);
 
-            endpointConfiguration.UseSerialization<NewtonsoftJsonSerializer>();
+            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
             AdvancedConfiguration = endpointConfiguration;
         }
