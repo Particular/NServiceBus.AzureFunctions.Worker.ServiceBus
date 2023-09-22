@@ -19,6 +19,10 @@
     <PackageReference Update="Particular.Analyzers" Version="1.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\NServiceBus.AzureFunctions.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" Link="NServiceBus.AzureFunctions.Analyzer.dll" Visible="false" />
+  </ItemGroup>
+
   <Target Name="AddSourceGeneratorToPackage" BeforeTargets="_GetPackageFiles">
     <ItemGroup>
       <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
