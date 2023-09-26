@@ -1,5 +1,0 @@
-<Project>
-	<PropertyGroup>
-		<WarningsAsErrors>CS8032</WarningsAsErrors>
-	</PropertyGroup>
-</Project>

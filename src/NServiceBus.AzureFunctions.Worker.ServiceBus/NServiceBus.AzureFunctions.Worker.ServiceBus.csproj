@@ -18,11 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="build\*" />
-    <Content Include="build\*" PackagePath="build" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Worker.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.Analyzer.dll" Visible="false" />
   </ItemGroup>
 
