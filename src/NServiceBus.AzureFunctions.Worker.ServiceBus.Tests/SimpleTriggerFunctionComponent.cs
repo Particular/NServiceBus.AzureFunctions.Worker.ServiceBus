@@ -42,7 +42,7 @@
 
             public override string Name { get; }
 
-            public override Task Start(CancellationToken token)
+            public override Task Start(CancellationToken cancellationToken = default)
             {
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name, default, null);
                 var endpointConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
@@ -69,7 +69,7 @@
                 return Task.CompletedTask;
             }
 
-            public override async Task ComponentsStarted(CancellationToken cancellationToken)
+            public override async Task ComponentsStarted(CancellationToken cancellationToken = default)
             {
                 await triggerAction(endpoint, new FakeFunctionContext());
                 await base.ComponentsStarted(cancellationToken);

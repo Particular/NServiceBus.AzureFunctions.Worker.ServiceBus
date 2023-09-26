@@ -7,11 +7,12 @@
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Avoid updating this packages as this might cause the code generator to fail to load on projects using older .NET SDKs / Visual Studio -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0-2.final" PrivateAssets="All" />
     <PackageReference Include="Particular.Packaging" Version="3.0.0" PrivateAssets="All" />
   </ItemGroup>
 

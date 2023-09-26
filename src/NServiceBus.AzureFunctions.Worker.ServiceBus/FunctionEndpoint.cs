@@ -28,7 +28,7 @@
             string replyTo,
             string correlationId,
             FunctionContext functionContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -39,7 +39,7 @@
                 .ConfigureAwait(false);
         }
 
-        internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken)
+        internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken = default)
         {
             if (messageProcessor == null)
             {
@@ -61,7 +61,7 @@
         }
 
         /// <inheritdoc />
-        public async Task Send(object message, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Send(object message, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -70,11 +70,11 @@
         }
 
         /// <inheritdoc />
-        public Task Send(object message, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Send(object message, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Send(message, new SendOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Send<T>(Action<T> messageConstructor, SendOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -83,11 +83,11 @@
         }
 
         /// <inheritdoc />
-        public Task Send<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Send<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Send(messageConstructor, new SendOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Publish(object message, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Publish(object message, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -96,11 +96,11 @@
         }
 
         /// <inheritdoc />
-        public Task Publish(object message, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Publish(object message, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Publish(message, new PublishOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Publish<T>(Action<T> messageConstructor, PublishOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -109,11 +109,11 @@
         }
 
         /// <inheritdoc />
-        public Task Publish<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Publish<T>(Action<T> messageConstructor, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Publish(messageConstructor, new PublishOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Subscribe(Type eventType, SubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -122,11 +122,11 @@
         }
 
         /// <inheritdoc />
-        public Task Subscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Subscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Subscribe(eventType, new SubscribeOptions(), functionContext, cancellationToken);
 
         /// <inheritdoc />
-        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken)
+        public async Task Unsubscribe(Type eventType, UnsubscribeOptions options, FunctionContext functionContext, CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
@@ -135,7 +135,7 @@
         }
 
         /// <inheritdoc />
-        public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken)
+        public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken = default)
             => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
         readonly Func<Task<IEndpointInstance>> endpointFactory;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>$(AnalyzerTargetFramework)</TargetFramework>
@@ -7,12 +7,13 @@
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Particular.Packaging" Version="3.0.0" PrivateAssets="All" />
     <!-- this package can only be upgraded when we drop support for older versions of Visual Studio -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.11.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0-2.final" PrivateAssets="All" />
+    <PackageReference Include="Particular.Packaging" Version="3.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="UseMajorMinorPatchForAssemblyVersion" AfterTargets="MinVer">
@@ -20,4 +21,5 @@
       <AssemblyVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</AssemblyVersion>
     </PropertyGroup>
   </Target>
+
 </Project>

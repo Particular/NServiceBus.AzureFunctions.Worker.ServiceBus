@@ -45,7 +45,7 @@
             string connectionString = default,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
-            Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
             RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c), connectionString);
             return hostBuilder;
@@ -59,7 +59,7 @@
             string endpointName,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
-            Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
             RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory);
             return hostBuilder;
@@ -74,8 +74,8 @@
             string connectionString,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
-            Guard.AgainstNullAndEmpty(nameof(endpointName), endpointName);
-            Guard.AgainstNullAndEmpty(nameof(connectionString), connectionString);
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
             RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory, connectionString);
             return hostBuilder;

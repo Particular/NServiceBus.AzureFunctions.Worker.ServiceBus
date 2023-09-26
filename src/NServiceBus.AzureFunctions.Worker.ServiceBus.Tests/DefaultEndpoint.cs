@@ -43,7 +43,7 @@
 
             var transport = configuration.UseTransport(azureServiceBusTransport);
 
-            configuration.UseSerialization<NewtonsoftJsonSerializer>();
+            configuration.UseSerialization<SystemJsonSerializer>();
 
             await configurationBuilderCustomization(configuration);
 

@@ -14,6 +14,6 @@
             string replyTo,
             string correlationId,
             ITransactionStrategy transactionStrategy,
-            CancellationToken cancellationToken);
+            CancellationToken cancellationToken = default);
     }
 }
