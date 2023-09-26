@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\NServiceBus.AzureFunctions.Worker.Analyzer.csproj" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,10 +22,9 @@
     <Content Include="build\*" PackagePath="build" />
   </ItemGroup>
 
-  <Target Name="AddAnalyzersToPackage" BeforeTargets="_GetPackageFiles">
+  <Target Name="AddAnalyzerToPackage" BeforeTargets="_GetPackageFiles">
     <ItemGroup>
       <None Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Worker.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" />
-      <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
     </ItemGroup>
   </Target>
 

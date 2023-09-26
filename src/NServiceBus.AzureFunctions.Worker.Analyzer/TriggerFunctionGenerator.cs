@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.AzureFunctions.SourceGenerator
+﻿namespace NServiceBus.AzureFunctions.Worker.Analyzer
 {
     using System.Text;
     using Microsoft.CodeAnalysis;
