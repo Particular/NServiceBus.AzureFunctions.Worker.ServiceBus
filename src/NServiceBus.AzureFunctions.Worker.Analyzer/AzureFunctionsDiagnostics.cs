@@ -4,6 +4,9 @@
 
     public static class AzureFunctionsDiagnostics
     {
+        public const string InvalidEndpointNameErrorId = "NSBWFUNC001";
+        public const string InvalidTriggerFunctionNameErrorId = "NSBWFUNC002";
+        public const string InvalidBindingExpressionId = "NSBWFUNC003";
         public const string PurgeOnStartupNotAllowedId = "NSBWFUNC004";
         public const string LimitMessageProcessingToNotAllowedId = "NSBWFUNC005";
         public const string DefineCriticalErrorActionNotAllowedId = "NSBWFUNC006";
@@ -20,6 +23,30 @@
         public const string TimeToWaitBeforeTriggeringCircuitBreakerNotAllowedId = "NSBWFUNC017";
 
         const string DiagnosticCategory = "NServiceBus.AzureFunctions";
+
+        internal static readonly DiagnosticDescriptor InvalidEndpointNameError = new DiagnosticDescriptor(
+           id: InvalidEndpointNameErrorId,
+           title: "Invalid Endpoint Name",
+           messageFormat: "Endpoint name is invalid and cannot be used to generate trigger function",
+           category: "TriggerFunctionGenerator",
+           DiagnosticSeverity.Error,
+           isEnabledByDefault: true);
+
+        internal static readonly DiagnosticDescriptor InvalidTriggerFunctionNameError = new DiagnosticDescriptor(
+            id: InvalidTriggerFunctionNameErrorId,
+            title: "Invalid Trigger Function Name",
+            messageFormat: "Trigger function name is invalid and cannot be used to generate trigger function",
+            category: "TriggerFunctionGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
+
+        internal static readonly DiagnosticDescriptor InvalidBindingExpression = new DiagnosticDescriptor(
+            id: InvalidBindingExpressionId,
+            title: "Invalid binding expression pattern use",
+            messageFormat: "Binding expression patterns require that a TriggerFunctionName be specified",
+            category: "TriggerFunctionGenerator",
+            DiagnosticSeverity.Error,
+            isEnabledByDefault: true);
 
         internal static readonly DiagnosticDescriptor PurgeOnStartupNotAllowed = new DiagnosticDescriptor(
              id: PurgeOnStartupNotAllowedId,
