@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj" />
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
+    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
