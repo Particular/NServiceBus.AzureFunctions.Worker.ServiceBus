@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NServiceBus.AzureFunctions.Analyzer\NServiceBus.AzureFunctions.Analyzer.csproj" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\NServiceBus.AzureFunctions.Worker.SourceGenerator.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\NServiceBus.AzureFunctions.Worker.Analyzer.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,16 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="build\*" />
-    <Content Include="build\*" PackagePath="build" />
+    <None Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Worker.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.8/cs/NServiceBus.AzureFunctions.Worker.Analyzer.dll" Visible="false" />
   </ItemGroup>
-
-  <Target Name="AddAnalyzersToPackage" BeforeTargets="_GetPackageFiles">
-    <ItemGroup>
-      <None Include="..\NServiceBus.AzureFunctions.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" />
-      <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
-    </ItemGroup>
-  </Target>
 
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />

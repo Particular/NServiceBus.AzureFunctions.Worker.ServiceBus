@@ -1,4 +1,4 @@
-﻿namespace NServiceBus.AzureFunctions.SourceGenerator
+﻿namespace NServiceBus.AzureFunctions.Worker.Analyzer
 {
     using System.Text;
     using Microsoft.CodeAnalysis;
@@ -8,31 +8,6 @@
     [Generator]
     public class TriggerFunctionGenerator : ISourceGenerator
     {
-        internal static readonly DiagnosticDescriptor InvalidEndpointNameError = new DiagnosticDescriptor(
-            id: "NSBWFUNC001",
-            title: "Invalid Endpoint Name",
-            messageFormat: "Endpoint name is invalid and cannot be used to generate trigger function",
-            category: "TriggerFunctionGenerator",
-            DiagnosticSeverity.Error,
-            isEnabledByDefault: true);
-
-        internal static readonly DiagnosticDescriptor InvalidTriggerFunctionNameError = new DiagnosticDescriptor(
-            id: "NSBWFUNC002",
-            title: "Invalid Trigger Function Name",
-            messageFormat: "Trigger function name is invalid and cannot be used to generate trigger function",
-            category: "TriggerFunctionGenerator",
-            DiagnosticSeverity.Error,
-            isEnabledByDefault: true);
-
-        internal static readonly DiagnosticDescriptor InvalidBindingExpression = new DiagnosticDescriptor(
-            id: "NSBWFUNC003",
-            title: "Invalid binding expression pattern use",
-            messageFormat: "Binding expression patterns require that a TriggerFunctionName be specified",
-            category: "TriggerFunctionGenerator",
-            DiagnosticSeverity.Error,
-            isEnabledByDefault: true);
-
-
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
@@ -95,21 +70,21 @@
             // Generate an error if empty/null/space is used as endpoint name
             if (string.IsNullOrWhiteSpace(syntaxReceiver.endpointName))
             {
-                context.ReportDiagnostic(Diagnostic.Create(InvalidEndpointNameError, Location.None, syntaxReceiver.endpointName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidEndpointNameError, Location.None, syntaxReceiver.endpointName));
                 return;
             }
 
             // Generate an error if a binding expression is provided with no trigger function name
             if (syntaxReceiver.isInvalidBindingExpression)
             {
-                context.ReportDiagnostic(Diagnostic.Create(InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
                 return;
             }
 
             // Generate an error if empty/null/space is used as trigger function name
             if (string.IsNullOrWhiteSpace(syntaxReceiver.triggerFunctionName))
             {
-                context.ReportDiagnostic(Diagnostic.Create(InvalidTriggerFunctionNameError, Location.None, syntaxReceiver.triggerFunctionName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidTriggerFunctionNameError, Location.None, syntaxReceiver.triggerFunctionName));
                 return;
             }
 
