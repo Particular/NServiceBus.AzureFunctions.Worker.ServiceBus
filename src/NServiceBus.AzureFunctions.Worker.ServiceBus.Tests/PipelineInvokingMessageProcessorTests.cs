@@ -181,7 +181,7 @@
             public bool OnCompleteCalled { get; private set; }
             public CommittableTransaction CompletedTransaction { get; private set; }
             public CommittableTransaction CreatedTransaction { get; private set; }
-            public List<TransportTransaction> CreatedTransportTransactions { get; } = new List<TransportTransaction>();
+            public List<TransportTransaction> CreatedTransportTransactions { get; } = [];
 
             public Task Complete(CommittableTransaction transaction, CancellationToken cancellationToken = default)
             {
