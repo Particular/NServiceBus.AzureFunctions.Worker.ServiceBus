@@ -1,8 +1,10 @@
 # NServiceBus.AzureFunctions.Worker.ServiceBus
 
-NServiceBus.AzureFunctions.Worker.ServiceBus is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
+NServiceBus.AzureFunctions.Worker.ServiceBus supports processing messages in AzureFunctions using the Azure Service Bus trigger and the NServiceBus message pipeline.
 
-Use it to process messages in AzureFunctions using the Azure Service Bus trigger and the NServiceBus message pipeline.
+It is part of the [Particular Service Platform](https://particular.net/service-platform), which includes [NServiceBus](https://particular.net/nservicebus) and tools to build, monitor, and debug distributed systems.
+
+# Documentation
 
 See the [Azure Functions with Azure Service Bus documentation](https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/in-process/) for more details.
 
