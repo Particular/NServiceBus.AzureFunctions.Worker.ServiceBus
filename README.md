@@ -6,7 +6,7 @@ It is part of the [Particular Service Platform](https://particular.net/service-p
 
 # Documentation
 
-See the [Using NServiceBus in Azure Functions (isolated process) documentation](https://docs.particular.net/samples/azure-functions/service-bus-worker/) for more details.
+See the [Using NServiceBus in Azure Functions (isolated process) documentation](https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/) for more details.
 
 ## Running tests locally
 
