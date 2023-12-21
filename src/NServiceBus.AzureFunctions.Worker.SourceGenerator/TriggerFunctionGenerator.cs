@@ -114,9 +114,9 @@ public class FunctionEndpointTrigger
             IDictionary<string, object> userProperties,
             string messageId,
             int deliveryCount,
-            string replyTo,
             string correlationId,
-            FunctionContext context)
+            FunctionContext context,
+            string replyTo = null)
         {{
             var legacyUserProperties = new Dictionary<string, string>(userProperties.Count);
 
