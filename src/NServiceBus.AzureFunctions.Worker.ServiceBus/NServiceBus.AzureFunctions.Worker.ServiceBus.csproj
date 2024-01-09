@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddPropsFileToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,12 @@
   <Target Name="AddSourceGeneratorToPackage" BeforeTargets="_GetPackageFiles">
     <ItemGroup>
       <None Include="..\NServiceBus.AzureFunctions.Worker.SourceGenerator\bin\$(Configuration)\**\NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Worker.SourceGenerator.dll" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AddPropsFileToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="NServiceBus.AzureFunctions.Worker.ServiceBus.props" PackagePath="build/$(TargetFramework)" />
     </ItemGroup>
   </Target>
 
