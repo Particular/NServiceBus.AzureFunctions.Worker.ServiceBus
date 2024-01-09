@@ -5,6 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddPropsFileToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,7 @@
   <ItemGroup>
     <None Include="..\NServiceBus.AzureFunctions.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs/NServiceBus.AzureFunctions.Analyzer.dll" Link="NServiceBus.AzureFunctions.Analyzer.dll" Visible="false" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="[5.4.0, 6.0.0)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="[1.8.0, 2.0.0)" />
@@ -31,13 +32,14 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="AddPropsFileToPackage">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="NServiceBus.AzureFunctions.Worker.ServiceBus.props" PackagePath="build/$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <InternalsVisibleTo Include="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests" Key="$(NServiceBusTestsKey)" />
-  </ItemGroup>
-  
-<ItemGroup>
-    <None Remove="build*\*" />
-    <Content Include="build\*" PackagePath="build" />
   </ItemGroup>
 
 </Project>
