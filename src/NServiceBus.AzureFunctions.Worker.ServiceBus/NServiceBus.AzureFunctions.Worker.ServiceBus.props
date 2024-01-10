@@ -1,0 +1,7 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <FunctionsEnableWorkerIndexing>false</FunctionsEnableWorkerIndexing>
+  </PropertyGroup>
+
+</Project>
