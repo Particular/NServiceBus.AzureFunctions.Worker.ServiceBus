@@ -1,0 +1,8 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <WarningsAsErrors>CS8032</WarningsAsErrors>
+    <FunctionsEnableWorkerIndexing>false</FunctionsEnableWorkerIndexing>
+  </PropertyGroup>
+
+</Project>
