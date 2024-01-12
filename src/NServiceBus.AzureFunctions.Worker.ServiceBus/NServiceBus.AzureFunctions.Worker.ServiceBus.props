@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <WarningsAsErrors>CS8032</WarningsAsErrors>
+    <FunctionsEnableMetadataSourceGen>false</FunctionsEnableMetadataSourceGen>
+    <FunctionsEnableExecutorSourceGen>false</FunctionsEnableExecutorSourceGen>
+    <!-- The property below is set to make sure the metadata source generator is actually disabled. 
+    This is needed due to a bug in the targets file and can be removed once 
+    https://github.com/Azure/azure-functions-dotnet-worker/issues/2209 is resolved
+    -->
     <FunctionsEnableWorkerIndexing>false</FunctionsEnableWorkerIndexing>
   </PropertyGroup>
 
