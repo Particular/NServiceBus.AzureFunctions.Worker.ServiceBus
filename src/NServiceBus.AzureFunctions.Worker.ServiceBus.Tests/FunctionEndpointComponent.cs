@@ -35,7 +35,7 @@
             });
         }
 
-        IList<TestMessage> testMessages = new List<TestMessage>();
+        IList<TestMessage> testMessages = [];
 
         class FunctionRunner : ComponentRunner
         {
