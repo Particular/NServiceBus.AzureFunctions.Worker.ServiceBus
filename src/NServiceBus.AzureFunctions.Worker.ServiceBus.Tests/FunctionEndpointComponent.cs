@@ -121,14 +121,14 @@
                 }
             }
 
-            public override Task Stop()
+            public override Task Stop(CancellationToken cancellationToken = default)
             {
                 if (scenarioContext.FailedMessages.TryGetValue(Name, out var failedMessages))
                 {
                     throw new MessageFailedException(failedMessages.First(), scenarioContext);
                 }
 
-                return base.Stop();
+                return base.Stop(cancellationToken);
             }
 
             readonly Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization;
