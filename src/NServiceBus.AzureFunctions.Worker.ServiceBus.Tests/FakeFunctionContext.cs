@@ -23,7 +23,9 @@
         public override RetryContext RetryContext { get; }
         public override IServiceProvider InstanceServices { get; set; }
         public override FunctionDefinition FunctionDefinition { get; }
+#pragma warning disable PS0025 // Dictionary keys should implement IEquatable<T> - Overriding Microsoft type for test
         public override IDictionary<object, object> Items { get; set; }
+#pragma warning restore PS0025 // Dictionary keys should implement IEquatable<T>
         public override IInvocationFeatures Features { get; }
     }
 
