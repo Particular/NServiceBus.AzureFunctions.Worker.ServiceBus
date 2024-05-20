@@ -2,10 +2,15 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Azure.Core;
+    using Azure.Identity;
     using AzureFunctions.Worker.ServiceBus;
     using Logging;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Identity.Client;
+    using Microsoft.VisualBasic;
     using Serialization;
 
     /// <summary>
@@ -33,7 +38,7 @@
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
         /// </summary>
-        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = default)
+        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = default, AzureComponentFactory azureComponentFactory = null)
         {
             var endpointConfiguration = new EndpointConfiguration(endpointName);
 
@@ -59,17 +64,13 @@
                 endpointConfiguration.License(licenseText);
             }
 
-            if (connectionString == null)
+            if (connectionString == null && azureComponentFactory == null)
             {
-                connectionString = GetConfiguredValueOrFallback(configuration, DefaultServiceBusConnectionName, optional: true);
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    throw new Exception($@"Azure Service Bus connection string has not been configured. Specify a connection string through IConfiguration, an environment variable named {DefaultServiceBusConnectionName} or passing it to `UseNServiceBus(ENDPOINTNAME,CONNECTIONSTRING)`");
-                }
+                throw new Exception("Either a connectionString or an Azure Component Factory must be supplied to generate the Azure Service Bus transport");
             }
-
-            Transport = new AzureServiceBusTransport(connectionString);
+            Transport = connectionString != null
+                ? new AzureServiceBusTransport(connectionString)
+                : CreateTransport(configuration, azureComponentFactory);
             Routing = endpointConfiguration.UseTransport(Transport);
 
             endpointConfiguration.UseSerialization<SystemJsonSerializer>();
@@ -132,5 +133,31 @@
 
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
+
+        static AzureServiceBusTransport CreateTransport(IConfiguration configuration, AzureComponentFactory azureComponentFactory)
+        {
+            IConfigurationSection connectionSection = configuration.GetSection(DefaultServiceBusConnectionName);
+            if (!connectionSection.Exists())
+            {
+                throw new Exception($@"Azure Service Bus connection string/section has not been configured. Specify a connection string through IConfiguration, an environment variable named {DefaultServiceBusConnectionName} or passing it to `UseNServiceBus(ENDPOINTNAME,CONNECTIONSTRING)`");
+            }
+
+            if (!string.IsNullOrWhiteSpace(connectionSection.Value))
+            {
+                return new AzureServiceBusTransport(connectionSection.Value);
+            }
+            else
+            {
+                string fullyQualifiedNamespace = connectionSection["fullyQualifiedNamespace"];
+                if (string.IsNullOrWhiteSpace(fullyQualifiedNamespace))
+                {
+                    throw new Exception("Connection should have an 'fullyQualifiedNamespace' property or be a string representing a connection string.");
+                }
+
+                var credential = azureComponentFactory.CreateTokenCredential(connectionSection);
+                return new AzureServiceBusTransport(fullyQualifiedNamespace, credential);
+            }
+
+        }
     }
 }

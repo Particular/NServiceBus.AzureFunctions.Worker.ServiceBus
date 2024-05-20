@@ -2,6 +2,7 @@
 {
     using System;
     using System.Reflection;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -108,7 +109,10 @@
 
                 serviceCollection.AddHostedService<InitializationHost>();
 
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
+                var azureServiceCollection = new ServiceCollection();
+                azureServiceCollection.AddAzureClientsCore();
+                using var azureServiceProvider = azureServiceCollection.BuildServiceProvider();
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, azureServiceProvider.GetService<AzureComponentFactory>());
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
