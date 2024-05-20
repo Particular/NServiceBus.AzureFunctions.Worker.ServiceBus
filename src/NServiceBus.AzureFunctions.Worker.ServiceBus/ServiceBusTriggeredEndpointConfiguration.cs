@@ -2,15 +2,12 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Azure.Core;
-    using Azure.Identity;
     using AzureFunctions.Worker.ServiceBus;
     using Logging;
     using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Identity.Client;
-    using Microsoft.VisualBasic;
     using Serialization;
 
     /// <summary>
