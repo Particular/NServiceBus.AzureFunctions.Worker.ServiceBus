@@ -5,24 +5,17 @@
     using System.Threading.Tasks;
     using Transport;
 
-    class ServerlessTransport : TransportDefinition
+    class ServerlessTransport(TransportDefinition baseTransport) : TransportDefinition(
+        TransportTransactionMode.ReceiveOnly,
+        baseTransport.SupportsDelayedDelivery,
+        baseTransport.SupportsPublishSubscribe,
+        baseTransport.SupportsTTBR)
     {
         // HINT: This constant is defined in NServiceBus but is not exposed
         const string MainReceiverId = "Main";
         const string SendOnlyConfigKey = "Endpoint.SendOnly";
 
         public IMessageProcessor MessageProcessor { get; private set; }
-
-        public ServerlessTransport(TransportDefinition baseTransport) : base(
-            TransportTransactionMode.ReceiveOnly,
-            baseTransport.SupportsDelayedDelivery,
-            baseTransport.SupportsPublishSubscribe,
-            baseTransport.SupportsTTBR)
-        {
-            this.baseTransport = baseTransport;
-        }
-
-        readonly TransportDefinition baseTransport;
 
         public override async Task<TransportInfrastructure> Initialize(
             HostSettings hostSettings,

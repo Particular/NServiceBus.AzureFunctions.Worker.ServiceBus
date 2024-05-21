@@ -15,10 +15,7 @@
 
         AsyncLocal<ILogger> logger = new AsyncLocal<ILogger>();
 
-        FunctionsLoggerFactory()
-        {
-            log = new Logger(logger);
-        }
+        FunctionsLoggerFactory() => log = new Logger(logger);
 
         public void SetCurrentLogger(ILogger currentLogger)
         {
@@ -28,14 +25,8 @@
             log.Flush(newLogger);
         }
 
-        public ILog GetLogger(Type type)
-        {
-            return log;
-        }
+        public ILog GetLogger(Type type) => log;
 
-        public ILog GetLogger(string name)
-        {
-            return log;
-        }
+        public ILog GetLogger(string name) => log;
     }
 }

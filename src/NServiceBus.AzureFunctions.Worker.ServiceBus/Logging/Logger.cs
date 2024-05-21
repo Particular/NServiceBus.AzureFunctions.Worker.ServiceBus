@@ -7,13 +7,8 @@
     using Microsoft.Extensions.Logging;
     using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-    class Logger : ILog
+    class Logger(AsyncLocal<ILogger> logger) : ILog
     {
-        public Logger(AsyncLocal<ILogger> logger)
-        {
-            this.logger = logger;
-        }
-
         public bool IsDebugEnabled => logger.Value?.IsEnabled(LogLevel.Debug) ?? true;
         public bool IsInfoEnabled => logger.Value?.IsEnabled(LogLevel.Information) ?? true;
         public bool IsWarnEnabled => logger.Value?.IsEnabled(LogLevel.Warning) ?? true;
@@ -101,7 +96,6 @@
             }
         }
 
-        AsyncLocal<ILogger> logger;
         readonly ConcurrentQueue<(LogLevel level, string message)> deferredMessageLogs = new ConcurrentQueue<(LogLevel level, string message)>();
         readonly ConcurrentQueue<(LogLevel level, string message, Exception exception)> deferredExceptionLogs = new ConcurrentQueue<(LogLevel level, string message, Exception exception)>();
         readonly ConcurrentQueue<(LogLevel level, string format, object[] args)> deferredFormatLogs = new ConcurrentQueue<(LogLevel level, string format, object[] args)>();
