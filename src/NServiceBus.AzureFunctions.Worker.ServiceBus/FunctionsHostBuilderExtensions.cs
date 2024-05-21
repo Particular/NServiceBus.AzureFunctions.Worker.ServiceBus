@@ -108,11 +108,9 @@
                 }
 
                 serviceCollection.AddHostedService<InitializationHost>();
+                serviceCollection.AddAzureClientsCore();
 
-                var azureServiceCollection = new ServiceCollection();
-                azureServiceCollection.AddAzureClientsCore();
-                using var azureServiceProvider = azureServiceCollection.BuildServiceProvider();
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, azureServiceProvider.GetService<AzureComponentFactory>());
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
