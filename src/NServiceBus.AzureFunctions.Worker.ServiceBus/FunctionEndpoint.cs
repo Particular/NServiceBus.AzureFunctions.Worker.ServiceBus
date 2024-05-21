@@ -13,9 +13,10 @@
     /// </summary>
     public class FunctionEndpoint : IFunctionEndpoint
     {
-        internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessInterceptor serverless, IServiceProvider serviceProvider)
+        internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessTransport serverlessTransport, IServiceProvider serviceProvider)
         {
-            this.serverless = serverless;
+            this.serverlessTransport = serverlessTransport;
+            this.serverlessTransport.ServiceProvider = serviceProvider;
             endpointFactory = () => externallyManagedContainerEndpoint.Start(serviceProvider);
         }
 
@@ -50,7 +51,7 @@
                     {
                         endpoint = await endpointFactory().ConfigureAwait(false);
 
-                        messageProcessor = serverless.MessageProcessor;
+                        messageProcessor = serverlessTransport.MessageProcessor;
                     }
                 }
                 finally
@@ -141,7 +142,7 @@
         readonly Func<Task<IEndpointInstance>> endpointFactory;
 
         readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-        readonly ServerlessInterceptor serverless;
+        readonly ServerlessTransport serverlessTransport;
 
         IMessageProcessor messageProcessor;
         IEndpointInstance endpoint;
