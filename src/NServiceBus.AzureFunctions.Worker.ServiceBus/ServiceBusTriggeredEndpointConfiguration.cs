@@ -7,7 +7,6 @@
     using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Identity.Client;
     using Serialization;
 
     /// <summary>
@@ -119,7 +118,7 @@
         public void DoNotSendMessagesToErrorQueue() => recoverabilityPolicy.SendFailedMessagesToErrorQueue = false;
 
         /// <summary>
-        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="LogLevel.Info" />.
+        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="NServiceBus.Logging.LogLevel.Info" />.
         /// </summary>
         public void LogDiagnostics() =>
             AdvancedConfiguration.CustomDiagnosticsWriter((diagnostics, _) =>
