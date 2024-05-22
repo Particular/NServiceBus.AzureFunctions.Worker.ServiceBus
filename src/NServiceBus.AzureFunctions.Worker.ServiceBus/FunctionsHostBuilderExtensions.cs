@@ -86,8 +86,7 @@
             string endpointName,
             Assembly callingAssembly,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
-            string connectionString = default)
-        {
+            string connectionString = default) =>
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;
@@ -107,7 +106,7 @@
 - Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
 
-                serviceCollection.AddHostedService<InstallerHost>();
+                serviceCollection.AddHostedService<InitializationHost>();
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
 
@@ -115,7 +114,6 @@
 
                 var endpointFactory = functionEndpointConfiguration.CreateEndpointFactory(serviceCollection);
 
-                // for backward compatibility
                 serviceCollection.AddSingleton(endpointFactory);
                 serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
 
@@ -129,8 +127,5 @@
                     return null;
                 }
             });
-
-
-        }
     }
 }

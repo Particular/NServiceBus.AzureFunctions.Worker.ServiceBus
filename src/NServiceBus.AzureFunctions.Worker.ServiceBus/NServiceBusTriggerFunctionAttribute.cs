@@ -21,9 +21,6 @@
         /// Endpoint logical name.
         /// </summary>
         /// <param name="endpointName">Endpoint name that is the input queue name.</param>
-        public NServiceBusTriggerFunctionAttribute(string endpointName)
-        {
-            EndpointName = endpointName;
-        }
+        public NServiceBusTriggerFunctionAttribute(string endpointName) => EndpointName = endpointName;
     }
 }

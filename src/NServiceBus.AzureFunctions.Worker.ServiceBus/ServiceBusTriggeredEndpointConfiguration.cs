@@ -13,10 +13,7 @@
     /// </summary>
     public partial class ServiceBusTriggeredEndpointConfiguration
     {
-        static ServiceBusTriggeredEndpointConfiguration()
-        {
-            LogManager.UseFactory(FunctionsLoggerFactory.Instance);
-        }
+        static ServiceBusTriggeredEndpointConfiguration() => LogManager.UseFactory(FunctionsLoggerFactory.Instance);
 
         /// <summary>
         /// The Azure Service Bus transport configuration.
@@ -116,30 +113,22 @@
         /// <summary>
         /// Define the serializer to be used.
         /// </summary>
-        public SerializationExtensions<T> UseSerialization<T>() where T : SerializationDefinition, new()
-        {
-            return AdvancedConfiguration.UseSerialization<T>();
-        }
+        public SerializationExtensions<T> UseSerialization<T>() where T : SerializationDefinition, new() => AdvancedConfiguration.UseSerialization<T>();
 
         /// <summary>
         /// Disables moving messages to the error queue even if an error queue name is configured.
         /// </summary>
-        public void DoNotSendMessagesToErrorQueue()
-        {
-            recoverabilityPolicy.SendFailedMessagesToErrorQueue = false;
-        }
+        public void DoNotSendMessagesToErrorQueue() => recoverabilityPolicy.SendFailedMessagesToErrorQueue = false;
 
         /// <summary>
         /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="LogLevel.Info" />.
         /// </summary>
-        public void LogDiagnostics()
-        {
+        public void LogDiagnostics() =>
             AdvancedConfiguration.CustomDiagnosticsWriter((diagnostics, _) =>
             {
                 LogManager.GetLogger("StartupDiagnostics").Info(diagnostics);
                 return Task.CompletedTask;
             });
-        }
 
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new ServerlessRecoverabilityPolicy();
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";

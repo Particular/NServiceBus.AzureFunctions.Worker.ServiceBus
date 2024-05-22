@@ -7,13 +7,8 @@
     using NServiceBus.Extensibility;
     using Transport;
 
-    class PipelineInvokingMessageProcessor : IMessageReceiver, IMessageProcessor
+    class PipelineInvokingMessageProcessor(IMessageReceiver baseTransportReceiver) : IMessageReceiver, IMessageProcessor
     {
-        public PipelineInvokingMessageProcessor(IMessageReceiver baseTransportReceiver)
-        {
-            this.baseTransportReceiver = baseTransportReceiver;
-        }
-
         public Task Initialize(PushRuntimeSettings limitations, OnMessage onMessage, OnError onError,
             CancellationToken cancellationToken = default)
         {
@@ -127,7 +122,6 @@
         public string Id => baseTransportReceiver.Id;
         public string ReceiveAddress => baseTransportReceiver.ReceiveAddress;
 
-        readonly IMessageReceiver baseTransportReceiver;
         OnMessage onMessage;
         OnError onError;
     }
