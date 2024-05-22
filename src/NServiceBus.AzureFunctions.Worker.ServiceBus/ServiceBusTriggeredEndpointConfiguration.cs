@@ -11,7 +11,7 @@
     /// <summary>
     /// Represents a serverless NServiceBus endpoint.
     /// </summary>
-    public partial class ServiceBusTriggeredEndpointConfiguration
+    public class ServiceBusTriggeredEndpointConfiguration
     {
         static ServiceBusTriggeredEndpointConfiguration() => LogManager.UseFactory(FunctionsLoggerFactory.Instance);
 
@@ -88,13 +88,10 @@
 
         static string GetConfiguredValueOrFallback(IConfiguration configuration, string key, bool optional)
         {
-            if (configuration != null)
+            var configuredValue = configuration?.GetValue<string>(key);
+            if (configuredValue != null)
             {
-                var configuredValue = configuration.GetValue<string>(key);
-                if (configuredValue != null)
-                {
-                    return configuredValue;
-                }
+                return configuredValue;
             }
 
             var environmentVariable = Environment.GetEnvironmentVariable(key);
@@ -119,7 +116,7 @@
         /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="NServiceBus.Logging.LogLevel.Info" />.
         /// </summary>
         public void LogDiagnostics() =>
-            AdvancedConfiguration.CustomDiagnosticsWriter((diagnostics, _) =>
+            AdvancedConfiguration.CustomDiagnosticsWriter(static (diagnostics, _) =>
             {
                 LogManager.GetLogger("StartupDiagnostics").Info(diagnostics);
                 return Task.CompletedTask;

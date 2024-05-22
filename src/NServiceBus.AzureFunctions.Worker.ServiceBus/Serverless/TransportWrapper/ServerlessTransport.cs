@@ -9,30 +9,17 @@
     using Microsoft.Extensions.DependencyInjection;
     using Transport;
 
-    class ServerlessTransport(TransportDefinition baseTransport) : TransportDefinition(
+    class ServerlessTransport(TransportExtensions<AzureServiceBusTransport> transportExtensions, string connectionString) : TransportDefinition(
         TransportTransactionMode.ReceiveOnly,
-        baseTransport.SupportsDelayedDelivery,
-        baseTransport.SupportsPublishSubscribe,
-        baseTransport.SupportsTTBR)
+        transportExtensions.Transport.SupportsDelayedDelivery,
+        transportExtensions.Transport.SupportsPublishSubscribe,
+        transportExtensions.Transport.SupportsTTBR)
     {
         // HINT: This constant is defined in NServiceBus but is not exposed
         const string MainReceiverId = "Main";
         const string SendOnlyConfigKey = "Endpoint.SendOnly";
 
         public IMessageProcessor MessageProcessor { get; private set; }
-
-        public ServerlessTransport(TransportExtensions<AzureServiceBusTransport> transportExtensions, string connectionString) : base(
-            TransportTransactionMode.ReceiveOnly,
-            transportExtensions.Transport.SupportsDelayedDelivery,
-            transportExtensions.Transport.SupportsPublishSubscribe,
-            transportExtensions.Transport.SupportsTTBR)
-        {
-            this.transportExtensions = transportExtensions;
-            this.connectionString = connectionString;
-        }
-
-        readonly TransportExtensions<AzureServiceBusTransport> transportExtensions;
-        readonly string connectionString;
 
         public IServiceProvider ServiceProvider { get; set; }
 
