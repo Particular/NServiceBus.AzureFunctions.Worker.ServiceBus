@@ -64,9 +64,9 @@
             // uninitialized transport that can later be configured with a connection string or a fully qualified name and
             // a token provider. Once we deprecate the old way we can for example add make the internal constructor
             // visible to functions or the code base has already moved into a different direction.
-            var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
-            Transport = transport.Transport;
-            Routing = transport.Routing();
+            transportExtensions = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
+            Transport = transportExtensions.Transport;
+            Routing = transportExtensions.Routing();
 
             endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
@@ -76,7 +76,7 @@
         internal Func<IServiceProvider, FunctionEndpoint> CreateEndpointFactory(IServiceCollection serviceCollection)
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
-            var serverlessTransport = new ServerlessTransport(Transport, connectionString);
+            var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString);
             AdvancedConfiguration.UseTransport(serverlessTransport);
 
             var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
@@ -127,5 +127,6 @@
 
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new();
         readonly string connectionString;
+        readonly TransportExtensions<AzureServiceBusTransport> transportExtensions;
     }
 }
