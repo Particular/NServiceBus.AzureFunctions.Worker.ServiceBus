@@ -21,17 +21,17 @@
 
         public IMessageProcessor MessageProcessor { get; private set; }
 
-        public ServerlessTransport(AzureServiceBusTransport proxyTransport, string connectionString) : base(
+        public ServerlessTransport(AzureServiceBusTransport baseTransport, string connectionString) : base(
             TransportTransactionMode.ReceiveOnly,
-            proxyTransport.SupportsDelayedDelivery,
-            proxyTransport.SupportsPublishSubscribe,
-            proxyTransport.SupportsTTBR)
+            baseTransport.SupportsDelayedDelivery,
+            baseTransport.SupportsPublishSubscribe,
+            baseTransport.SupportsTTBR)
         {
-            this.proxyTransport = proxyTransport;
+            this.baseTransport = baseTransport;
             this.connectionString = connectionString;
         }
 
-        readonly AzureServiceBusTransport proxyTransport;
+        readonly AzureServiceBusTransport baseTransport;
         readonly string connectionString;
 
         public IServiceProvider ServiceProvider { get; set; }
@@ -42,10 +42,10 @@
             string[] sendingAddresses,
             CancellationToken cancellationToken = default)
         {
-            var actualTransport = CreateTransport(connectionString, ServiceProvider.GetRequiredService<IConfiguration>(), proxyTransport,
+            ConfigureTransportConnection(connectionString, ServiceProvider.GetRequiredService<IConfiguration>(), baseTransport,
                 ServiceProvider.GetRequiredService<AzureComponentFactory>());
 
-            var baseTransportInfrastructure = await actualTransport.Initialize(
+            var baseTransportInfrastructure = await baseTransport.Initialize(
                     hostSettings,
                     receivers,
                     sendingAddresses,
@@ -65,15 +65,17 @@
 
         public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
 
-        internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
-
-        static AzureServiceBusTransport CreateTransport(string connectionString, IConfiguration configuration,
-            AzureServiceBusTransport proxyTransport, AzureComponentFactory azureComponentFactory)
+        static void ConfigureTransportConnection(string connectionString, IConfiguration configuration,
+            AzureServiceBusTransport baseTransport, AzureComponentFactory azureComponentFactory)
         {
-            AzureServiceBusTransport transport;
+            // We are deliberately using the old way of configuring a transport here because it allows us configuring
+            // the uninitialized transport with a connection string or a fully qualified name and a token provider.
+            // Once we deprecate the old way we can for example add make the internal ConnectionString, FQDN or
+            // TokenProvider properties visible to functions or the code base has already moved into a different direction.
+            var transport = new TransportExtensions<AzureServiceBusTransport>(baseTransport, null);
             if (connectionString != null)
             {
-                transport = new AzureServiceBusTransport(connectionString);
+                _ = transport.ConnectionString(connectionString);
             }
             else
             {
@@ -85,7 +87,7 @@
 
                 if (!string.IsNullOrWhiteSpace(connectionSection.Value))
                 {
-                    transport = new AzureServiceBusTransport(connectionSection.Value);
+                    _ = transport.ConnectionString(connectionSection.Value);
                 }
                 else
                 {
@@ -96,25 +98,13 @@
                     }
 
                     var credential = azureComponentFactory.CreateTokenCredential(connectionSection);
-                    transport = new AzureServiceBusTransport(fullyQualifiedNamespace, credential);
+                    _ = transport.CustomTokenCredential(fullyQualifiedNamespace, credential);
                 }
             }
-
-            // TODO map all settings
-            if (proxyTransport.WebProxy != null)
-            {
-                transport.WebProxy = proxyTransport.WebProxy;
-            }
-            transport.PrefetchCount = proxyTransport.PrefetchCount;
-            transport.Topology = proxyTransport.Topology;
-            transport.EnablePartitioning = proxyTransport.EnablePartitioning;
-
-            return transport;
         }
 
-        readonly TransportTransactionMode[] supportedTransactionModes =
-        {
-            TransportTransactionMode.ReceiveOnly
-        };
+        internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
+
+        readonly TransportTransactionMode[] supportedTransactionModes = [TransportTransactionMode.ReceiveOnly];
     }
 }

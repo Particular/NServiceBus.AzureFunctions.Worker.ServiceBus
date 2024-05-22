@@ -6,6 +6,7 @@
     using NServiceBus;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
 
     class DefaultEndpoint : IEndpointSetupTemplate
     {
@@ -27,7 +28,7 @@
             recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
             configuration.SendFailedMessagesTo("error");
 
-            var connectionString = Environment.GetEnvironmentVariable(ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName);
+            var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
             var azureServiceBusTransport = new AzureServiceBusTransport(connectionString)
             {
                 SubscriptionRuleNamingConvention = type =>

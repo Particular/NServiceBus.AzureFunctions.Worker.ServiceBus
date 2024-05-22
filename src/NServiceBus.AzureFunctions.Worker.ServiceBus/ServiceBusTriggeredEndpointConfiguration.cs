@@ -60,8 +60,13 @@
                 endpointConfiguration.License(licenseText);
             }
 
-            Transport = new AzureServiceBusTransport("TransportProxy");
-            Routing = endpointConfiguration.UseTransport(Transport);
+            // We are deliberately using the old way of creating a transport here because it allows us to create an
+            // uninitialized transport that can later be configured with a connection string or a fully qualified name and
+            // a token provider. Once we deprecate the old way we can for example add make the internal constructor
+            // visible to functions or the code base has already moved into a different direction.
+            var transport = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
+            Transport = transport.Transport;
+            Routing = transport.Routing();
 
             endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
