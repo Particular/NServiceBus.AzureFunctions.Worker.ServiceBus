@@ -21,17 +21,17 @@
 
         public IMessageProcessor MessageProcessor { get; private set; }
 
-        public ServerlessTransport(AzureServiceBusTransport baseTransport, string connectionString) : base(
+        public ServerlessTransport(TransportExtensions<AzureServiceBusTransport> transportExtensions, string connectionString) : base(
             TransportTransactionMode.ReceiveOnly,
-            baseTransport.SupportsDelayedDelivery,
-            baseTransport.SupportsPublishSubscribe,
-            baseTransport.SupportsTTBR)
+            transportExtensions.Transport.SupportsDelayedDelivery,
+            transportExtensions.Transport.SupportsPublishSubscribe,
+            transportExtensions.Transport.SupportsTTBR)
         {
-            this.baseTransport = baseTransport;
+            this.transportExtensions = transportExtensions;
             this.connectionString = connectionString;
         }
 
-        readonly AzureServiceBusTransport baseTransport;
+        readonly TransportExtensions<AzureServiceBusTransport> transportExtensions;
         readonly string connectionString;
 
         public IServiceProvider ServiceProvider { get; set; }
@@ -42,10 +42,10 @@
             string[] sendingAddresses,
             CancellationToken cancellationToken = default)
         {
-            ConfigureTransportConnection(connectionString, ServiceProvider.GetRequiredService<IConfiguration>(), baseTransport,
+            var configuredTransport = ConfigureTransportConnection(connectionString, ServiceProvider.GetRequiredService<IConfiguration>(), transportExtensions,
                 ServiceProvider.GetRequiredService<AzureComponentFactory>());
 
-            var baseTransportInfrastructure = await baseTransport.Initialize(
+            var baseTransportInfrastructure = await configuredTransport.Initialize(
                     hostSettings,
                     receivers,
                     sendingAddresses,
@@ -65,17 +65,16 @@
 
         public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
 
-        static void ConfigureTransportConnection(string connectionString, IConfiguration configuration,
-            AzureServiceBusTransport baseTransport, AzureComponentFactory azureComponentFactory)
+        // We are deliberately using the old way of configuring a transport here because it allows us configuring
+        // the uninitialized transport with a connection string or a fully qualified name and a token provider.
+        // Once we deprecate the old way we can for example add make the internal ConnectionString, FQDN or
+        // TokenProvider properties visible to functions or the code base has already moved into a different direction.
+        static AzureServiceBusTransport ConfigureTransportConnection(string connectionString, IConfiguration configuration,
+            TransportExtensions<AzureServiceBusTransport> transportExtensions, AzureComponentFactory azureComponentFactory)
         {
-            // We are deliberately using the old way of configuring a transport here because it allows us configuring
-            // the uninitialized transport with a connection string or a fully qualified name and a token provider.
-            // Once we deprecate the old way we can for example add make the internal ConnectionString, FQDN or
-            // TokenProvider properties visible to functions or the code base has already moved into a different direction.
-            var transport = new TransportExtensions<AzureServiceBusTransport>(baseTransport, null);
             if (connectionString != null)
             {
-                _ = transport.ConnectionString(connectionString);
+                _ = transportExtensions.ConnectionString(connectionString);
             }
             else
             {
@@ -87,7 +86,7 @@
 
                 if (!string.IsNullOrWhiteSpace(connectionSection.Value))
                 {
-                    _ = transport.ConnectionString(connectionSection.Value);
+                    _ = transportExtensions.ConnectionString(connectionSection.Value);
                 }
                 else
                 {
@@ -98,9 +97,11 @@
                     }
 
                     var credential = azureComponentFactory.CreateTokenCredential(connectionSection);
-                    _ = transport.CustomTokenCredential(fullyQualifiedNamespace, credential);
+                    _ = transportExtensions.CustomTokenCredential(fullyQualifiedNamespace, credential);
                 }
             }
+
+            return transportExtensions.Transport;
         }
 
         internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
