@@ -6,6 +6,7 @@
     using Azure.Messaging.ServiceBus.Administration;
     using Microsoft.Extensions.Hosting;
     using NServiceBus;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NServiceBus.Features;
     using NUnit.Framework;
 
@@ -32,8 +33,8 @@
             Thread.Sleep(5000);
             await host.StopAsync();
 
-            var connectionString = Environment.GetEnvironmentVariable(ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName);
-            Assert.IsNotNull(connectionString, $"Environment variable '{ServiceBusTriggeredEndpointConfiguration.DefaultServiceBusConnectionName}' should be defined to run tests.");
+            var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
+            Assert.IsNotNull(connectionString, $"Environment variable '{ServerlessTransport.DefaultServiceBusConnectionName}' should be defined to run tests.");
 
             var client = new ServiceBusAdministrationClient(connectionString);
 
