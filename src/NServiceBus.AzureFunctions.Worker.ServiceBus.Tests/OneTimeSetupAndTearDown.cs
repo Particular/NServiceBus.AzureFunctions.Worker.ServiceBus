@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus.Administration;
-    using NServiceBus;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NUnit.Framework;
 
