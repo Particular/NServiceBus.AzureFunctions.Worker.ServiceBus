@@ -3,19 +3,10 @@
     using System;
     using System.Collections.Generic;
     using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     sealed class FakeFunctionContext : FunctionContext
     {
-        public FakeFunctionContext()
-        {
-            var sc = new ServiceCollection();
-            sc.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
-
-            InstanceServices = sc.BuildServiceProvider();
-        }
-
         public override string InvocationId { get; }
         public override string FunctionId { get; }
         public override TraceContext TraceContext { get; }
@@ -35,10 +26,7 @@
         {
         }
 
-        public ILogger CreateLogger(string categoryName)
-        {
-            return new DummyLogger();
-        }
+        public ILogger CreateLogger(string categoryName) => new DummyLogger();
 
         public void AddProvider(ILoggerProvider provider)
         {
