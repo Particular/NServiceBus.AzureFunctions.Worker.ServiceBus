@@ -1,44 +1,56 @@
 ﻿namespace ServiceBus.Tests
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus.Administration;
-    using Microsoft.Extensions.Hosting;
-    using NServiceBus;
+    using NServiceBus.AcceptanceTesting;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
-    using NServiceBus.Features;
+    using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
+    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
     [TestFixture]
     public class When_starting_the_function_without_installers
     {
-        [Test]
-        public async Task Should_not_create_queues()
+        [SetUp]
+        public async Task SetUp()
         {
-            string functionName = "f" + Guid.NewGuid().ToString();
-
-            var host = new HostBuilder()
-            //.ConfigureFunctionsWorkerDefaults() NOTE cannot use outside an Azure Function project without too much infrastructure setup
-            .UseNServiceBus(
-                functionName,
-                (con, c) =>
-                {
-                    c.AdvancedConfiguration.DisableFeature<Sagas>();
-                })
-            .Build();
-
-            await host.StartAsync();
-            Thread.Sleep(5000);
-            await host.StopAsync();
-
             var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
             Assert.IsNotNull(connectionString, $"Environment variable '{ServerlessTransport.DefaultServiceBusConnectionName}' should be defined to run tests.");
 
-            var client = new ServiceBusAdministrationClient(connectionString);
+            adminClient = new ServiceBusAdministrationClient(connectionString);
 
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            Assert.IsFalse(await client.QueueExistsAsync(functionName, cancellationTokenSource.Token), "Queues should not be created");
+            endpointNamingConvention = Conventions.EndpointNamingConvention(typeof(FunctionWithoutInstallersEnabled));
+            // This is to make sure when this test is executed locally it would still pass. On CI/CD we have an ASB instance for each run
+            if (await adminClient.QueueExistsAsync(endpointNamingConvention))
+            {
+                await adminClient.DeleteQueueAsync(endpointNamingConvention);
+            }
+        }
+
+        [Test]
+        public async Task Should_not_create_queues()
+        {
+            await Scenario.Define<ScenarioContext>()
+                .WithComponent(new FunctionWithoutInstallersEnabled())
+                .Done(c => c.EndpointsStarted)
+                .Run();
+
+            Assert.IsFalse(await adminClient.QueueExistsAsync(endpointNamingConvention), "Queues should not be created");
+        }
+
+        ServiceBusAdministrationClient adminClient;
+        string endpointNamingConvention;
+
+        class FunctionWithoutInstallersEnabled : FunctionEndpointComponent
+        {
+            public FunctionWithoutInstallersEnabled() =>
+                CustomizeConfiguration = c =>
+                {
+                    // The base infrastructure enables installers by default. There is no official way to disable installers
+                    // so we have to use the backdoor settings key to disable them.
+                    c.AdvancedConfiguration.GetSettings().Set("Installers.Enable", false);
+                };
         }
     }
 }
