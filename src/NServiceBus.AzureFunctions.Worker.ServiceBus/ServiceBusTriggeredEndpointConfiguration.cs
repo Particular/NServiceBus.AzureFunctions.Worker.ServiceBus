@@ -49,12 +49,12 @@
             endpointConfiguration.CustomDiagnosticsWriter((_, __) => Task.CompletedTask);
 
             // 'WEBSITE_SITE_NAME' represents an Azure Function App and the environment variable is set when hosting the function in Azure.
-            var functionAppName = GetConfiguredValueOrFallback(configuration, "WEBSITE_SITE_NAME", true) ?? Environment.MachineName;
+            var functionAppName = configuration?.GetValue<string>("WEBSITE_SITE_NAME") ?? Environment.MachineName;
             endpointConfiguration.UniquelyIdentifyRunningInstance()
                 .UsingCustomDisplayName(functionAppName)
                 .UsingCustomIdentifier(DeterministicGuid.Create(functionAppName));
 
-            var licenseText = GetConfiguredValueOrFallback(configuration, "NSERVICEBUS_LICENSE", optional: true);
+            var licenseText = configuration?.GetValue<string>("NSERVICEBUS_LICENSE");
             if (!string.IsNullOrWhiteSpace(licenseText))
             {
                 endpointConfiguration.License(licenseText);
@@ -84,22 +84,6 @@
                 serviceCollection);
 
             return serviceProvider => new FunctionEndpoint(startableEndpoint, serverlessTransport, serviceProvider);
-        }
-
-        static string GetConfiguredValueOrFallback(IConfiguration configuration, string key, bool optional)
-        {
-            var configuredValue = configuration?.GetValue<string>(key);
-            if (configuredValue != null)
-            {
-                return configuredValue;
-            }
-
-            var environmentVariable = Environment.GetEnvironmentVariable(key);
-            if (string.IsNullOrEmpty(environmentVariable) && !optional)
-            {
-                throw new Exception($"Configuration or environment value for '{key}' was not set or was empty.");
-            }
-            return environmentVariable;
         }
 
         /// <summary>
