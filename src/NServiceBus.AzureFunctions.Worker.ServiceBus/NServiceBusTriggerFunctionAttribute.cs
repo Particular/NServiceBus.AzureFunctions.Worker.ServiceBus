@@ -18,6 +18,11 @@
         public string TriggerFunctionName { get; set; }
 
         /// <summary>
+        /// Gets or sets the app setting name that contains the Service Bus connection string.
+        /// </summary>
+        public string Connection { get; set; }
+
+        /// <summary>
         /// Endpoint logical name.
         /// </summary>
         /// <param name="endpointName">Endpoint name that is the input queue name.</param>

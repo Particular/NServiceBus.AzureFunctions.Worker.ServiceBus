@@ -91,9 +91,10 @@
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;
-                var endpointNameValue = callingAssembly
-                    ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
-                    ?.EndpointName;
+                var triggerAttribute = callingAssembly
+                    ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>();
+                var endpointNameValue = triggerAttribute?.EndpointName;
+                var connectionName = triggerAttribute?.Connection;
 
                 endpointName ??= configuration.GetValue<string>("ENDPOINT_NAME")
                                  ?? TryResolveBindingExpression()
@@ -110,7 +111,7 @@
                 serviceCollection.AddHostedService<InitializationHost>();
                 serviceCollection.AddAzureClientsCore();
 
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, connectionName);
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 

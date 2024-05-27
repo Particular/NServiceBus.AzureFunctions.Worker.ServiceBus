@@ -33,9 +33,10 @@
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
         /// </summary>
-        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = default)
+        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = default, string connectionName = default)
         {
             this.connectionString = connectionString;
+            this.connectionName = connectionName;
             var endpointConfiguration = new EndpointConfiguration(endpointName);
 
             var recoverability = endpointConfiguration.Recoverability();
@@ -76,7 +77,7 @@
         internal Func<IServiceProvider, FunctionEndpoint> CreateEndpointFactory(IServiceCollection serviceCollection)
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
-            var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString);
+            var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString, connectionName);
             AdvancedConfiguration.UseTransport(serverlessTransport);
 
             var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
@@ -108,6 +109,7 @@
 
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new();
         readonly string connectionString;
+        readonly string connectionName;
         readonly TransportExtensions<AzureServiceBusTransport> transportExtensions;
     }
 }

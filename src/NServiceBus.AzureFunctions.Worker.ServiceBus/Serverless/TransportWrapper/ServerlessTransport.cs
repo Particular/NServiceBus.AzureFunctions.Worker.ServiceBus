@@ -9,7 +9,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Transport;
 
-    class ServerlessTransport(TransportExtensions<AzureServiceBusTransport> transportExtensions, string connectionString) : TransportDefinition(
+    class ServerlessTransport(TransportExtensions<AzureServiceBusTransport> transportExtensions, string connectionString, string connectionName) : TransportDefinition(
         TransportTransactionMode.ReceiveOnly,
         transportExtensions.Transport.SupportsDelayedDelivery,
         transportExtensions.Transport.SupportsPublishSubscribe,
@@ -29,7 +29,7 @@
             string[] sendingAddresses,
             CancellationToken cancellationToken = default)
         {
-            var configuredTransport = ConfigureTransportConnection(connectionString, ServiceProvider.GetRequiredService<IConfiguration>(), transportExtensions,
+            var configuredTransport = ConfigureTransportConnection(connectionString, connectionName, ServiceProvider.GetRequiredService<IConfiguration>(), transportExtensions,
                 ServiceProvider.GetRequiredService<AzureComponentFactory>());
 
             var baseTransportInfrastructure = await configuredTransport.Initialize(
@@ -56,7 +56,7 @@
         // the uninitialized transport with a connection string or a fully qualified name and a token provider.
         // Once we deprecate the old way we can for example add make the internal ConnectionString, FQDN or
         // TokenProvider properties visible to functions or the code base has already moved into a different direction.
-        static AzureServiceBusTransport ConfigureTransportConnection(string connectionString, IConfiguration configuration,
+        static AzureServiceBusTransport ConfigureTransportConnection(string connectionString, string connectionName, IConfiguration configuration,
             TransportExtensions<AzureServiceBusTransport> transportExtensions, AzureComponentFactory azureComponentFactory)
         {
             if (connectionString != null)
@@ -65,10 +65,11 @@
             }
             else
             {
-                IConfigurationSection connectionSection = configuration.GetSection(DefaultServiceBusConnectionName);
+                var serviceBusConnectionName = string.IsNullOrWhiteSpace(connectionName) ? DefaultServiceBusConnectionName : connectionName;
+                IConfigurationSection connectionSection = configuration.GetSection(serviceBusConnectionName);
                 if (!connectionSection.Exists())
                 {
-                    throw new Exception($"Azure Service Bus connection string/section has not been configured. Specify a connection string through IConfiguration, an environment variable named {DefaultServiceBusConnectionName} or passing it to `UseNServiceBus(ENDPOINTNAME,CONNECTIONSTRING)`");
+                    throw new Exception($"Azure Service Bus connection string/section has not been configured. Specify a connection string through IConfiguration, an environment variable named {serviceBusConnectionName} or passing it to `UseNServiceBus(ENDPOINTNAME,CONNECTIONSTRING)`");
                 }
 
                 if (!string.IsNullOrWhiteSpace(connectionSection.Value))
