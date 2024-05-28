@@ -6,15 +6,8 @@ using Microsoft.Extensions.Logging;
 using NServiceBus;
 
 
-class HttpSender
+class HttpSender(IFunctionEndpoint functionEndpoint)
 {
-    readonly IFunctionEndpoint functionEndpoint;
-
-    public HttpSender(IFunctionEndpoint functionEndpoint)
-    {
-        this.functionEndpoint = functionEndpoint;
-    }
-
     [Function("HttpSenderV4")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req,
