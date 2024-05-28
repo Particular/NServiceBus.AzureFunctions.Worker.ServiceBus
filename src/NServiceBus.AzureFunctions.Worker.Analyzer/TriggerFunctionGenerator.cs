@@ -109,15 +109,15 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using NServiceBus;
 
+[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
 public class FunctionEndpointTrigger
 {{
-    IFunctionEndpoint endpoint;
+        readonly IFunctionEndpoint endpoint;
 
         public FunctionEndpointTrigger(IFunctionEndpoint endpoint)
         {{
             this.endpoint = endpoint;
         }}
-
 
         [Function(""{syntaxReceiver.triggerFunctionName}"")]
         public async Task Run(
