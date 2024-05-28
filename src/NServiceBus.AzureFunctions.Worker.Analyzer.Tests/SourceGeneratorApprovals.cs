@@ -168,6 +168,22 @@ using NServiceBus;
             Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId));
         }
 
+        [Test]
+        public void Can_supply_connection_name()
+        {
+            var source =
+                @"using NServiceBus;
+
+[assembly: NServiceBusTriggerFunction(""endpoint"", Connection = ""FooBar"")]
+
+public class Startup
+{
+}";
+            var (output, _) = GetGeneratedOutput(source);
+
+            Approver.Verify(output);
+        }
+
         [OneTimeSetUp]
         public void Init()
         {
