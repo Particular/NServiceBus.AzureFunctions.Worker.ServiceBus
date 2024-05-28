@@ -11,7 +11,7 @@ public class Program
             .ConfigureFunctionsWorkerDefaults()
             .UseNServiceBus(c =>
             {
-                c.Routing.RouteToEndpoint(typeof(TriggerMessage), "some-queue");
+                c.Routing.RouteToEndpoint(typeof(TriggerMessage), "FunctionsTestEndpoint2");
                 c.AdvancedConfiguration.EnableInstallers();
             })
             .Build();
