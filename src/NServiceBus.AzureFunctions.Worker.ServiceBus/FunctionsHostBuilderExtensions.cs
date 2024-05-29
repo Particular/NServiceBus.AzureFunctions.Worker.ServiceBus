@@ -82,6 +82,12 @@
             return hostBuilder;
         }
 
+        // We are currently not exposing the connectionName parameter over the public API. The reason is that
+        // functions already supports loading configuration from the settings and we want to avoid cluttering the public
+        // API with more optional parameters. Additionally, adding more optional strings has a high likelihood of
+        // clashing with existing string parameters like endpointName or connectionString. This means the connection name
+        // is currently only supported over the attribute which make things more aligned with how the ServiceBusTriggerAttribute
+        // works.
         static void RegisterEndpointFactory(
             IHostBuilder hostBuilder,
             string endpointName,
