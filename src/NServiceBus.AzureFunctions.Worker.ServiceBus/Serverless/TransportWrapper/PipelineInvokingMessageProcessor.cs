@@ -84,7 +84,7 @@
         public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         // No-op because the rate at which Azure Functions pushes messages to the pipeline can't be controlled.
-        public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
+        public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
