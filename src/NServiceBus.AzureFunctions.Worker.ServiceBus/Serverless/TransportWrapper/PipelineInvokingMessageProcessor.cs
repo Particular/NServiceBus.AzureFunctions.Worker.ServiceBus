@@ -28,6 +28,7 @@
             var messageId = serviceBusReceivedMessage.GetMessageId();
             var body = serviceBusReceivedMessage.GetBody();
             var contextBag = new ContextBag();
+            contextBag.Set(serviceBusReceivedMessage);
 
             try
             {
