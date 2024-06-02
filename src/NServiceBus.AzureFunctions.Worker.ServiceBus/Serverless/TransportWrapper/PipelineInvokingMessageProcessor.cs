@@ -29,6 +29,7 @@
             var messageId = message.GetMessageId();
             var body = message.GetBody();
             var contextBag = new ContextBag();
+            // Azure Service Bus transport also makes the incoming message available. We can do the same narrow the gap
             contextBag.Set(message);
 
             try
