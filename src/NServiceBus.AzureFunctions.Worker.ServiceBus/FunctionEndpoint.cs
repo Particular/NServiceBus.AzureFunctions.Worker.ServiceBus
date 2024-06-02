@@ -30,7 +30,7 @@
             await InitializeEndpointIfNecessary(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await messageProcessor.Process(message, messageActions, NoTransactionStrategy.Instance, cancellationToken)
+            await messageProcessor.Process(message, messageActions, cancellationToken)
                 .ConfigureAwait(false);
         }
 

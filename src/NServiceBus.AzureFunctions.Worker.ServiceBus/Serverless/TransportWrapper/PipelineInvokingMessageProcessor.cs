@@ -7,6 +7,7 @@
     using Microsoft.Azure.Functions.Worker;
     using NServiceBus.Extensibility;
     using Transport;
+    using Transport.AzureServiceBus;
 
     class PipelineInvokingMessageProcessor(IMessageReceiver baseTransportReceiver) : IMessageReceiver, IMessageProcessor
     {
@@ -23,7 +24,6 @@
 
         public async Task Process(ServiceBusReceivedMessage message,
             ServiceBusMessageActions messageActions,
-            ITransactionStrategy transactionStrategy,
             CancellationToken cancellationToken = default)
         {
             var messageId = message.GetMessageId();
@@ -33,21 +33,12 @@
 
             try
             {
-                using var transaction = transactionStrategy.CreateTransaction();
-                var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                var messageContext = new MessageContext(
-                    messageId,
-                    message.GetNServiceBusHeaders(),
-                    body,
-                    transportTransaction,
-                    ReceiveAddress,
-                    contextBag);
+                using var azureServiceBusTransportTransaction = new AzureServiceBusTransportTransaction();
+                var messageContext = CreateMessageContext(message, messageId, body, azureServiceBusTransportTransaction.TransportTransaction, contextBag);
 
                 await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
-                await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
-
-                transaction?.Commit();
+                azureServiceBusTransportTransaction.Commit();
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -55,31 +46,28 @@
             }
             catch (Exception exception)
             {
-                using var transaction = transactionStrategy.CreateTransaction();
-                var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                var errorContext = new ErrorContext(
-                    exception,
-                    message.GetNServiceBusHeaders(),
-                    messageId,
-                    body,
-                    transportTransaction,
-                    message.DeliveryCount,
-                    ReceiveAddress,
-                    contextBag);
+                using var azureServiceBusTransportTransaction = new AzureServiceBusTransportTransaction();
+                var errorContext = CreateErrorContext(message, exception, messageId, body, azureServiceBusTransportTransaction.TransportTransaction, contextBag);
 
                 var errorHandleResult = await onError.Invoke(errorContext, cancellationToken).ConfigureAwait(false);
 
                 if (errorHandleResult == ErrorHandleResult.Handled)
                 {
-                    await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
-
-                    transaction?.Commit();
+                    azureServiceBusTransportTransaction.Commit();
                     return;
                 }
 
                 throw;
             }
         }
+
+        ErrorContext CreateErrorContext(ServiceBusReceivedMessage message, Exception exception, string messageId,
+            BinaryData body, TransportTransaction transportTransaction, ContextBag contextBag) =>
+            new(exception, message.GetNServiceBusHeaders(), messageId, body, transportTransaction, message.DeliveryCount, ReceiveAddress, contextBag);
+
+        MessageContext CreateMessageContext(ServiceBusReceivedMessage message, string messageId, BinaryData body,
+            TransportTransaction transportTransaction, ContextBag contextBag) =>
+            new(messageId, message.GetNServiceBusHeaders(), body, transportTransaction, ReceiveAddress, contextBag);
 
         public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

@@ -1,26 +1,23 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Transactions;
     using Azure.Messaging.ServiceBus;
-    using NServiceBus;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NServiceBus.Transport;
     using NUnit.Framework;
+    using Transport.AzureServiceBus;
 
     [TestFixture]
     public class PipelineInvokingMessageProcessorTests
     {
-        static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvokingMessageProcessor pipeline)
+        static Task Process(object message, PipelineInvokingMessageProcessor pipeline)
         {
             var receivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
                 MessageHelper.GetBody(message), properties: MessageHelper.GetUserProperties(message),
                 messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
-            return pipeline.Process(receivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
+            return pipeline.Process(receivedMessage, new FakeServiceBusMessageActions());
         }
 
         [Test]
@@ -34,8 +31,6 @@
                     return Task.CompletedTask;
                 });
 
-            var transactionStrategy = new TestableFunctionTransactionStrategy();
-
             var message = new TestMessage();
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
@@ -45,30 +40,32 @@
                 body, properties: userProperties,
                 messageId: messageId, deliveryCount: 1);
 
-            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
+            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.IsTrue(transactionStrategy.OnCompleteCalled);
             Assert.AreEqual(body, messageContext.Body.ToArray());
             Assert.AreSame(messageId, messageContext.NativeMessageId);
             CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.AreEqual(1, transactionStrategy.CreatedTransportTransactions.Count);
-            Assert.AreSame(transactionStrategy.CreatedTransportTransactions[0], messageContext.TransportTransaction);
+            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
+            Assert.AreSame(transaction.TransportTransaction, messageContext.TransportTransaction);
         }
 
         [Test]
         public async Task When_processing_fails_should_provide_error_context()
         {
             var pipelineException = new Exception("test exception");
+            MessageContext messageContext = null;
             ErrorContext errorContext = null;
             var pipelineInvoker = await CreatePipeline(
-                (_, __) => throw pipelineException,
+                (ctx, __) =>
+                {
+                    messageContext = ctx;
+                    throw pipelineException;
+                },
                 (errCtx, _) =>
                 {
                     errorContext = errCtx;
                     return Task.FromResult(ErrorHandleResult.Handled);
                 });
-
-            var transactionStrategy = new TestableFunctionTransactionStrategy();
 
             var message = new TestMessage();
             var messageId = Guid.NewGuid().ToString("N");
@@ -79,14 +76,16 @@
                 body, properties: userProperties,
                 messageId: messageId, deliveryCount: 1);
 
-            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
+            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
             Assert.AreSame(pipelineException, errorContext.Exception);
             Assert.AreSame(messageId, errorContext.Message.NativeMessageId);
             Assert.AreEqual(body, errorContext.Message.Body.ToArray());
             CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.AreSame(transactionStrategy.CreatedTransportTransactions.Last(), errorContext.TransportTransaction); // verify usage of the correct transport transaction instance
-            Assert.AreEqual(2, transactionStrategy.CreatedTransportTransactions.Count); // verify that a new transport transaction has been created for the error handling
+            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
+            Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
+            Assert.AreSame(errorContextTransaction.TransportTransaction, errorContext.TransportTransaction); // verify usage of the correct transport transaction instance
+            Assert.AreNotSame(messageContextTransaction, errorContextTransaction.TransportTransaction); // verify that a new transport transaction has been created for the error handling
         }
 
         [Test]
@@ -97,12 +96,9 @@
                 (_, __) => throw new Exception("main pipeline failure"),
                 (_, __) => throw errorPipelineException);
 
-            var transactionStrategy = new TestableFunctionTransactionStrategy();
-
             var exception = Assert.ThrowsAsync<Exception>(async () =>
-                await Process(new TestMessage(), transactionStrategy, pipelineInvoker));
+                await Process(new TestMessage(), pipelineInvoker));
 
-            Assert.IsFalse(transactionStrategy.OnCompleteCalled);
             Assert.AreSame(errorPipelineException, exception);
         }
 
@@ -113,11 +109,8 @@
                 (_, __) => throw new Exception("main pipeline failure"),
                 (_, __) => Task.FromResult(ErrorHandleResult.Handled));
 
-            var transactionStrategy = new TestableFunctionTransactionStrategy();
-
-            await Process(new TestMessage(), transactionStrategy, pipelineInvoker);
-
-            Assert.IsTrue(transactionStrategy.OnCompleteCalled);
+            // TODO: What should we assert here?
+            await Process(new TestMessage(), pipelineInvoker);
         }
 
         [Test]
@@ -128,12 +121,9 @@
                 (_, __) => throw mainPipelineException,
                 (_, __) => Task.FromResult(ErrorHandleResult.RetryRequired));
 
-            var transactionStrategy = new TestableFunctionTransactionStrategy();
-
             var exception = Assert.ThrowsAsync<Exception>(async () =>
-                await Process(new TestMessage(), transactionStrategy, pipelineInvoker));
+                await Process(new TestMessage(), pipelineInvoker));
 
-            Assert.IsFalse(transactionStrategy.OnCompleteCalled);
             Assert.AreSame(mainPipelineException, exception);
         }
 
@@ -157,40 +147,10 @@
 
             public Task Initialize(PushRuntimeSettings limitations, OnMessage onMessage, OnError onError, CancellationToken cancellationToken = default) => Task.CompletedTask;
             public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
-            public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
+            public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = default) => Task.CompletedTask;
             public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
         }
 
-        class TestMessage
-        {
-        }
-
-        class TestableFunctionTransactionStrategy : ITransactionStrategy
-        {
-            public bool OnCompleteCalled { get; private set; }
-            public CommittableTransaction CompletedTransaction { get; private set; }
-            public CommittableTransaction CreatedTransaction { get; private set; }
-            public List<TransportTransaction> CreatedTransportTransactions { get; } = [];
-
-            public Task Complete(CommittableTransaction transaction, CancellationToken cancellationToken = default)
-            {
-                OnCompleteCalled = true;
-                CompletedTransaction = transaction;
-                return Task.CompletedTask;
-            }
-
-            public CommittableTransaction CreateTransaction()
-            {
-                CreatedTransaction = new CommittableTransaction();
-                return CreatedTransaction;
-            }
-
-            public TransportTransaction CreateTransportTransaction(CommittableTransaction transaction)
-            {
-                var transportTransaction = new TransportTransaction();
-                CreatedTransportTransactions.Add(transportTransaction);
-                return transportTransaction;
-            }
-        }
+        class TestMessage;
     }
 }

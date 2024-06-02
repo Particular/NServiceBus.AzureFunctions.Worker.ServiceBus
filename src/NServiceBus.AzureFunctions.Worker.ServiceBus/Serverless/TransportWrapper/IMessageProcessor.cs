@@ -9,7 +9,6 @@
     {
         Task Process(ServiceBusReceivedMessage message,
             ServiceBusMessageActions messageActions,
-            ITransactionStrategy transactionStrategy,
             CancellationToken cancellationToken = default);
     }
 }
