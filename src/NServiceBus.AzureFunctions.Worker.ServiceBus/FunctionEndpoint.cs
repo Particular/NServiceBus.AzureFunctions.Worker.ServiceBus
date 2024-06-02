@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using AzureFunctions.Worker.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
 
@@ -21,14 +22,7 @@
         }
 
         /// <inheritdoc />
-        public async Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            FunctionContext functionContext,
+        public async Task Process(ServiceBusReceivedMessage serviceBusReceivedMessage, FunctionContext functionContext,
             CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
@@ -36,9 +30,23 @@
             await InitializeEndpointIfNecessary(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await messageProcessor.Process(body, userProperties, messageId, deliveryCount, replyTo, correlationId, NoTransactionStrategy.Instance, cancellationToken)
+            await messageProcessor.Process(serviceBusReceivedMessage, NoTransactionStrategy.Instance, cancellationToken)
                 .ConfigureAwait(false);
         }
+
+        /// <inheritdoc />
+        public Task Process(
+            byte[] body,
+            IDictionary<string, object> userProperties,
+            string messageId,
+            int deliveryCount,
+            string replyTo,
+            string correlationId,
+            FunctionContext functionContext,
+            CancellationToken cancellationToken = default) =>
+            Process(ServiceBusModelFactory.ServiceBusReceivedMessage(BinaryData.FromBytes(body),
+                properties: userProperties, messageId: messageId, deliveryCount: deliveryCount,
+                correlationId: correlationId, replyTo: replyTo), functionContext, cancellationToken);
 
         internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken = default)
         {

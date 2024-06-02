@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -13,6 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus.Tests;
     using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
@@ -123,15 +125,10 @@
                     }
 
                     var functionContext = new FakeFunctionContext { InstanceServices = host.Services };
-                    await endpoint.Process(
-                        MessageHelper.GetBody(message.Body),
-                        userProperties,
-                        Guid.NewGuid().ToString("N"),
-                        1,
-                        null,
-                        string.Empty,
-                        functionContext,
-                        cancellationToken);
+                    var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+                        MessageHelper.GetBody(message.Body), properties: userProperties,
+                        messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
+                    await endpoint.Process(serviceBusReceivedMessage, functionContext, cancellationToken);
                 }
             }
 

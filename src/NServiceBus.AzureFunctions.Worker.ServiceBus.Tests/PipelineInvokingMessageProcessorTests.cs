@@ -6,26 +6,22 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
+    using Azure.Messaging.ServiceBus;
     using NServiceBus;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus.Tests;
     using NServiceBus.Transport;
     using NUnit.Framework;
 
     [TestFixture]
     public class PipelineInvokingMessageProcessorTests
-
     {
         static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvokingMessageProcessor pipeline)
         {
-            return pipeline.Process(
-                MessageHelper.GetBody(message),
-                MessageHelper.GetUserProperties(message),
-                Guid.NewGuid().ToString("N"),
-                1,
-                null,
-                null,
-                transactionStrategy,
-                CancellationToken.None);
+            var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+                MessageHelper.GetBody(message), properties: MessageHelper.GetUserProperties(message),
+                messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
+            return pipeline.Process(serviceBusReceivedMessage, transactionStrategy);
         }
 
         [Test]
@@ -45,15 +41,12 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await pipelineInvoker.Process(
-                body,
-                userProperties,
-                messageId,
-                1,
-                null,
-                null,
-                transactionStrategy,
-                CancellationToken.None);
+
+            var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+                body, properties: userProperties,
+                messageId: messageId, deliveryCount: 1);
+
+            await pipelineInvoker.Process(serviceBusReceivedMessage, transactionStrategy);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
             Assert.AreEqual(body, messageContext.Body.ToArray());
@@ -82,15 +75,12 @@
             var messageId = Guid.NewGuid().ToString("N");
             var body = MessageHelper.GetBody(message);
             var userProperties = MessageHelper.GetUserProperties(message);
-            await pipelineInvoker.Process(
-                body,
-                userProperties,
-                messageId,
-                1,
-                null,
-                null,
-                transactionStrategy,
-                CancellationToken.None);
+
+            var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+                body, properties: userProperties,
+                messageId: messageId, deliveryCount: 1);
+
+            await pipelineInvoker.Process(serviceBusReceivedMessage, transactionStrategy);
 
             Assert.AreSame(pipelineException, errorContext.Exception);
             Assert.AreSame(messageId, errorContext.Message.NativeMessageId);

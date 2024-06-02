@@ -1,9 +1,9 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using NServiceBus.Extensibility;
     using Transport;
 
@@ -21,37 +21,31 @@
         }
 
         public async Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
+            ServiceBusReceivedMessage serviceBusReceivedMessage,
             ITransactionStrategy transactionStrategy,
             CancellationToken cancellationToken = default)
         {
-            body ??= Array.Empty<byte>(); // might be null
-            messageId ??= Guid.NewGuid().ToString("N");
+            var messageId = serviceBusReceivedMessage.GetMessageId();
+            var body = serviceBusReceivedMessage.GetBody();
+            var contextBag = new ContextBag();
 
             try
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
-                {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var messageContext = new MessageContext(
-                        messageId,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        body,
-                        transportTransaction,
-                        ReceiveAddress,
-                        new ContextBag());
+                using var transaction = transactionStrategy.CreateTransaction();
+                var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
+                var messageContext = new MessageContext(
+                    messageId,
+                    serviceBusReceivedMessage.GetNServiceBusHeaders(),
+                    body,
+                    transportTransaction,
+                    ReceiveAddress,
+                    contextBag);
 
-                    await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
+                await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
-                    await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
+                await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
 
-                    transaction?.Commit();
-                }
+                transaction?.Commit();
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -59,55 +53,29 @@
             }
             catch (Exception exception)
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
+                using var transaction = transactionStrategy.CreateTransaction();
+                var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
+                var errorContext = new ErrorContext(
+                    exception,
+                    serviceBusReceivedMessage.GetNServiceBusHeaders(),
+                    messageId,
+                    body,
+                    transportTransaction,
+                    serviceBusReceivedMessage.DeliveryCount,
+                    ReceiveAddress,
+                    contextBag);
+
+                var errorHandleResult = await onError.Invoke(errorContext, cancellationToken).ConfigureAwait(false);
+
+                if (errorHandleResult == ErrorHandleResult.Handled)
                 {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var errorContext = new ErrorContext(
-                        exception,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        messageId,
-                        body,
-                        transportTransaction,
-                        deliveryCount,
-                        ReceiveAddress,
-                        new ContextBag());
+                    await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
 
-                    var errorHandleResult = await onError.Invoke(errorContext, cancellationToken).ConfigureAwait(false);
-
-                    if (errorHandleResult == ErrorHandleResult.Handled)
-                    {
-                        await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
-
-                        transaction?.Commit();
-                        return;
-                    }
-
-                    throw;
-                }
-            }
-
-            static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, object> userProperties, string replyTo, string correlationId)
-            {
-                var headers = new Dictionary<string, string>(userProperties.Count);
-
-                foreach (var userProperty in userProperties)
-                {
-                    headers[userProperty.Key] = userProperty.Value?.ToString();
+                    transaction?.Commit();
+                    return;
                 }
 
-                headers.Remove("NServiceBus.Transport.Encoding");
-
-                if (!string.IsNullOrWhiteSpace(replyTo))
-                {
-                    headers.TryAdd(Headers.ReplyToAddress, replyTo);
-                }
-
-                if (!string.IsNullOrWhiteSpace(correlationId))
-                {
-                    headers.TryAdd(Headers.CorrelationId, correlationId);
-                }
-
-                return headers;
+                throw;
             }
         }
 

@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
 
     /// <summary>
@@ -12,6 +14,18 @@
     /// </summary>
     public interface IFunctionEndpoint
     {
+        /// <summary>
+        /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
+        /// </summary>
+        Task Process(
+            ServiceBusReceivedMessage serviceBusReceivedMessage,
+            FunctionContext functionContext,
+            CancellationToken cancellationToken = default) =>
+            Process(serviceBusReceivedMessage.Body.ToArray(), serviceBusReceivedMessage.ApplicationProperties.ToDictionary(),
+                serviceBusReceivedMessage.MessageId, serviceBusReceivedMessage.DeliveryCount,
+                serviceBusReceivedMessage.ReplyTo, serviceBusReceivedMessage.CorrelationId, functionContext,
+                cancellationToken);
+
         /// <summary>
         /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
         /// </summary>
