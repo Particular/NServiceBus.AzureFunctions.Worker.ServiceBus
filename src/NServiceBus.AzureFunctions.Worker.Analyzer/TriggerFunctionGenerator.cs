@@ -123,9 +123,9 @@ public class FunctionEndpointTrigger
 
         [Function(""{syntaxReceiver.triggerFunctionName}"")]
         public async Task Run(
-            [ServiceBusTrigger(""{syntaxReceiver.endpointName}""{connectionParam})] ServiceBusReceivedMessage message, FunctionContext context, CancellationToken cancellationToken)
+            [ServiceBusTrigger(""{syntaxReceiver.endpointName}""{connectionParam})] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
         {{
-            await endpoint.Process(message, context, cancellationToken);
+            await endpoint.Process(message, messageActions, context, cancellationToken);
         }}
 }}";
             context.AddSource("NServiceBus__FunctionEndpointTrigger", SourceText.From(source, Encoding.UTF8));

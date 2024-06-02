@@ -18,12 +18,13 @@
         /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
         /// </summary>
         Task Process(
-            ServiceBusReceivedMessage serviceBusReceivedMessage,
+            ServiceBusReceivedMessage message,
+            ServiceBusMessageActions messageActions,
             FunctionContext functionContext,
             CancellationToken cancellationToken = default) =>
-            Process(serviceBusReceivedMessage.Body.ToArray(), serviceBusReceivedMessage.ApplicationProperties.ToDictionary(),
-                serviceBusReceivedMessage.MessageId, serviceBusReceivedMessage.DeliveryCount,
-                serviceBusReceivedMessage.ReplyTo, serviceBusReceivedMessage.CorrelationId, functionContext,
+            Process(message.Body.ToArray(), message.ApplicationProperties.ToDictionary(),
+                message.MessageId, message.DeliveryCount,
+                message.ReplyTo, message.CorrelationId, functionContext,
                 cancellationToken);
 
         /// <summary>

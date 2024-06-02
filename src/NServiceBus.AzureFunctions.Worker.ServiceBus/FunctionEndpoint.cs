@@ -22,7 +22,7 @@
         }
 
         /// <inheritdoc />
-        public async Task Process(ServiceBusReceivedMessage serviceBusReceivedMessage, FunctionContext functionContext,
+        public async Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext,
             CancellationToken cancellationToken = default)
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
@@ -30,7 +30,7 @@
             await InitializeEndpointIfNecessary(CancellationToken.None)
                 .ConfigureAwait(false);
 
-            await messageProcessor.Process(serviceBusReceivedMessage, NoTransactionStrategy.Instance, cancellationToken)
+            await messageProcessor.Process(message, messageActions, NoTransactionStrategy.Instance, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -46,7 +46,7 @@
             CancellationToken cancellationToken = default) =>
             Process(ServiceBusModelFactory.ServiceBusReceivedMessage(BinaryData.FromBytes(body),
                 properties: userProperties, messageId: messageId, deliveryCount: deliveryCount,
-                correlationId: correlationId, replyTo: replyTo), functionContext, cancellationToken);
+                correlationId: correlationId, replyTo: replyTo), default, functionContext, cancellationToken);
 
         internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken = default)
         {

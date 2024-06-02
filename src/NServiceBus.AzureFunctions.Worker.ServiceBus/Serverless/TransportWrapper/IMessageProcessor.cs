@@ -3,11 +3,12 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Microsoft.Azure.Functions.Worker;
 
     interface IMessageProcessor
     {
-        Task Process(
-            ServiceBusReceivedMessage serviceBusReceivedMessage,
+        Task Process(ServiceBusReceivedMessage message,
+            ServiceBusMessageActions messageActions,
             ITransactionStrategy transactionStrategy,
             CancellationToken cancellationToken = default);
     }

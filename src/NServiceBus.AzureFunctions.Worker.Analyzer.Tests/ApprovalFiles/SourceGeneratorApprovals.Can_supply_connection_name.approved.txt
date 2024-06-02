@@ -18,8 +18,8 @@ public class FunctionEndpointTrigger
 
         [Function("NServiceBusFunctionEndpointTrigger-endpoint")]
         public async Task Run(
-            [ServiceBusTrigger("endpoint", Connection="FooBar")] ServiceBusReceivedMessage message, FunctionContext context, CancellationToken cancellationToken)
+            [ServiceBusTrigger("endpoint", Connection="FooBar")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
         {
-            await endpoint.Process(message, context, cancellationToken);
+            await endpoint.Process(message, messageActions, context, cancellationToken);
         }
 }

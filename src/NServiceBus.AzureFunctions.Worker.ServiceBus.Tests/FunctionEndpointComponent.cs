@@ -125,10 +125,11 @@
                     }
 
                     var functionContext = new FakeFunctionContext { InstanceServices = host.Services };
+                    var messageActions = new FakeServiceBusMessageActions();
                     var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
                         MessageHelper.GetBody(message.Body), properties: userProperties,
                         messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
-                    await endpoint.Process(serviceBusReceivedMessage, functionContext, cancellationToken);
+                    await endpoint.Process(serviceBusReceivedMessage, messageActions, functionContext, cancellationToken);
                 }
             }
 

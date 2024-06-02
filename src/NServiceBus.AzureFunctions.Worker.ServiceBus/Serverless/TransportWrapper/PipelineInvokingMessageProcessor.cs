@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Microsoft.Azure.Functions.Worker;
     using NServiceBus.Extensibility;
     using Transport;
 
@@ -20,15 +21,15 @@
                 cancellationToken) ?? Task.CompletedTask;
         }
 
-        public async Task Process(
-            ServiceBusReceivedMessage serviceBusReceivedMessage,
+        public async Task Process(ServiceBusReceivedMessage message,
+            ServiceBusMessageActions messageActions,
             ITransactionStrategy transactionStrategy,
             CancellationToken cancellationToken = default)
         {
-            var messageId = serviceBusReceivedMessage.GetMessageId();
-            var body = serviceBusReceivedMessage.GetBody();
+            var messageId = message.GetMessageId();
+            var body = message.GetBody();
             var contextBag = new ContextBag();
-            contextBag.Set(serviceBusReceivedMessage);
+            contextBag.Set(message);
 
             try
             {
@@ -36,7 +37,7 @@
                 var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
                 var messageContext = new MessageContext(
                     messageId,
-                    serviceBusReceivedMessage.GetNServiceBusHeaders(),
+                    message.GetNServiceBusHeaders(),
                     body,
                     transportTransaction,
                     ReceiveAddress,
@@ -58,11 +59,11 @@
                 var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
                 var errorContext = new ErrorContext(
                     exception,
-                    serviceBusReceivedMessage.GetNServiceBusHeaders(),
+                    message.GetNServiceBusHeaders(),
                     messageId,
                     body,
                     transportTransaction,
-                    serviceBusReceivedMessage.DeliveryCount,
+                    message.DeliveryCount,
                     ReceiveAddress,
                     contextBag);
 

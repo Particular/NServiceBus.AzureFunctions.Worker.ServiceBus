@@ -18,10 +18,10 @@
     {
         static Task Process(object message, ITransactionStrategy transactionStrategy, PipelineInvokingMessageProcessor pipeline)
         {
-            var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+            var receivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
                 MessageHelper.GetBody(message), properties: MessageHelper.GetUserProperties(message),
                 messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
-            return pipeline.Process(serviceBusReceivedMessage, transactionStrategy);
+            return pipeline.Process(receivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
         }
 
         [Test]
@@ -46,7 +46,7 @@
                 body, properties: userProperties,
                 messageId: messageId, deliveryCount: 1);
 
-            await pipelineInvoker.Process(serviceBusReceivedMessage, transactionStrategy);
+            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
 
             Assert.IsTrue(transactionStrategy.OnCompleteCalled);
             Assert.AreEqual(body, messageContext.Body.ToArray());
@@ -80,7 +80,7 @@
                 body, properties: userProperties,
                 messageId: messageId, deliveryCount: 1);
 
-            await pipelineInvoker.Process(serviceBusReceivedMessage, transactionStrategy);
+            await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions(), transactionStrategy);
 
             Assert.AreSame(pipelineException, errorContext.Exception);
             Assert.AreSame(messageId, errorContext.Message.NativeMessageId);
