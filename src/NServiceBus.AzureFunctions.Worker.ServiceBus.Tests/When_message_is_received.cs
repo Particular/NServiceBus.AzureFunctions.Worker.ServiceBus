@@ -33,20 +33,10 @@
 
         class FunctionHandler : FunctionEndpointComponent
         {
-            public FunctionHandler(object triggerMessage)
+            public FunctionHandler(object triggerMessage) => AddTestMessage(triggerMessage);
+
+            public class HappyDayMessageHandler(Context testContext) : IHandleMessages<HappyDayMessage>
             {
-                AddTestMessage(triggerMessage);
-            }
-
-            public class HappyDayMessageHandler : IHandleMessages<HappyDayMessage>
-            {
-                Context testContext;
-
-                public HappyDayMessageHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(HappyDayMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerInvoked();

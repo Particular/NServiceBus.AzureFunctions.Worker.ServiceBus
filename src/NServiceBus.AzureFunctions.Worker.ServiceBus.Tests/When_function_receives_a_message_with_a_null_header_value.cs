@@ -37,20 +37,10 @@
 
         class FunctionHandler : FunctionEndpointComponent
         {
-            public FunctionHandler(string headerKey)
+            public FunctionHandler(string headerKey) => AddTestMessage(new MessageWithNullHeader(), new Dictionary<string, object> { { headerKey, null } });
+
+            public class MessageWithNullHeaderHandler(Context testContext) : IHandleMessages<MessageWithNullHeader>
             {
-                AddTestMessage(new MessageWithNullHeader(), new Dictionary<string, object> { { headerKey, null } });
-            }
-
-            public class MessageWithNullHeaderHandler : IHandleMessages<MessageWithNullHeader>
-            {
-                Context testContext;
-
-                public MessageWithNullHeaderHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(MessageWithNullHeader message, IMessageHandlerContext context)
                 {
                     testContext.Headers = context.MessageHeaders;

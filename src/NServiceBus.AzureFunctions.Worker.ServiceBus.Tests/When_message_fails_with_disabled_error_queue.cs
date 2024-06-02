@@ -34,10 +34,7 @@
 
             public class FailingHandler : IHandleMessages<TriggerMessage>
             {
-                public Task Handle(TriggerMessage message, IMessageHandlerContext context)
-                {
-                    throw new SimulatedException();
-                }
+                public Task Handle(TriggerMessage message, IMessageHandlerContext context) => throw new SimulatedException();
             }
         }
 

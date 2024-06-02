@@ -9,14 +9,12 @@
     public class When_sending_message
     {
         [Test]
-        public async Task Should_send_message_to_target_queue()
-        {
+        public async Task Should_send_message_to_target_queue() =>
             await Scenario.Define<Context>()
                 .WithEndpoint<ReceivingEndpoint>()
                 .WithComponent(new SendingFunction(new TriggerMessage()))
                 .Done(c => c.HandlerReceivedMessage)
                 .Run();
-        }
 
         class Context : ScenarioContext
         {
@@ -25,20 +23,10 @@
 
         public class ReceivingEndpoint : EndpointConfigurationBuilder
         {
-            public ReceivingEndpoint()
+            public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
+
+            class OutgoingMessageHandler(Context testContext) : IHandleMessages<FollowupMessage>
             {
-                EndpointSetup<DefaultEndpoint>();
-            }
-
-            class OutgoingMessageHandler : IHandleMessages<FollowupMessage>
-            {
-                Context testContext;
-
-                public OutgoingMessageHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(FollowupMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerReceivedMessage = true;
@@ -49,17 +37,11 @@
 
         class SendingFunction : FunctionEndpointComponent
         {
-            public SendingFunction(object triggerMessage)
-            {
-                AddTestMessage(triggerMessage);
-            }
+            public SendingFunction(object triggerMessage) => AddTestMessage(triggerMessage);
 
             public class TriggerMessageHandler : IHandleMessages<TriggerMessage>
             {
-                public Task Handle(TriggerMessage message, IMessageHandlerContext context)
-                {
-                    return context.Send(Conventions.EndpointNamingConvention(typeof(ReceivingEndpoint)), new FollowupMessage());
-                }
+                public Task Handle(TriggerMessage message, IMessageHandlerContext context) => context.Send(Conventions.EndpointNamingConvention(typeof(ReceivingEndpoint)), new FollowupMessage());
             }
         }
 

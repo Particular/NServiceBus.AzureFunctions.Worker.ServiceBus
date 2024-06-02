@@ -10,14 +10,12 @@
     public class When_using_sendonly
     {
         [Test]
-        public async Task Should_send_messages()
-        {
+        public async Task Should_send_messages() =>
             await Scenario.Define<Context>()
                 .WithEndpoint<ReceivingEndpoint>()
                 .WithComponent(new SendOnlyFunction())
                 .Done(c => c.HandlerReceivedMessage)
                 .Run();
-        }
 
         class Context : ScenarioContext
         {
@@ -28,12 +26,8 @@
         {
             public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
 
-            public class TestMessageHandler : IHandleMessages<TestMessage>
+            public class TestMessageHandler(Context testContext) : IHandleMessages<TestMessage>
             {
-                readonly Context testContext;
-
-                public TestMessageHandler(Context testContext) => this.testContext = testContext;
-
                 public Task Handle(TestMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerReceivedMessage = true;

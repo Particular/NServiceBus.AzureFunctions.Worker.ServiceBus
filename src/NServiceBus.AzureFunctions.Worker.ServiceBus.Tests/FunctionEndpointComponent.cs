@@ -29,14 +29,12 @@
 
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
 
-        public void AddTestMessage(object body, IDictionary<string, object> userProperties = null)
-        {
+        public void AddTestMessage(object body, IDictionary<string, object> userProperties = null) =>
             testMessages.Add(new TestMessage
             {
                 Body = body,
                 UserProperties = userProperties ?? new Dictionary<string, object>()
             });
-        }
 
         protected virtual Task OnStart(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => Task.CompletedTask;
 
@@ -44,24 +42,15 @@
 
         IList<TestMessage> testMessages = [];
 
-        class FunctionRunner : ComponentRunner
+        class FunctionRunner(
+            IList<TestMessage> messages,
+            Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+            Func<IFunctionEndpoint, FunctionContext, Task> onStart,
+            ScenarioContext scenarioContext,
+            Type functionComponentType)
+            : ComponentRunner
         {
-            public FunctionRunner(
-                IList<TestMessage> messages,
-                Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
-                Func<IFunctionEndpoint, FunctionContext, Task> onStart,
-                ScenarioContext scenarioContext,
-                Type functionComponentType)
-            {
-                this.messages = messages;
-                this.configurationCustomization = configurationCustomization;
-                this.onStart = onStart;
-                this.scenarioContext = scenarioContext;
-                this.functionComponentType = functionComponentType;
-                Name = Conventions.EndpointNamingConvention(functionComponentType);
-            }
-
-            public override string Name { get; }
+            public override string Name { get; } = Conventions.EndpointNamingConvention(functionComponentType);
 
             public override async Task Start(CancellationToken cancellationToken = default)
             {
@@ -142,11 +131,6 @@
                 }
             }
 
-            readonly Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization;
-            readonly Func<IFunctionEndpoint, FunctionContext, Task> onStart;
-            readonly ScenarioContext scenarioContext;
-            readonly Type functionComponentType;
-            IList<TestMessage> messages;
             FunctionEndpoint endpoint;
             IHost host;
         }
