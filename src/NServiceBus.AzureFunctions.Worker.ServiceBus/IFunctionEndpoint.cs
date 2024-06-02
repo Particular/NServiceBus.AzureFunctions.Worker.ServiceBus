@@ -30,6 +30,7 @@
         /// <summary>
         /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
         /// </summary>
+        [ObsoleteEx(Message = "Change the function signature to accept a ServiceBusReceivedMessage and the ServiceBusMessageActions instead of binding to individual elements of the ServiceBusReceivedMessage.", TreatAsErrorFromVersion = "5.0.0", RemoveInVersion = "6.0.0", ReplacementTypeOrMember = "Process(ServiceBusReceiveMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default)")]
         Task Process(
             byte[] body,
             IDictionary<string, object> userProperties,
