@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -14,8 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
-    using NServiceBus.AzureFunctions.Worker.ServiceBus.Tests;
-    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
+    using Conventions = AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {

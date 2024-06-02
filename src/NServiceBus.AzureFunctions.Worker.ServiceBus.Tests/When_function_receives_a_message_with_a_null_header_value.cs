@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Collections.Generic;
     using System.Threading;

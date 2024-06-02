@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,6 @@
     using Azure.Messaging.ServiceBus;
     using NServiceBus;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
-    using NServiceBus.AzureFunctions.Worker.ServiceBus.Tests;
     using NServiceBus.Transport;
     using NUnit.Framework;
 

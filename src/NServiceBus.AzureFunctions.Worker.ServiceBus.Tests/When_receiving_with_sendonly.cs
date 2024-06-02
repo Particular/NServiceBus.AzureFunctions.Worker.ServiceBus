@@ -1,10 +1,10 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
-    using NServiceBus.AcceptanceTesting;
-    using NServiceBus;
-    using NUnit.Framework;
     using System.Threading.Tasks;
+    using NServiceBus;
+    using NServiceBus.AcceptanceTesting;
+    using NUnit.Framework;
 
     public class When_receiving_with_sendonly
     {

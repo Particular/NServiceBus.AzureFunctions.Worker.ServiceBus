@@ -1,10 +1,10 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
-    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
+    using Conventions = AcceptanceTesting.Customization.Conventions;
 
     public class When_sending_message
     {

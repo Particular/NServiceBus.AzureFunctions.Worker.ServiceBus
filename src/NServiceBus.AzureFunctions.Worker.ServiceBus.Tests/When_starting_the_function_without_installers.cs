@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -7,7 +7,7 @@
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
     using NServiceBus.Configuration.AdvancedExtensibility;
     using NUnit.Framework;
-    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
+    using Conventions = AcceptanceTesting.Customization.Conventions;
 
     [TestFixture]
     public class When_starting_the_function_without_installers

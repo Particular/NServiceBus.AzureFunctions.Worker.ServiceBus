@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using Microsoft.Azure.Functions.Worker;
