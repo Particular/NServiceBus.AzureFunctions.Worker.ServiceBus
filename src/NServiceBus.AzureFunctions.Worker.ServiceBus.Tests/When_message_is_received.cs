@@ -2,6 +2,7 @@
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
@@ -17,11 +18,13 @@
                 .Run();
 
             Assert.AreEqual(1, context.HandlerInvocationCount);
+            Assert.That(context.ReceivedMessageAvailable, Is.True);
         }
 
         public class Context : ScenarioContext
         {
             public int HandlerInvocationCount => count;
+            public bool ReceivedMessageAvailable { get; set; }
 
             public void HandlerInvoked() => Interlocked.Increment(ref count);
 
@@ -47,6 +50,7 @@
                 public Task Handle(HappyDayMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerInvoked();
+                    testContext.ReceivedMessageAvailable = context.Extensions.TryGet(out ServiceBusReceivedMessage _);
                     return Task.CompletedTask;
                 }
             }
