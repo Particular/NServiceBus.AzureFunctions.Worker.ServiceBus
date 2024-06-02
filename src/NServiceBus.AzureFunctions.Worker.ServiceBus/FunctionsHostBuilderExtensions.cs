@@ -2,6 +2,7 @@
 {
     using System;
     using System.Reflection;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -81,6 +82,12 @@
             return hostBuilder;
         }
 
+        // We are currently not exposing the connectionName parameter over the public API. The reason is that
+        // functions already supports loading configuration from the settings and we want to avoid cluttering the public
+        // API with more optional parameters. Additionally, adding more optional strings has a high likelihood of
+        // clashing with existing string parameters like endpointName or connectionString. This means the connection name
+        // is currently only supported over the attribute which make things more aligned with how the ServiceBusTriggerAttribute
+        // works.
         static void RegisterEndpointFactory(
             IHostBuilder hostBuilder,
             string endpointName,
@@ -90,9 +97,10 @@
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;
-                var endpointNameValue = callingAssembly
-                    ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>()
-                    ?.EndpointName;
+                var triggerAttribute = callingAssembly
+                    ?.GetCustomAttribute<NServiceBusTriggerFunctionAttribute>();
+                var endpointNameValue = triggerAttribute?.EndpointName;
+                var connectionName = triggerAttribute?.Connection;
 
                 endpointName ??= configuration.GetValue<string>("ENDPOINT_NAME")
                                  ?? TryResolveBindingExpression()
@@ -107,8 +115,9 @@
                 }
 
                 serviceCollection.AddHostedService<InitializationHost>();
+                serviceCollection.AddAzureClientsCore();
 
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString);
+                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, connectionName);
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 

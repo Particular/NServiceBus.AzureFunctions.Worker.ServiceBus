@@ -5,7 +5,10 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
@@ -14,15 +17,14 @@
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {
-        public Task<ComponentRunner> CreateRunner(RunDescriptor runDescriptor)
-        {
-            return Task.FromResult<ComponentRunner>(
+        public Task<ComponentRunner> CreateRunner(RunDescriptor runDescriptor) =>
+            Task.FromResult<ComponentRunner>(
                 new FunctionRunner(
                     testMessages,
                     CustomizeConfiguration,
+                    OnStartCore,
                     runDescriptor.ScenarioContext,
                     GetType()));
-        }
 
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
 
@@ -35,6 +37,10 @@
             });
         }
 
+        protected virtual Task OnStart(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => Task.CompletedTask;
+
+        Task OnStartCore(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => OnStart(functionEndpoint, functionContext);
+
         IList<TestMessage> testMessages = [];
 
         class FunctionRunner : ComponentRunner
@@ -42,11 +48,13 @@
             public FunctionRunner(
                 IList<TestMessage> messages,
                 Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+                Func<IFunctionEndpoint, FunctionContext, Task> onStart,
                 ScenarioContext scenarioContext,
                 Type functionComponentType)
             {
                 this.messages = messages;
                 this.configurationCustomization = configurationCustomization;
+                this.onStart = onStart;
                 this.scenarioContext = scenarioContext;
                 this.functionComponentType = functionComponentType;
                 Name = Conventions.EndpointNamingConvention(functionComponentType);
@@ -54,51 +62,57 @@
 
             public override string Name { get; }
 
-            public override Task Start(CancellationToken cancellationToken = default)
+            public override async Task Start(CancellationToken cancellationToken = default)
             {
-                var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(Name, null, default);
-                var endpointConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
+                var hostBuilder = Host.CreateDefaultBuilder();
+                hostBuilder.ConfigureServices(services =>
+                {
+                    // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
+                    services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
+                });
+                hostBuilder.UseNServiceBus(Name, (configuration, triggerConfiguration) =>
+                {
+                    var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 
-                endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
+                    endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
 
-                endpointConfiguration.Recoverability()
-                    .Immediate(i => i.NumberOfRetries(0))
-                    .Delayed(d => d.NumberOfRetries(0))
-                    .Failed(c => c
-                        // track messages sent to the error queue to fail the test
-                        .OnMessageSentToErrorQueue((failedMessage, ct) =>
-                        {
-                            scenarioContext.FailedMessages.AddOrUpdate(
-                                Name,
-                                new[] { failedMessage },
-                                (_, fm) =>
-                                {
-                                    var messages = fm.ToList();
-                                    messages.Add(failedMessage);
-                                    return messages;
-                                });
-                            return Task.CompletedTask;
-                        }));
+                    endpointConfiguration.Recoverability()
+                        .Immediate(i => i.NumberOfRetries(0))
+                        .Delayed(d => d.NumberOfRetries(0))
+                        .Failed(c => c
+                            // track messages sent to the error queue to fail the test
+                            .OnMessageSentToErrorQueue((failedMessage, ct) =>
+                            {
+                                scenarioContext.FailedMessages.AddOrUpdate(
+                                    Name,
+                                    new[] { failedMessage },
+                                    (_, fm) =>
+                                    {
+                                        var messages = fm.ToList();
+                                        messages.Add(failedMessage);
+                                        return messages;
+                                    });
+                                return Task.CompletedTask;
+                            }));
 
-                endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
+                    endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
 
-                // enable installers to auto-create the input queue for tests
-                // in real Azure functions the input queue is assumed to exist
-                endpointConfiguration.EnableInstallers();
+                    // enable installers to auto-create the input queue for tests
+                    // in real Azure functions the input queue is assumed to exist
+                    endpointConfiguration.EnableInstallers();
 
-                configurationCustomization(functionEndpointConfiguration);
+                    configurationCustomization(triggerConfiguration);
+                });
 
-                var serviceCollection = new ServiceCollection();
-                var endpointFactory = functionEndpointConfiguration.CreateEndpointFactory(serviceCollection);
+                host = hostBuilder.Build();
+                await host.StartAsync(cancellationToken);
 
-                var serviceProvider = serviceCollection.BuildServiceProvider();
-                endpoint = endpointFactory(serviceProvider);
-
-                return Task.CompletedTask;
+                endpoint = host.Services.GetRequiredService<FunctionEndpoint>();
             }
 
             public override async Task ComponentsStarted(CancellationToken cancellationToken = default)
             {
+                await onStart(endpoint, new FakeFunctionContext { InstanceServices = host.Services });
                 foreach (var message in messages)
                 {
                     var userProperties = MessageHelper.GetUserProperties(message.Body);
@@ -108,7 +122,7 @@
                         userProperties[customUserProperty.Key] = customUserProperty.Value;
                     }
 
-                    var functionContext = new FakeFunctionContext();
+                    var functionContext = new FakeFunctionContext { InstanceServices = host.Services };
                     await endpoint.Process(
                         MessageHelper.GetBody(message.Body),
                         userProperties,
@@ -121,21 +135,23 @@
                 }
             }
 
-            public override Task Stop(CancellationToken cancellationToken = default)
+            public override async Task Stop(CancellationToken cancellationToken = default)
             {
+                await host.StopAsync(cancellationToken);
+
                 if (scenarioContext.FailedMessages.TryGetValue(Name, out var failedMessages))
                 {
                     throw new MessageFailedException(failedMessages.First(), scenarioContext);
                 }
-
-                return base.Stop(cancellationToken);
             }
 
             readonly Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization;
+            readonly Func<IFunctionEndpoint, FunctionContext, Task> onStart;
             readonly ScenarioContext scenarioContext;
             readonly Type functionComponentType;
             IList<TestMessage> messages;
             FunctionEndpoint endpoint;
+            IHost host;
         }
 
         class TestMessage

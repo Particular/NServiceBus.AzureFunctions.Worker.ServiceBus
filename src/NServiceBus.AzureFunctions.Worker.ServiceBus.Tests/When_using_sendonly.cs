@@ -42,22 +42,18 @@
             }
         }
 
-        class SendOnlyFunction : SimpleTriggerFunctionComponent
+        class SendOnlyFunction : FunctionEndpointComponent
         {
-            public SendOnlyFunction()
-            {
+            public SendOnlyFunction() =>
                 CustomizeConfiguration = configuration =>
                 {
                     configuration.AdvancedConfiguration.SendOnly();
 
                     configuration.Routing.RouteToEndpoint(typeof(TestMessage), typeof(ReceivingEndpoint));
                 };
-            }
 
-            public override Task TriggerAction(IFunctionEndpoint endpoint, FunctionContext executionContext)
-            {
-                return endpoint.Send(new TestMessage(), executionContext);
-            }
+            protected override Task OnStart(IFunctionEndpoint endpoint, FunctionContext executionContext)
+                => endpoint.Send(new TestMessage(), executionContext);
         }
 
         class TestMessage : IMessage
