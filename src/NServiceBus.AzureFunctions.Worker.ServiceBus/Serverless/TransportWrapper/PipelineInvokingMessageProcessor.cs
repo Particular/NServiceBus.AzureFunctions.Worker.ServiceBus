@@ -16,7 +16,7 @@
         {
             this.onMessage = onMessage;
             this.onError = onError;
-            return baseTransportReceiver?.Initialize(limitations,
+            return baseTransportReceiver.Initialize(limitations,
                 (_, __) => Task.CompletedTask,
                 (_, __) => Task.FromResult(ErrorHandleResult.Handled),
                 cancellationToken) ?? Task.CompletedTask;
