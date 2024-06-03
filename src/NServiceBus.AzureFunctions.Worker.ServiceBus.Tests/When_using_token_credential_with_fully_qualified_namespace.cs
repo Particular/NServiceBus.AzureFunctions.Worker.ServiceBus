@@ -6,24 +6,25 @@ namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
     using AcceptanceTesting;
     using Azure.Messaging.ServiceBus;
     using NUnit.Framework;
+    using static System.Environment;
 
     public class When_using_token_credential_with_fully_qualified_namespace
     {
         string fullyQualifiedNamespace;
-
         string originalConnectionString;
+        readonly string fullyQualifiedNamespaceStringKey = $"{defaultConnectionStringKey}__fullyQualifiedNamespace";
+        static readonly string defaultConnectionStringKey = ServerlessTransport.DefaultServiceBusConnectionName;
 
         [SetUp]
         public void SetUp()
         {
-            string defaultConnectionStringKey = ServerlessTransport.DefaultServiceBusConnectionName;
-            originalConnectionString = Environment.GetEnvironmentVariable(defaultConnectionStringKey);
+            originalConnectionString = GetEnvironmentVariable(defaultConnectionStringKey);
 
             var connectionStringProperties = ServiceBusConnectionStringProperties.Parse(originalConnectionString);
             fullyQualifiedNamespace = connectionStringProperties.FullyQualifiedNamespace;
 
-            Environment.SetEnvironmentVariable(defaultConnectionStringKey, null, EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable($"{defaultConnectionStringKey}__fullyQualifiedNamespace",
+            SetEnvironmentVariable(defaultConnectionStringKey, null, EnvironmentVariableTarget.Process);
+            SetEnvironmentVariable(fullyQualifiedNamespaceStringKey,
                 fullyQualifiedNamespace, EnvironmentVariableTarget.Process);
         }
 
@@ -31,7 +32,7 @@ namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
         public async Task Should_work()
         {
             Context context = await Scenario.Define<Context>()
-                .WithComponent(new FunctionUsingTokenAuth())
+                .WithComponent(new FunctionUsingTokenCredential())
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
@@ -41,10 +42,9 @@ namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
         [TearDown]
         public void TearDown()
         {
-            string defaultConnectionStringKey = ServerlessTransport.DefaultServiceBusConnectionName;
-            Environment.SetEnvironmentVariable($"{defaultConnectionStringKey}__fullyQualifiedNamespace",
+            SetEnvironmentVariable(fullyQualifiedNamespaceStringKey,
                 fullyQualifiedNamespace, EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName,
+            SetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName,
                 originalConnectionString);
         }
 
@@ -56,11 +56,11 @@ namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
             public void HandlerInvoked() => Interlocked.Increment(ref count);
         }
 
-        class FunctionUsingTokenAuth : FunctionEndpointComponent
+        class FunctionUsingTokenCredential : FunctionEndpointComponent
         {
-            public FunctionUsingTokenAuth() => AddTestMessage(new Message());
+            public FunctionUsingTokenCredential() => AddTestMessage(new Message());
 
-            public class Handler(Context testContext) : IHandleMessages<Message>
+            class Handler(Context testContext) : IHandleMessages<Message>
             {
                 public Task Handle(Message message, IMessageHandlerContext context)
                 {
