@@ -103,14 +103,13 @@
         }
 
         [Test]
-        public async Task When_error_pipeline_handles_error_should_complete_message()
+        public async Task When_error_pipeline_handles_error_should_not_throw()
         {
             var pipelineInvoker = await CreatePipeline(
                 (_, __) => throw new Exception("main pipeline failure"),
                 (_, __) => Task.FromResult(ErrorHandleResult.Handled));
 
-            // TODO: What should we assert here?
-            await Process(new TestMessage(), pipelineInvoker);
+            Assert.DoesNotThrowAsync(async () => await Process(new TestMessage(), pipelineInvoker));
         }
 
         [Test]
