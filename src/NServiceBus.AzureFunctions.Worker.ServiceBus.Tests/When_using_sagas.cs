@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -37,18 +37,11 @@
                 AddTestMessage(new ReadSagaDataValueMessage { CorrelationProperty = correlationProperty });
             }
 
-            public class DemoSaga : Saga<DemoSagaData>,
+            public class DemoSaga(Context testContext) : Saga<DemoSagaData>,
                 IAmStartedByMessages<StartSagaMessage>,
                 IHandleMessages<UpdateSagaMessage>,
                 IHandleMessages<ReadSagaDataValueMessage>
             {
-                Context testContext;
-
-                public DemoSaga(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 protected override void ConfigureHowToFindSaga(SagaPropertyMapper<DemoSagaData> mapper) =>
                     mapper.MapSaga(s => s.CorrelationProperty)
                         .ToMessage<StartSagaMessage>(m => m.CorrelationProperty)

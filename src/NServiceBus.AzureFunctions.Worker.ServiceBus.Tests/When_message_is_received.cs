@@ -1,7 +1,8 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
@@ -17,11 +18,13 @@
                 .Run();
 
             Assert.AreEqual(1, context.HandlerInvocationCount);
+            Assert.That(context.ReceivedMessageAvailable, Is.True);
         }
 
         public class Context : ScenarioContext
         {
             public int HandlerInvocationCount => count;
+            public bool ReceivedMessageAvailable { get; set; }
 
             public void HandlerInvoked() => Interlocked.Increment(ref count);
 
@@ -30,23 +33,14 @@
 
         class FunctionHandler : FunctionEndpointComponent
         {
-            public FunctionHandler(object triggerMessage)
+            public FunctionHandler(object triggerMessage) => AddTestMessage(triggerMessage);
+
+            public class HappyDayMessageHandler(Context testContext) : IHandleMessages<HappyDayMessage>
             {
-                AddTestMessage(triggerMessage);
-            }
-
-            public class HappyDayMessageHandler : IHandleMessages<HappyDayMessage>
-            {
-                Context testContext;
-
-                public HappyDayMessageHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(HappyDayMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerInvoked();
+                    testContext.ReceivedMessageAvailable = context.Extensions.TryGet(out ServiceBusReceivedMessage _);
                     return Task.CompletedTask;
                 }
             }

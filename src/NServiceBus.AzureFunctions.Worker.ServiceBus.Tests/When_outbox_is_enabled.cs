@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using NServiceBus;
@@ -35,15 +35,8 @@
                 AddTestMessage(triggerMessage);
             }
 
-            public class SomeMessageHandler : IHandleMessages<SomeMessage>
+            public class SomeMessageHandler(Context testContext) : IHandleMessages<SomeMessage>
             {
-                Context testContext;
-
-                public SomeMessageHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(SomeMessage message, IMessageHandlerContext context)
                 {
                     testContext.GotTheMessage = true;

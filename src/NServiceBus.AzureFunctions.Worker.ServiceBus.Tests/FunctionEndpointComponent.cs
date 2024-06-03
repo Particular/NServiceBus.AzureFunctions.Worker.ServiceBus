@@ -1,10 +1,11 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -13,7 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
-    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
+    using Conventions = AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
     {
@@ -28,14 +29,12 @@
 
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
 
-        public void AddTestMessage(object body, IDictionary<string, object> userProperties = null)
-        {
+        public void AddTestMessage(object body, IDictionary<string, object> userProperties = null) =>
             testMessages.Add(new TestMessage
             {
                 Body = body,
                 UserProperties = userProperties ?? new Dictionary<string, object>()
             });
-        }
 
         protected virtual Task OnStart(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => Task.CompletedTask;
 
@@ -43,24 +42,15 @@
 
         IList<TestMessage> testMessages = [];
 
-        class FunctionRunner : ComponentRunner
+        class FunctionRunner(
+            IList<TestMessage> messages,
+            Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+            Func<IFunctionEndpoint, FunctionContext, Task> onStart,
+            ScenarioContext scenarioContext,
+            Type functionComponentType)
+            : ComponentRunner
         {
-            public FunctionRunner(
-                IList<TestMessage> messages,
-                Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
-                Func<IFunctionEndpoint, FunctionContext, Task> onStart,
-                ScenarioContext scenarioContext,
-                Type functionComponentType)
-            {
-                this.messages = messages;
-                this.configurationCustomization = configurationCustomization;
-                this.onStart = onStart;
-                this.scenarioContext = scenarioContext;
-                this.functionComponentType = functionComponentType;
-                Name = Conventions.EndpointNamingConvention(functionComponentType);
-            }
-
-            public override string Name { get; }
+            public override string Name { get; } = Conventions.EndpointNamingConvention(functionComponentType);
 
             public override async Task Start(CancellationToken cancellationToken = default)
             {
@@ -123,15 +113,11 @@
                     }
 
                     var functionContext = new FakeFunctionContext { InstanceServices = host.Services };
-                    await endpoint.Process(
-                        MessageHelper.GetBody(message.Body),
-                        userProperties,
-                        Guid.NewGuid().ToString("N"),
-                        1,
-                        null,
-                        string.Empty,
-                        functionContext,
-                        cancellationToken);
+                    var messageActions = new FakeServiceBusMessageActions();
+                    var serviceBusReceivedMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(
+                        MessageHelper.GetBody(message.Body), properties: userProperties,
+                        messageId: Guid.NewGuid().ToString("N"), deliveryCount: 1);
+                    await endpoint.Process(serviceBusReceivedMessage, messageActions, functionContext, cancellationToken);
                 }
             }
 
@@ -145,11 +131,6 @@
                 }
             }
 
-            readonly Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization;
-            readonly Func<IFunctionEndpoint, FunctionContext, Task> onStart;
-            readonly ScenarioContext scenarioContext;
-            readonly Type functionComponentType;
-            IList<TestMessage> messages;
             FunctionEndpoint endpoint;
             IHost host;
         }

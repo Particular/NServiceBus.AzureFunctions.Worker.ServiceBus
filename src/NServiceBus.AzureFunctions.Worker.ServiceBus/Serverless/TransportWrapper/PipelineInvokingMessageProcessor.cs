@@ -1,11 +1,13 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
+    using Microsoft.Azure.Functions.Worker;
     using NServiceBus.Extensibility;
     using Transport;
+    using Transport.AzureServiceBus;
 
     class PipelineInvokingMessageProcessor(IMessageReceiver baseTransportReceiver) : IMessageReceiver, IMessageProcessor
     {
@@ -14,44 +16,30 @@
         {
             this.onMessage = onMessage;
             this.onError = onError;
-            return baseTransportReceiver?.Initialize(limitations,
+            return baseTransportReceiver.Initialize(limitations,
                 (_, __) => Task.CompletedTask,
                 (_, __) => Task.FromResult(ErrorHandleResult.Handled),
                 cancellationToken) ?? Task.CompletedTask;
         }
 
-        public async Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            ITransactionStrategy transactionStrategy,
+        public async Task Process(ServiceBusReceivedMessage message,
+            ServiceBusMessageActions messageActions,
             CancellationToken cancellationToken = default)
         {
-            body ??= Array.Empty<byte>(); // might be null
-            messageId ??= Guid.NewGuid().ToString("N");
+            var messageId = message.GetMessageId();
+            var body = message.GetBody();
+            var contextBag = new ContextBag();
+            // Azure Service Bus transport also makes the incoming message available. We can do the same narrow the gap
+            contextBag.Set(message);
 
             try
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
-                {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var messageContext = new MessageContext(
-                        messageId,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        body,
-                        transportTransaction,
-                        ReceiveAddress,
-                        new ContextBag());
+                using var azureServiceBusTransportTransaction = new AzureServiceBusTransportTransaction();
+                var messageContext = CreateMessageContext(message, messageId, body, azureServiceBusTransportTransaction.TransportTransaction, contextBag);
 
-                    await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
+                await onMessage(messageContext, cancellationToken).ConfigureAwait(false);
 
-                    await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
-
-                    transaction?.Commit();
-                }
+                azureServiceBusTransportTransaction.Commit();
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -59,62 +47,33 @@
             }
             catch (Exception exception)
             {
-                using (var transaction = transactionStrategy.CreateTransaction())
+                using var azureServiceBusTransportTransaction = new AzureServiceBusTransportTransaction();
+                var errorContext = CreateErrorContext(message, exception, messageId, body, azureServiceBusTransportTransaction.TransportTransaction, contextBag);
+
+                var errorHandleResult = await onError.Invoke(errorContext, cancellationToken).ConfigureAwait(false);
+
+                if (errorHandleResult == ErrorHandleResult.Handled)
                 {
-                    var transportTransaction = transactionStrategy.CreateTransportTransaction(transaction);
-                    var errorContext = new ErrorContext(
-                        exception,
-                        CreateNServiceBusHeaders(userProperties, replyTo, correlationId),
-                        messageId,
-                        body,
-                        transportTransaction,
-                        deliveryCount,
-                        ReceiveAddress,
-                        new ContextBag());
-
-                    var errorHandleResult = await onError.Invoke(errorContext, cancellationToken).ConfigureAwait(false);
-
-                    if (errorHandleResult == ErrorHandleResult.Handled)
-                    {
-                        await transactionStrategy.Complete(transaction, cancellationToken).ConfigureAwait(false);
-
-                        transaction?.Commit();
-                        return;
-                    }
-
-                    throw;
-                }
-            }
-
-            static Dictionary<string, string> CreateNServiceBusHeaders(IDictionary<string, object> userProperties, string replyTo, string correlationId)
-            {
-                var headers = new Dictionary<string, string>(userProperties.Count);
-
-                foreach (var userProperty in userProperties)
-                {
-                    headers[userProperty.Key] = userProperty.Value?.ToString();
+                    azureServiceBusTransportTransaction.Commit();
+                    return;
                 }
 
-                headers.Remove("NServiceBus.Transport.Encoding");
-
-                if (!string.IsNullOrWhiteSpace(replyTo))
-                {
-                    headers.TryAdd(Headers.ReplyToAddress, replyTo);
-                }
-
-                if (!string.IsNullOrWhiteSpace(correlationId))
-                {
-                    headers.TryAdd(Headers.CorrelationId, correlationId);
-                }
-
-                return headers;
+                throw;
             }
         }
+
+        ErrorContext CreateErrorContext(ServiceBusReceivedMessage message, Exception exception, string messageId,
+            BinaryData body, TransportTransaction transportTransaction, ContextBag contextBag) =>
+            new(exception, message.GetNServiceBusHeaders(), messageId, body, transportTransaction, message.DeliveryCount, ReceiveAddress, contextBag);
+
+        MessageContext CreateMessageContext(ServiceBusReceivedMessage message, string messageId, BinaryData body,
+            TransportTransaction transportTransaction, ContextBag contextBag) =>
+            new(messageId, message.GetNServiceBusHeaders(), body, transportTransaction, ReceiveAddress, contextBag);
 
         public Task StartReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         // No-op because the rate at which Azure Functions pushes messages to the pipeline can't be controlled.
-        public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = new CancellationToken()) => Task.CompletedTask;
+        public Task ChangeConcurrency(PushRuntimeSettings limitations, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task StopReceive(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

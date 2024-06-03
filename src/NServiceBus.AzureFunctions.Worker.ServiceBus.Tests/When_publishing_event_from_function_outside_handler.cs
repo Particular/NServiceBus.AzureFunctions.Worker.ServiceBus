@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using NServiceBus;
@@ -26,20 +26,10 @@
 
         class OutsideSubscriber : EndpointConfigurationBuilder
         {
-            public OutsideSubscriber()
+            public OutsideSubscriber() => EndpointSetup<DefaultEndpoint>();
+
+            public class EventHandler(Context testContext) : IHandleMessages<OutsideEvent>
             {
-                EndpointSetup<DefaultEndpoint>();
-            }
-
-            public class EventHandler : IHandleMessages<OutsideEvent>
-            {
-                Context testContext;
-
-                public EventHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(OutsideEvent message, IMessageHandlerContext context)
                 {
                     testContext.EventReceived = true;

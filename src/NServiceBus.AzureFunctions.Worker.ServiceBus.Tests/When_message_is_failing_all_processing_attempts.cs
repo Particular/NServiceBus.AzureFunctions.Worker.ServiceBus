@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -33,20 +33,10 @@
 
         class FailingFunction : FunctionEndpointComponent
         {
-            public FailingFunction(object triggerMessage)
+            public FailingFunction(object triggerMessage) => AddTestMessage(triggerMessage);
+
+            public class FailingHandler(Context testContext) : IHandleMessages<TriggerMessage>
             {
-                AddTestMessage(triggerMessage);
-            }
-
-            public class FailingHandler : IHandleMessages<TriggerMessage>
-            {
-                Context testContext;
-
-                public FailingHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerInvocations++;

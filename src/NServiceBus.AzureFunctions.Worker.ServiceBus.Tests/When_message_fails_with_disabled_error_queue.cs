@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -34,10 +34,7 @@
 
             public class FailingHandler : IHandleMessages<TriggerMessage>
             {
-                public Task Handle(TriggerMessage message, IMessageHandlerContext context)
-                {
-                    throw new SimulatedException();
-                }
+                public Task Handle(TriggerMessage message, IMessageHandlerContext context) => throw new SimulatedException();
             }
         }
 

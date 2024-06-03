@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "ManualTests.HostV4": {
-      "commandName": "Project"
-    }
-  }
-}

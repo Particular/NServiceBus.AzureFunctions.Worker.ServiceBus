@@ -1,16 +1,14 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
     using NUnit.Framework;
-    using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
     public class When_sending_message_outside_handler
     {
         [Test]
-        public async Task Should_send_message_to_target_queue()
-        {
+        public async Task Should_send_message_to_target_queue() =>
             await Scenario.Define<Context>()
                 .WithEndpoint<ReceivingEndpoint>(b => b.When(async session =>
                 {
@@ -20,7 +18,6 @@
                 }))
                 .Done(c => c.HandlerReceivedMessage)
                 .Run();
-        }
 
         class Context : ScenarioContext
         {
@@ -29,20 +26,10 @@
 
         public class ReceivingEndpoint : EndpointConfigurationBuilder
         {
-            public ReceivingEndpoint()
+            public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
+
+            class TriggerMessageHandler(Context testContext) : IHandleMessages<TriggerMessage>
             {
-                EndpointSetup<DefaultEndpoint>();
-            }
-
-            class TriggerMessageHandler : IHandleMessages<TriggerMessage>
-            {
-                Context testContext;
-
-                public TriggerMessageHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context)
                 {
                     testContext.HandlerReceivedMessage = true;

@@ -1,4 +1,4 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
     using NServiceBus;
@@ -26,20 +26,10 @@
 
         class InsideSubscriber : EndpointConfigurationBuilder
         {
-            public InsideSubscriber()
+            public InsideSubscriber() => EndpointSetup<DefaultEndpoint>();
+
+            public class EventHandler(Context testContext) : IHandleMessages<InsideEvent>
             {
-                EndpointSetup<DefaultEndpoint>();
-            }
-
-            public class EventHandler : IHandleMessages<InsideEvent>
-            {
-                Context testContext;
-
-                public EventHandler(Context testContext)
-                {
-                    this.testContext = testContext;
-                }
-
                 public Task Handle(InsideEvent message, IMessageHandlerContext context)
                 {
                     testContext.EventReceived = true;
@@ -50,17 +40,11 @@
 
         class PublishingFunction : FunctionEndpointComponent
         {
-            public PublishingFunction()
-            {
-                AddTestMessage(new TriggerMessage());
-            }
+            public PublishingFunction() => AddTestMessage(new TriggerMessage());
 
             public class PublishingHandler : IHandleMessages<TriggerMessage>
             {
-                public Task Handle(TriggerMessage message, IMessageHandlerContext context)
-                {
-                    return context.Publish(new InsideEvent());
-                }
+                public Task Handle(TriggerMessage message, IMessageHandlerContext context) => context.Publish(new InsideEvent());
             }
         }
 

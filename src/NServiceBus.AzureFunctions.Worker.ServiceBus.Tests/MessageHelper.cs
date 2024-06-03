@@ -1,5 +1,6 @@
-﻿namespace ServiceBus.Tests
+﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using NServiceBus;
@@ -12,13 +13,11 @@
         static SystemJsonSerializer serializer = new SystemJsonSerializer();
         static IMessageSerializer messageSerializer = serializer.Configure(new SettingsHolder())(new MessageMapper());
 
-        public static byte[] GetBody(object message)
+        public static BinaryData GetBody(object message)
         {
-            using (var stream = new MemoryStream())
-            {
-                messageSerializer.Serialize(message, stream);
-                return stream.ToArray();
-            }
+            using var stream = new MemoryStream();
+            messageSerializer.Serialize(message, stream);
+            return new BinaryData(stream.ToArray());
         }
 
         public static IDictionary<string, object> GetUserProperties(object message)
