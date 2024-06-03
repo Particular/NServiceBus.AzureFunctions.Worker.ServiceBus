@@ -29,14 +29,12 @@
                 AddTestMessage(new ATestMessage());
             }
 
-            public class TestMessageHandler : IHandleMessages<ATestMessage>
+            class TestMessageHandler : IHandleMessages<ATestMessage>
             {
                 public Task Handle(ATestMessage message, IMessageHandlerContext context) => Task.CompletedTask;
             }
         }
 
-        class ATestMessage : IMessage
-        {
-        }
+        class ATestMessage : IMessage;
     }
 }

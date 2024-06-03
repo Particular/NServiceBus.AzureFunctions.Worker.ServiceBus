@@ -28,7 +28,7 @@
         {
             public OutsideSubscriber() => EndpointSetup<DefaultEndpoint>();
 
-            public class EventHandler(Context testContext) : IHandleMessages<OutsideEvent>
+            class EventHandler(Context testContext) : IHandleMessages<OutsideEvent>
             {
                 public Task Handle(OutsideEvent message, IMessageHandlerContext context)
                 {
@@ -38,8 +38,6 @@
             }
         }
 
-        class OutsideEvent : IEvent
-        {
-        }
+        class OutsideEvent : IEvent;
     }
 }

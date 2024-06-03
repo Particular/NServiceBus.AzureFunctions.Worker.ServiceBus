@@ -48,12 +48,13 @@ namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
                 originalConnectionString);
         }
 
-        public class Context : ScenarioContext
+        class Context : ScenarioContext
         {
-            int count;
             public int HandlerInvocationCount => count;
 
             public void HandlerInvoked() => Interlocked.Increment(ref count);
+
+            int count;
         }
 
         class FunctionUsingTokenCredential : FunctionEndpointComponent

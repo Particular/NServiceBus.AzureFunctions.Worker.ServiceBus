@@ -35,7 +35,7 @@
         {
             public FailingFunction(object triggerMessage) => AddTestMessage(triggerMessage);
 
-            public class FailingHandler(Context testContext) : IHandleMessages<TriggerMessage>
+            class FailingHandler(Context testContext) : IHandleMessages<TriggerMessage>
             {
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context)
                 {
@@ -45,8 +45,6 @@
             }
         }
 
-        class TriggerMessage : IMessage
-        {
-        }
+        class TriggerMessage : IMessage;
     }
 }

@@ -39,9 +39,6 @@
             Assert.IsFalse(await adminClient.QueueExistsAsync(endpointNamingConvention), "Queues should not be created");
         }
 
-        ServiceBusAdministrationClient adminClient;
-        string endpointNamingConvention;
-
         class FunctionWithoutInstallersEnabled : FunctionEndpointComponent
         {
             public FunctionWithoutInstallersEnabled() =>
@@ -52,5 +49,8 @@
                     c.AdvancedConfiguration.GetSettings().Set("Installers.Enable", false);
                 };
         }
+
+        ServiceBusAdministrationClient adminClient;
+        string endpointNamingConvention;
     }
 }

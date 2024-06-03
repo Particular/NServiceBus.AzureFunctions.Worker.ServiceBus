@@ -39,7 +39,7 @@
         {
             public FunctionHandler(string headerKey) => AddTestMessage(new MessageWithNullHeader(), new Dictionary<string, object> { { headerKey, null } });
 
-            public class MessageWithNullHeaderHandler(Context testContext) : IHandleMessages<MessageWithNullHeader>
+            class MessageWithNullHeaderHandler(Context testContext) : IHandleMessages<MessageWithNullHeader>
             {
                 public Task Handle(MessageWithNullHeader message, IMessageHandlerContext context)
                 {
@@ -50,8 +50,6 @@
             }
         }
 
-        class MessageWithNullHeader : IMessage
-        {
-        }
+        class MessageWithNullHeader : IMessage;
     }
 }
