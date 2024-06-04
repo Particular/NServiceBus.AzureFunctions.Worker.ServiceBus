@@ -21,7 +21,7 @@
             Assert.That(context.ReceivedMessageAvailable, Is.True);
         }
 
-        public class Context : ScenarioContext
+        class Context : ScenarioContext
         {
             public int HandlerInvocationCount => count;
             public bool ReceivedMessageAvailable { get; set; }
@@ -35,7 +35,7 @@
         {
             public FunctionHandler(object triggerMessage) => AddTestMessage(triggerMessage);
 
-            public class HappyDayMessageHandler(Context testContext) : IHandleMessages<HappyDayMessage>
+            class HappyDayMessageHandler(Context testContext) : IHandleMessages<HappyDayMessage>
             {
                 public Task Handle(HappyDayMessage message, IMessageHandlerContext context)
                 {
@@ -46,8 +46,6 @@
             }
         }
 
-        class HappyDayMessage : IMessage
-        {
-        }
+        class HappyDayMessage : IMessage;
     }
 }

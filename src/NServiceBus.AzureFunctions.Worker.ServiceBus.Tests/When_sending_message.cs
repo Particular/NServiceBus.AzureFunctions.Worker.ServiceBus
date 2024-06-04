@@ -21,7 +21,7 @@
             public bool HandlerReceivedMessage { get; set; }
         }
 
-        public class ReceivingEndpoint : EndpointConfigurationBuilder
+        class ReceivingEndpoint : EndpointConfigurationBuilder
         {
             public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
 
@@ -39,18 +39,14 @@
         {
             public SendingFunction(object triggerMessage) => AddTestMessage(triggerMessage);
 
-            public class TriggerMessageHandler : IHandleMessages<TriggerMessage>
+            class TriggerMessageHandler : IHandleMessages<TriggerMessage>
             {
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context) => context.Send(Conventions.EndpointNamingConvention(typeof(ReceivingEndpoint)), new FollowupMessage());
             }
         }
 
-        class TriggerMessage : IMessage
-        {
-        }
+        class TriggerMessage : IMessage;
 
-        class FollowupMessage : IMessage
-        {
-        }
+        class FollowupMessage : IMessage;
     }
 }

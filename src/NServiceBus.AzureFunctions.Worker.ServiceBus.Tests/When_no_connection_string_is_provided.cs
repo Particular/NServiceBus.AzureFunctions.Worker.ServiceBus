@@ -37,8 +37,8 @@
             Environment.SetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName,
                 originalConnectionString);
 
-        string originalConnectionString;
-
         class FunctionWithoutConnectionString : FunctionEndpointComponent;
+
+        string originalConnectionString;
     }
 }

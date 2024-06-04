@@ -28,7 +28,7 @@
         {
             public InsideSubscriber() => EndpointSetup<DefaultEndpoint>();
 
-            public class EventHandler(Context testContext) : IHandleMessages<InsideEvent>
+            class EventHandler(Context testContext) : IHandleMessages<InsideEvent>
             {
                 public Task Handle(InsideEvent message, IMessageHandlerContext context)
                 {
@@ -42,18 +42,14 @@
         {
             public PublishingFunction() => AddTestMessage(new TriggerMessage());
 
-            public class PublishingHandler : IHandleMessages<TriggerMessage>
+            class PublishingHandler : IHandleMessages<TriggerMessage>
             {
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context) => context.Publish(new InsideEvent());
             }
         }
 
-        class TriggerMessage : IMessage
-        {
-        }
+        class TriggerMessage : IMessage;
 
-        class InsideEvent : IEvent
-        {
-        }
+        class InsideEvent : IEvent;
     }
 }

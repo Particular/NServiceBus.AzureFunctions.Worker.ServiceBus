@@ -32,14 +32,12 @@
                 AddTestMessage(new TriggerMessage());
             }
 
-            public class FailingHandler : IHandleMessages<TriggerMessage>
+            class FailingHandler : IHandleMessages<TriggerMessage>
             {
                 public Task Handle(TriggerMessage message, IMessageHandlerContext context) => throw new SimulatedException();
             }
         }
 
-        class TriggerMessage : IMessage
-        {
-        }
+        class TriggerMessage : IMessage;
     }
 }

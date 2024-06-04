@@ -37,7 +37,7 @@
                 AddTestMessage(new ReadSagaDataValueMessage { CorrelationProperty = correlationProperty });
             }
 
-            public class DemoSaga(Context testContext) : Saga<DemoSagaData>,
+            class DemoSaga(Context testContext) : Saga<DemoSagaData>,
                 IAmStartedByMessages<StartSagaMessage>,
                 IHandleMessages<UpdateSagaMessage>,
                 IHandleMessages<ReadSagaDataValueMessage>
@@ -68,7 +68,7 @@
                 }
             }
 
-            public class DemoSagaData : ContainSagaData
+            class DemoSagaData : ContainSagaData
             {
                 public string CorrelationProperty { get; set; }
                 public int SomeCounter { get; set; }

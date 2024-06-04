@@ -18,7 +18,7 @@
             Assert.True(context.GotTheMessage);
         }
 
-        public class Context : ScenarioContext
+        class Context : ScenarioContext
         {
             public bool GotTheMessage { get; set; }
         }
@@ -35,7 +35,7 @@
                 AddTestMessage(triggerMessage);
             }
 
-            public class SomeMessageHandler(Context testContext) : IHandleMessages<SomeMessage>
+            class SomeMessageHandler(Context testContext) : IHandleMessages<SomeMessage>
             {
                 public Task Handle(SomeMessage message, IMessageHandlerContext context)
                 {
@@ -45,8 +45,6 @@
             }
         }
 
-        class SomeMessage : IMessage
-        {
-        }
+        class SomeMessage : IMessage;
     }
 }

@@ -24,7 +24,7 @@
             public bool HandlerReceivedMessage { get; set; }
         }
 
-        public class ReceivingEndpoint : EndpointConfigurationBuilder
+        class ReceivingEndpoint : EndpointConfigurationBuilder
         {
             public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
 
@@ -38,8 +38,6 @@
             }
         }
 
-        class TriggerMessage : IMessage
-        {
-        }
+        class TriggerMessage : IMessage;
     }
 }

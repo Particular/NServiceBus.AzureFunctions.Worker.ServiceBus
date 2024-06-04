@@ -26,7 +26,7 @@
         {
             public ReceivingEndpoint() => EndpointSetup<DefaultEndpoint>();
 
-            public class TestMessageHandler(Context testContext) : IHandleMessages<TestMessage>
+            class TestMessageHandler(Context testContext) : IHandleMessages<TestMessage>
             {
                 public Task Handle(TestMessage message, IMessageHandlerContext context)
                 {
@@ -50,8 +50,6 @@
                 => endpoint.Send(new TestMessage(), executionContext);
         }
 
-        class TestMessage : IMessage
-        {
-        }
+        class TestMessage : IMessage;
     }
 }
