@@ -121,9 +121,16 @@
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
-                var endpointFactory = functionEndpointConfiguration.CreateEndpointFactory(serviceCollection);
+                var serverless = functionEndpointConfiguration.MakeServerless();
+                var advancedConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
+                var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                    advancedConfiguration,
+                    serviceCollection);
 
-                serviceCollection.AddSingleton(endpointFactory);
+                serviceCollection.AddSingleton(functionEndpointConfiguration);
+                serviceCollection.AddSingleton(startableEndpoint);
+                serviceCollection.AddSingleton(serverless);
+                serviceCollection.AddSingleton<FunctionEndpoint>();
                 serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
 
                 string TryResolveBindingExpression()
