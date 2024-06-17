@@ -97,7 +97,7 @@
                 host = hostBuilder.Build();
                 await host.StartAsync(cancellationToken);
 
-                endpoint = host.Services.GetRequiredService<FunctionEndpoint>();
+                endpoint = host.Services.GetRequiredService<IFunctionEndpoint>();
             }
 
             public override async Task ComponentsStarted(CancellationToken cancellationToken = default)
@@ -131,7 +131,7 @@
                 }
             }
 
-            FunctionEndpoint endpoint;
+            IFunctionEndpoint endpoint;
             IHost host;
         }
 

@@ -127,10 +127,7 @@
                     advancedConfiguration,
                     serviceCollection);
 
-                serviceCollection.AddSingleton(functionEndpointConfiguration);
-                serviceCollection.AddSingleton(startableEndpoint);
-                serviceCollection.AddSingleton(serverless);
-                serviceCollection.AddSingleton<FunctionEndpoint>();
+                serviceCollection.AddSingleton(sp => new FunctionEndpoint(startableEndpoint, serverless, sp));
                 serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
 
                 string TryResolveBindingExpression()
