@@ -73,7 +73,7 @@
             AdvancedConfiguration = endpointConfiguration;
         }
 
-        internal ServerlessTransport CreateEndpointFactory()
+        internal ServerlessTransport CreateServerlessTransport()
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
             var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString, connectionName);
