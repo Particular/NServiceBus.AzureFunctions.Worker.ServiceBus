@@ -73,7 +73,7 @@
             AdvancedConfiguration = endpointConfiguration;
         }
 
-        internal ServerlessTransport MakeServerless()
+        internal ServerlessTransport CreateEndpointFactory()
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
             var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString, connectionName);
@@ -92,7 +92,7 @@
         public void DoNotSendMessagesToErrorQueue() => recoverabilityPolicy.SendFailedMessagesToErrorQueue = false;
 
         /// <summary>
-        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="NServiceBus.Logging.LogLevel.Info" />.
+        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="LogLevel.Info" />.
         /// </summary>
         public void LogDiagnostics() =>
             AdvancedConfiguration.CustomDiagnosticsWriter(static (diagnostics, _) =>

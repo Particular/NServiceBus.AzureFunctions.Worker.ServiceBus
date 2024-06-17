@@ -121,7 +121,7 @@
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
-                var serverless = functionEndpointConfiguration.MakeServerless();
+                var serverless = functionEndpointConfiguration.CreateEndpointFactory();
                 var advancedConfiguration = functionEndpointConfiguration.AdvancedConfiguration;
                 var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
                     advancedConfiguration,
