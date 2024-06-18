@@ -6,6 +6,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using NServiceBus.AzureFunctions.Worker.ServiceBus;
 
     /// <summary>
     /// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IHostBuilder"/>.
@@ -121,9 +122,23 @@
 
                 configurationCustomization?.Invoke(configuration, functionEndpointConfiguration);
 
-                var endpointFactory = functionEndpointConfiguration.CreateEndpointFactory(serviceCollection);
+                // This has to be done here since keys are added to the settingsholder which will be locked once the endpoint is created
+                var serverlessTransport = functionEndpointConfiguration.CreateServerlessTransport();
 
-                serviceCollection.AddSingleton(endpointFactory);
+                // This has to be done here to allow NServiceBus to register components in the service collection being passed in
+                var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+                    functionEndpointConfiguration.AdvancedConfiguration,
+                    serviceCollection);
+
+                serviceCollection.AddSingleton(startableEndpoint);
+                serviceCollection.AddSingleton(serverlessTransport);
+
+                // we are manually resolving all dependencies of FunctionEndpoint since Serverless transport is internal and we run into constructor selection issues if not
+                serviceCollection.AddSingleton(sp => new FunctionEndpoint(
+                    sp.GetRequiredService<IStartableEndpointWithExternallyManagedContainer>(),
+                    sp.GetRequiredService<ServerlessTransport>(),
+                    sp));
+
                 serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
 
                 string TryResolveBindingExpression()

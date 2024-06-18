@@ -5,7 +5,6 @@
     using AzureFunctions.Worker.ServiceBus;
     using Logging;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Serialization;
 
     /// <summary>
@@ -74,17 +73,12 @@
             AdvancedConfiguration = endpointConfiguration;
         }
 
-        internal Func<IServiceProvider, FunctionEndpoint> CreateEndpointFactory(IServiceCollection serviceCollection)
+        internal ServerlessTransport CreateServerlessTransport()
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
             var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString, connectionName);
             AdvancedConfiguration.UseTransport(serverlessTransport);
-
-            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
-                AdvancedConfiguration,
-                serviceCollection);
-
-            return serviceProvider => new FunctionEndpoint(startableEndpoint, serverlessTransport, serviceProvider);
+            return serverlessTransport;
         }
 
         /// <summary>
@@ -98,7 +92,7 @@
         public void DoNotSendMessagesToErrorQueue() => recoverabilityPolicy.SendFailedMessagesToErrorQueue = false;
 
         /// <summary>
-        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="NServiceBus.Logging.LogLevel.Info" />.
+        /// Logs endpoint diagnostics information to the log. Diagnostics are logged on level <see cref="LogLevel.Info" />.
         /// </summary>
         public void LogDiagnostics() =>
             AdvancedConfiguration.CustomDiagnosticsWriter(static (diagnostics, _) =>
