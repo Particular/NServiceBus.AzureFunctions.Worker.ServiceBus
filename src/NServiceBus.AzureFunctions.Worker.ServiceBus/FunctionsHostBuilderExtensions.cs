@@ -130,7 +130,6 @@
                     functionEndpointConfiguration.AdvancedConfiguration,
                     serviceCollection);
 
-
                 serviceCollection.AddSingleton(startableEndpoint);
                 serviceCollection.AddSingleton(serverlessTransport);
 
