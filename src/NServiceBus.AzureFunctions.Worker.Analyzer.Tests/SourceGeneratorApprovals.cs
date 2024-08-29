@@ -59,7 +59,7 @@ namespace Foo
             var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"")]";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidBindingExpressionId));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidBindingExpressionId), Is.True);
         }
 
         [Test]
@@ -125,7 +125,7 @@ using NServiceBus;
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId), Is.True);
         }
 
         [Test]
@@ -138,7 +138,7 @@ using NServiceBus;
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId), Is.True);
         }
 
         [TestCase("")]
@@ -152,7 +152,7 @@ using NServiceBus;
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId), Is.True);
         }
 
         [Test]
@@ -165,7 +165,7 @@ using NServiceBus;
 ";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.True(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId), Is.True);
         }
 
         [Test]

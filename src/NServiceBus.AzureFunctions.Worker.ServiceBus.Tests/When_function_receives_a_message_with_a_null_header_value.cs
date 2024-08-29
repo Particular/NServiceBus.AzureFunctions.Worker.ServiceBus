@@ -20,7 +20,7 @@
                 .Run();
 
             Assert.AreEqual(1, context.HandlerInvocationCount);
-            Assert.True(context.Headers.ContainsKey(headerKey));
+            Assert.That(context.Headers.ContainsKey(headerKey), Is.True);
             Assert.Null(context.Headers[headerKey]);
         }
 
