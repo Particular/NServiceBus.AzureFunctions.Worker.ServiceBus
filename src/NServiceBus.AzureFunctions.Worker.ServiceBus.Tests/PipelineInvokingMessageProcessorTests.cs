@@ -47,7 +47,7 @@
                 Assert.That(messageContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
                 Assert.That(messageContext.NativeMessageId, Is.SameAs(messageId));
             });
-            CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
+            Assert.That(userProperties, Is.SubsetOf(messageContext.Headers)); // the IncomingMessage has an additional MessageId header
             Assert.Multiple(() =>
             {
                 Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
@@ -90,7 +90,7 @@
                 Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
                 Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
             });
-            CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
+            Assert.That(userProperties, Is.SubsetOf(errorContext.Message.Headers)); // the IncomingMessage has an additional MessageId header
             Assert.Multiple(() =>
             {
                 Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
