@@ -42,7 +42,7 @@
 
             await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.AreEqual(body.ToArray(), messageContext.Body.ToArray());
+            Assert.That(messageContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
             Assert.AreSame(messageId, messageContext.NativeMessageId);
             CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
             Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
@@ -80,7 +80,7 @@
 
             Assert.AreSame(pipelineException, errorContext.Exception);
             Assert.AreSame(messageId, errorContext.Message.NativeMessageId);
-            Assert.AreEqual(body.ToArray(), errorContext.Message.Body.ToArray());
+            Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
             CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
             Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
             Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);

@@ -19,7 +19,7 @@
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
-            Assert.AreEqual(1, context.HandlerInvocationCount);
+            Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
             Assert.That(context.Headers.ContainsKey(headerKey), Is.True);
             Assert.Null(context.Headers[headerKey]);
         }
