@@ -68,7 +68,7 @@ namespace Foo
             var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"", TriggerFunctionName = ""trigger"")]";
             var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-            Assert.False(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False);
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace Foo
             var source = @"using NServiceBus;";
             var (_, diagnostics) = GetGeneratedOutput(source);
 
-            Assert.False(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
+            Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False);
         }
 
         [Test]
@@ -226,7 +226,7 @@ public class Startup
 
             if (!suppressGeneratedDiagnosticsErrors)
             {
-                Assert.False(generateDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), "Failed: " + generateDiagnostics.FirstOrDefault()?.GetMessage());
+                Assert.That(generateDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False, "Failed: " + generateDiagnostics.FirstOrDefault()?.GetMessage());
             }
 
             return (outputCompilation.SyntaxTrees.Last().ToString(), generateDiagnostics);
