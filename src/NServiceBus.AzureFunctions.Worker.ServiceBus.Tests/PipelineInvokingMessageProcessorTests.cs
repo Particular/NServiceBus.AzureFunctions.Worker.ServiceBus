@@ -85,7 +85,7 @@
             Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
             Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
             Assert.That(errorContext.TransportTransaction, Is.SameAs(errorContextTransaction.TransportTransaction)); // verify usage of the correct transport transaction instance
-            Assert.AreNotSame(messageContextTransaction, errorContextTransaction.TransportTransaction); // verify that a new transport transaction has been created for the error handling
+            Assert.That(errorContextTransaction.TransportTransaction, Is.Not.SameAs(messageContextTransaction)); // verify that a new transport transaction has been created for the error handling
         }
 
         [Test]
