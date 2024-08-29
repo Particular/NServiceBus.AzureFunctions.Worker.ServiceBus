@@ -21,7 +21,7 @@
 
             Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
             Assert.That(context.Headers.ContainsKey(headerKey), Is.True);
-            Assert.Null(context.Headers[headerKey]);
+            Assert.That(context.Headers[headerKey], Is.Null);
         }
 
         public class Context : ScenarioContext
