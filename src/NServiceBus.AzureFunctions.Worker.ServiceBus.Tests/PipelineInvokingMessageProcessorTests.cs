@@ -42,11 +42,17 @@
 
             await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.That(messageContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
-            Assert.That(messageContext.NativeMessageId, Is.SameAs(messageId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
+                Assert.That(messageContext.NativeMessageId, Is.SameAs(messageId));
+            });
             CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
-            Assert.That(messageContext.TransportTransaction, Is.SameAs(transaction.TransportTransaction));
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
+                Assert.That(messageContext.TransportTransaction, Is.SameAs(transaction.TransportTransaction));
+            });
         }
 
         [Test]
@@ -78,14 +84,20 @@
 
             await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.That(errorContext.Exception, Is.SameAs(pipelineException));
-            Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
-            Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
+            Assert.Multiple(() =>
+            {
+                Assert.That(errorContext.Exception, Is.SameAs(pipelineException));
+                Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
+                Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
+            });
             CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
-            Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
-            Assert.That(errorContext.TransportTransaction, Is.SameAs(errorContextTransaction.TransportTransaction)); // verify usage of the correct transport transaction instance
-            Assert.That(errorContextTransaction.TransportTransaction, Is.Not.SameAs(messageContextTransaction)); // verify that a new transport transaction has been created for the error handling
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
+                Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
+                Assert.That(errorContext.TransportTransaction, Is.SameAs(errorContextTransaction.TransportTransaction)); // verify usage of the correct transport transaction instance
+                Assert.That(errorContextTransaction.TransportTransaction, Is.Not.SameAs(messageContextTransaction)); // verify that a new transport transaction has been created for the error handling
+            });
         }
 
         [Test]

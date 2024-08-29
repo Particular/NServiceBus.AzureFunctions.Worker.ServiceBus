@@ -17,8 +17,11 @@
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
-            Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
-            Assert.That(context.ReceivedMessageAvailable, Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
+                Assert.That(context.ReceivedMessageAvailable, Is.True);
+            });
         }
 
         class Context : ScenarioContext

@@ -19,9 +19,12 @@
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
-            Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
-            Assert.That(context.Headers.ContainsKey(headerKey), Is.True);
-            Assert.That(context.Headers[headerKey], Is.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.HandlerInvocationCount, Is.EqualTo(1));
+                Assert.That(context.Headers.ContainsKey(headerKey), Is.True);
+                Assert.That(context.Headers[headerKey], Is.Null);
+            });
         }
 
         public class Context : ScenarioContext
