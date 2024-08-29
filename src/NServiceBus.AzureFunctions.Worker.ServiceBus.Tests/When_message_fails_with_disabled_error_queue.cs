@@ -20,7 +20,7 @@
             });
 
             StringAssert.Contains("Failed to process message", exception.Message);
-            Assert.IsInstanceOf<SimulatedException>(exception.InnerException);
+            Assert.That(exception.InnerException, Is.InstanceOf<SimulatedException>());
         }
 
         class FailingFunction : FunctionEndpointComponent
