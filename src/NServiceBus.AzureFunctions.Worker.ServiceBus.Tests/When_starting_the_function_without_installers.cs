@@ -36,7 +36,7 @@
                 .Done(c => c.EndpointsStarted)
                 .Run();
 
-            Assert.IsFalse(await adminClient.QueueExistsAsync(endpointNamingConvention), "Queues should not be created");
+            Assert.That((bool)await adminClient.QueueExistsAsync(endpointNamingConvention), Is.False, "Queues should not be created");
         }
 
         class FunctionWithoutInstallersEnabled : FunctionEndpointComponent
