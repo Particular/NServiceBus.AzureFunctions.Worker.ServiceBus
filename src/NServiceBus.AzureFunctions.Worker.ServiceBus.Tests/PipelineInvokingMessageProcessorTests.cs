@@ -42,11 +42,17 @@
 
             await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.AreEqual(body.ToArray(), messageContext.Body.ToArray());
-            Assert.AreSame(messageId, messageContext.NativeMessageId);
-            CollectionAssert.IsSubsetOf(userProperties, messageContext.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
-            Assert.AreSame(transaction.TransportTransaction, messageContext.TransportTransaction);
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
+                Assert.That(messageContext.NativeMessageId, Is.SameAs(messageId));
+            });
+            Assert.That(userProperties, Is.SubsetOf(messageContext.Headers)); // the IncomingMessage has an additional MessageId header
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction transaction), Is.True);
+                Assert.That(messageContext.TransportTransaction, Is.SameAs(transaction.TransportTransaction));
+            });
         }
 
         [Test]
@@ -78,14 +84,20 @@
 
             await pipelineInvoker.Process(serviceBusReceivedMessage, new FakeServiceBusMessageActions());
 
-            Assert.AreSame(pipelineException, errorContext.Exception);
-            Assert.AreSame(messageId, errorContext.Message.NativeMessageId);
-            Assert.AreEqual(body.ToArray(), errorContext.Message.Body.ToArray());
-            CollectionAssert.IsSubsetOf(userProperties, errorContext.Message.Headers); // the IncomingMessage has an additional MessageId header
-            Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
-            Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
-            Assert.AreSame(errorContextTransaction.TransportTransaction, errorContext.TransportTransaction); // verify usage of the correct transport transaction instance
-            Assert.AreNotSame(messageContextTransaction, errorContextTransaction.TransportTransaction); // verify that a new transport transaction has been created for the error handling
+            Assert.Multiple(() =>
+            {
+                Assert.That(errorContext.Exception, Is.SameAs(pipelineException));
+                Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
+                Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
+            });
+            Assert.That(userProperties, Is.SubsetOf(errorContext.Message.Headers)); // the IncomingMessage has an additional MessageId header
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
+                Assert.That(errorContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction errorContextTransaction), Is.True);
+                Assert.That(errorContext.TransportTransaction, Is.SameAs(errorContextTransaction.TransportTransaction)); // verify usage of the correct transport transaction instance
+                Assert.That(errorContextTransaction, Is.Not.SameAs(messageContextTransaction)); // verify that a new transport transaction has been created for the error handling
+            });
         }
 
         [Test]
@@ -99,7 +111,7 @@
             var exception = Assert.ThrowsAsync<Exception>(async () =>
                 await Process(new TestMessage(), pipelineInvoker));
 
-            Assert.AreSame(errorPipelineException, exception);
+            Assert.That(exception, Is.SameAs(errorPipelineException));
         }
 
         [Test]
@@ -123,7 +135,7 @@
             var exception = Assert.ThrowsAsync<Exception>(async () =>
                 await Process(new TestMessage(), pipelineInvoker));
 
-            Assert.AreSame(mainPipelineException, exception);
+            Assert.That(exception, Is.SameAs(mainPipelineException));
         }
 
         static async Task<PipelineInvokingMessageProcessor> CreatePipeline(OnMessage mainPipeline = null, OnError errorPipeline = null)
