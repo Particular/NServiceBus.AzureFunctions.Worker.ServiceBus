@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System.Threading.Tasks;
+    using global::ServiceBus.Tests;
     using Microsoft.Azure.Functions.Worker;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
@@ -45,9 +46,9 @@
             }
         }
 
-        class TestFunction : FunctionEndpointComponent
+        class TestFunction : SimpleTriggerFunctionComponent
         {
-            protected override Task OnStart(IFunctionEndpoint endpoint, FunctionContext executionContext)
+            public override Task TriggerAction(IFunctionEndpoint endpoint, FunctionContext executionContext)
             {
                 var options = new PublishOptions();
                 options.SetHeader("TestKey", "TestValue");
