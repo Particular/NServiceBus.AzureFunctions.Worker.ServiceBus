@@ -92,7 +92,7 @@
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
             await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
-            await endpoint.Publish(message, cancellationToken).ConfigureAwait(false);
+            await endpoint.Publish(message, options, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
