@@ -1,7 +1,6 @@
-﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
+﻿namespace ServiceBus.Tests
 {
     using System.Threading.Tasks;
-    using global::ServiceBus.Tests;
     using Microsoft.Azure.Functions.Worker;
     using NServiceBus;
     using NServiceBus.AcceptanceTesting;
@@ -12,9 +11,6 @@
         [Test]
         public async Task Should_publish_to_subscribers_with_headers()
         {
-            var options = new PublishOptions();
-            options.SetHeader("TestKey", "TestValue");
-
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<Subscriber>()
                 .WithComponent(new TestFunction())
