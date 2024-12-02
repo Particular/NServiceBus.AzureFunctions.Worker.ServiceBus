@@ -11,9 +11,6 @@
         [Test]
         public async Task Should_publish_to_subscribers_with_headers()
         {
-            var options = new PublishOptions();
-            options.SetHeader("TestKey", "TestValue");
-
             var context = await Scenario.Define<Context>()
                 .WithEndpoint<Subscriber>()
                 .WithComponent(new TestFunction())
