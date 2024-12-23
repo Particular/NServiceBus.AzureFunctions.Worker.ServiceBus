@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
     <!-- this package can only be upgraded when we drop support for older versions of Visual Studio -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
@@ -19,5 +19,5 @@
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Analyzer\NServiceBus.AzureFunctions.Analyzer.csproj" />
     <ProjectReference Include="..\NServiceBus.AzureFunctions.Worker.ServiceBus\NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
   </ItemGroup>
-  
+
 </Project>
