@@ -29,22 +29,13 @@
             configuration.SendFailedMessagesTo("error");
 
             var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
-            var azureServiceBusTransport = new AzureServiceBusTransport(connectionString)
-            {
-                SubscriptionRuleNamingConvention = type =>
-                {
-                    if (type.FullName.Length <= 50)
-                    {
-                        return type.FullName;
-                    }
+            var topology = TopicTopology.Default;
+            topology.OverrideSubscriptionNameFor(endpointConfiguration.EndpointName, endpointConfiguration.EndpointName.Shorten());
+            var azureServiceBusTransport = new AzureServiceBusTransport(connectionString, topology);
 
-                    return type.Name;
-                }
-            };
+            _ = configuration.UseTransport(azureServiceBusTransport);
 
-            var transport = configuration.UseTransport(azureServiceBusTransport);
-
-            configuration.UseSerialization<SystemJsonSerializer>();
+            _ = configuration.UseSerialization<SystemJsonSerializer>();
 
             await configurationBuilderCustomization(configuration);
 
