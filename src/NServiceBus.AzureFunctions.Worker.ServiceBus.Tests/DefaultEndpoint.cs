@@ -28,6 +28,8 @@
             recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
             configuration.SendFailedMessagesTo("error");
 
+            configuration.EnforcePublisherMetadataRegistration(endpointConfiguration.EndpointName, endpointConfiguration.PublisherMetadata);
+
             var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
             var topology = TopicTopology.Default;
             topology.OverrideSubscriptionNameFor(endpointConfiguration.EndpointName, endpointConfiguration.EndpointName.Shorten());
