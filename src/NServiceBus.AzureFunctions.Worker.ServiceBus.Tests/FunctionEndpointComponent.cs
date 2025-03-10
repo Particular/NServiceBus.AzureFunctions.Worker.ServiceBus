@@ -14,6 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using Transport.AzureServiceBus;
     using Conventions = AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
@@ -69,6 +70,17 @@
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 
                     endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
+
+                    if (triggerConfiguration.Transport.Topology is TopicPerEventTopology topology)
+                    {
+                        topology.OverrideSubscriptionNameFor(Name, Name.Shorten());
+
+                        foreach (var eventType in publisherMetadata.Publishers.SelectMany(p => p.Events))
+                        {
+                            topology.PublishTo(eventType, eventType.ToTopicName());
+                            topology.SubscribeTo(eventType, eventType.ToTopicName());
+                        }
+                    }
 
                     endpointConfiguration.EnforcePublisherMetadataRegistration(Name, publisherMetadata);
 

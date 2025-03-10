@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.ServiceBus.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using NServiceBus;
@@ -33,6 +34,11 @@
             var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
             var topology = TopicTopology.Default;
             topology.OverrideSubscriptionNameFor(endpointConfiguration.EndpointName, endpointConfiguration.EndpointName.Shorten());
+            foreach (var eventType in endpointConfiguration.PublisherMetadata.Publishers.SelectMany(p => p.Events))
+            {
+                topology.PublishTo(eventType, eventType.ToTopicName());
+                topology.SubscribeTo(eventType, eventType.ToTopicName());
+            }
             var azureServiceBusTransport = new AzureServiceBusTransport(connectionString, topology);
 
             _ = configuration.UseTransport(azureServiceBusTransport);
