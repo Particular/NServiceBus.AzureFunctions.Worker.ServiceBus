@@ -26,7 +26,7 @@
 
         class OutsideSubscriber : EndpointConfigurationBuilder
         {
-            public OutsideSubscriber() => EndpointSetup<DefaultEndpoint>();
+            public OutsideSubscriber() => EndpointSetup<DefaultEndpoint>(_ => { }, metadata => metadata.RegisterSelfAsPublisherFor<OutsideEvent>(this));
 
             class EventHandler(Context testContext) : IHandleMessages<OutsideEvent>
             {
