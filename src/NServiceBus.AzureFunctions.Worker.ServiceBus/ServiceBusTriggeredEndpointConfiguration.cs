@@ -1,11 +1,14 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using AzureFunctions.Worker.ServiceBus;
+    using Configuration.AdvancedExtensibility;
     using Logging;
     using Microsoft.Extensions.Configuration;
     using Serialization;
+    using Transport.AzureServiceBus;
 
     /// <summary>
     /// Represents a serverless NServiceBus endpoint.
@@ -32,7 +35,7 @@
         /// <summary>
         /// Creates a serverless NServiceBus endpoint.
         /// </summary>
-        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = default, string connectionName = default)
+        internal ServiceBusTriggeredEndpointConfiguration(string endpointName, IConfiguration configuration = null, string connectionString = null, string connectionName = null)
         {
             this.connectionString = connectionString;
             this.connectionName = connectionName;
@@ -60,15 +63,18 @@
                 endpointConfiguration.License(licenseText);
             }
 
-            // We are deliberately using the old way of creating a transport here because it allows us to create an
-            // uninitialized transport that can later be configured with a connection string or a fully qualified name and
-            // a token provider. Once we deprecate the old way we can for example add make the internal constructor
-            // visible to functions or the code base has already moved into a different direction.
-            transportExtensions = endpointConfiguration.UseTransport<AzureServiceBusTransport>();
-            Transport = transportExtensions.Transport;
-            Routing = transportExtensions.Routing();
+            TopicTopology topicTopology = TopicTopology.Default;
+            // TODO: What should the variable name be?
+            var topologyJson = configuration?.GetValue<string>("AzureServiceBusTopology");
+            if (topologyJson is not null)
+            {
+                topicTopology = TopicTopology.FromOptions(JsonSerializer.Deserialize(topologyJson, TopologyOptionsSerializationContext.Default.TopologyOptions));
+            }
 
-            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+            Transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", topicTopology);
+            Routing = new RoutingSettings<AzureServiceBusTransport>(endpointConfiguration.GetSettings());
+
+            _ = endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
             AdvancedConfiguration = endpointConfiguration;
         }
@@ -76,8 +82,8 @@
         internal ServerlessTransport CreateServerlessTransport()
         {
             // Configure ServerlessTransport as late as possible to prevent users changing the transport configuration
-            var serverlessTransport = new ServerlessTransport(transportExtensions, connectionString, connectionName);
-            AdvancedConfiguration.UseTransport(serverlessTransport);
+            var serverlessTransport = new ServerlessTransport(Transport, connectionString, connectionName);
+            _ = AdvancedConfiguration.UseTransport(serverlessTransport);
             return serverlessTransport;
         }
 
@@ -104,6 +110,5 @@
         readonly ServerlessRecoverabilityPolicy recoverabilityPolicy = new();
         readonly string connectionString;
         readonly string connectionName;
-        readonly TransportExtensions<AzureServiceBusTransport> transportExtensions;
     }
 }

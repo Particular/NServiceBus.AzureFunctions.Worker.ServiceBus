@@ -29,7 +29,7 @@
 
         class Subscriber : EndpointConfigurationBuilder
         {
-            public Subscriber() => EndpointSetup<DefaultEndpoint>();
+            public Subscriber() => EndpointSetup<DefaultEndpoint>(_ => { }, metadata => metadata.RegisterPublisherFor<EventWithOptions>(typeof(TestFunction)));
 
             class EventHandler(Context testContext) : IHandleMessages<EventWithOptions>
             {
@@ -44,6 +44,8 @@
 
         class TestFunction : FunctionEndpointComponent
         {
+            public TestFunction() => PublisherMetadata.RegisterPublisherFor<EventWithOptions>(typeof(TestFunction));
+
             protected override Task OnStart(IFunctionEndpoint endpoint, FunctionContext executionContext)
             {
                 var options = new PublishOptions();

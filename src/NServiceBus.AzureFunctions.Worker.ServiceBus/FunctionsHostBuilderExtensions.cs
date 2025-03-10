@@ -44,7 +44,7 @@
         public static IHostBuilder UseNServiceBus(
             this IHostBuilder hostBuilder,
             string endpointName,
-            string connectionString = default,
+            string connectionString = null,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
@@ -94,7 +94,7 @@
             string endpointName,
             Assembly callingAssembly,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
-            string connectionString = default) =>
+            string connectionString = null) =>
             hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             {
                 var configuration = hostBuilderContext.Configuration;

@@ -14,6 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using Transport.AzureServiceBus;
     using Conventions = AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
@@ -25,9 +26,12 @@
                     CustomizeConfiguration,
                     OnStartCore,
                     runDescriptor.ScenarioContext,
+                    PublisherMetadata,
                     GetType()));
 
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
+
+        public PublisherMetadata PublisherMetadata { get; } = new PublisherMetadata();
 
         public void AddTestMessage(object body, IDictionary<string, object> userProperties = null) =>
             testMessages.Add(new TestMessage
@@ -47,6 +51,7 @@
             Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
             Func<IFunctionEndpoint, FunctionContext, Task> onStart,
             ScenarioContext scenarioContext,
+            PublisherMetadata publisherMetadata,
             Type functionComponentType)
             : ComponentRunner
         {
@@ -66,6 +71,19 @@
 
                     endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
 
+                    if (triggerConfiguration.Transport.Topology is TopicPerEventTopology topology)
+                    {
+                        topology.OverrideSubscriptionNameFor(Name, Name.Shorten());
+
+                        foreach (var eventType in publisherMetadata.Publishers.SelectMany(p => p.Events))
+                        {
+                            topology.PublishTo(eventType, eventType.ToTopicName());
+                            topology.SubscribeTo(eventType, eventType.ToTopicName());
+                        }
+                    }
+
+                    endpointConfiguration.EnforcePublisherMetadataRegistration(Name, publisherMetadata);
+
                     endpointConfiguration.Recoverability()
                         .Immediate(i => i.NumberOfRetries(0))
                         .Delayed(d => d.NumberOfRetries(0))
@@ -73,14 +91,14 @@
                             // track messages sent to the error queue to fail the test
                             .OnMessageSentToErrorQueue((failedMessage, ct) =>
                             {
-                                scenarioContext.FailedMessages.AddOrUpdate(
+                                _ = scenarioContext.FailedMessages.AddOrUpdate(
                                     Name,
-                                    new[] { failedMessage },
+                                    [failedMessage],
                                     (_, fm) =>
                                     {
-                                        var messages = fm.ToList();
-                                        messages.Add(failedMessage);
-                                        return messages;
+                                        var failedMessages = fm.ToList();
+                                        failedMessages.Add(failedMessage);
+                                        return failedMessages;
                                     });
                                 return Task.CompletedTask;
                             }));
