@@ -1,5 +1,3 @@
 using NServiceBus;
 
-public class SomeEvent : IEvent
-{
-}
+public class SomeEvent : IEvent;
