@@ -24,12 +24,14 @@
                 new FunctionRunner(
                     testMessages,
                     CustomizeConfiguration,
+                    CustomizeHostBuilder,
                     OnStartCore,
                     runDescriptor.ScenarioContext,
                     PublisherMetadata,
                     GetType()));
 
-        public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
+        public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; init; } = _ => { };
+        public Action<IHostBuilder> CustomizeHostBuilder { private get; init; } = _ => { };
 
         public PublisherMetadata PublisherMetadata { get; } = new PublisherMetadata();
 
@@ -44,11 +46,12 @@
 
         Task OnStartCore(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => OnStart(functionEndpoint, functionContext);
 
-        IList<TestMessage> testMessages = [];
+        readonly IList<TestMessage> testMessages = [];
 
         class FunctionRunner(
             IList<TestMessage> messages,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+            Action<IHostBuilder> hostBuilderCustomization,
             Func<IFunctionEndpoint, FunctionContext, Task> onStart,
             ScenarioContext scenarioContext,
             PublisherMetadata publisherMetadata,
@@ -60,11 +63,14 @@
             public override async Task Start(CancellationToken cancellationToken = default)
             {
                 var hostBuilder = Host.CreateDefaultBuilder();
-                hostBuilder.ConfigureServices(services =>
+                _ = hostBuilder.ConfigureServices(services =>
                 {
                     // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
                     services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
                 });
+
+                hostBuilderCustomization(hostBuilder);
+
                 hostBuilder.UseNServiceBus(Name, (configuration, triggerConfiguration) =>
                 {
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;

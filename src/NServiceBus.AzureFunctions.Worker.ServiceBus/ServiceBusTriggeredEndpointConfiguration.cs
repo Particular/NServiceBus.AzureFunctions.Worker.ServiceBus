@@ -64,8 +64,7 @@
             }
 
             TopicTopology topicTopology = TopicTopology.Default;
-            // TODO: What should the variable name be?
-            var topologyJson = configuration?.GetValue<string>("AzureServiceBusTopology");
+            var topologyJson = configuration?.GetValue<string>("AzureServiceBusTopologyOptions");
             if (topologyJson is not null)
             {
                 topicTopology = TopicTopology.FromOptions(JsonSerializer.Deserialize(topologyJson, TopologyOptionsSerializationContext.Default.TopologyOptions));
