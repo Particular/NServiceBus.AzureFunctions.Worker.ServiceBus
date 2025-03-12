@@ -9,6 +9,7 @@
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Core;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Diagnostics;
@@ -20,10 +21,10 @@
         protected virtual LanguageVersion AnalyzerLanguageVersion => LanguageVersion.CSharp7;
 
         protected Task Assert(string markupCode, CancellationToken cancellationToken = default) =>
-            Assert(Array.Empty<string>(), markupCode, Array.Empty<string>(), cancellationToken);
+            Assert([], markupCode, [], cancellationToken);
 
         protected Task Assert(string expectedDiagnosticId, string markupCode, CancellationToken cancellationToken = default) =>
-            Assert(new[] { expectedDiagnosticId }, markupCode, Array.Empty<string>(), cancellationToken);
+            Assert([expectedDiagnosticId], markupCode, [], cancellationToken);
 
         protected async Task Assert(string[] expectedDiagnosticIds, string markupCode, string[] ignoreDiagnosticIds, CancellationToken cancellationToken = default)
         {
@@ -102,8 +103,7 @@
             return project;
         }
 
-        static AnalyzerTestFixture()
-        {
+        static AnalyzerTestFixture() =>
             ProjectReferences = ImmutableList.Create(
                 MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location),
@@ -111,9 +111,9 @@
                     .Location),
                 MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                 MetadataReference.CreateFromFile(typeof(IFunctionEndpoint).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(TokenCredential).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(EndpointConfiguration).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(AzureServiceBusTransport).GetTypeInfo().Assembly.Location));
-        }
 
         static readonly ImmutableList<PortableExecutableReference> ProjectReferences;
 
@@ -149,18 +149,16 @@
             }
         }
 
-        protected static string[] SplitMarkupCodeIntoFiles(string markupCode)
-        {
-            return DocumentSplittingRegex.Split(markupCode)
+        protected static string[] SplitMarkupCodeIntoFiles(string markupCode) =>
+            DocumentSplittingRegex.Split(markupCode)
                 .Where(docCode => !string.IsNullOrWhiteSpace(docCode))
                 .ToArray();
-        }
 
         static (string[] code, List<(string file, TextSpan span)>) Parse(string markupCode)
         {
             if (markupCode == null)
             {
-                return (Array.Empty<string>(), new List<(string, TextSpan)>());
+                return ([], []);
             }
 
             var documents = SplitMarkupCodeIntoFiles(markupCode);
@@ -177,7 +175,7 @@
 
                 while (remainingCode.Length > 0)
                 {
-                    var beforeAndAfterOpening = remainingCode.Split(new[] { "[|" }, 2, StringSplitOptions.None);
+                    var beforeAndAfterOpening = remainingCode.Split(["[|"], 2, StringSplitOptions.None);
 
                     if (beforeAndAfterOpening.Length == 1)
                     {
@@ -185,7 +183,7 @@
                         break;
                     }
 
-                    var midAndAfterClosing = beforeAndAfterOpening[1].Split(new[] { "|]" }, 2, StringSplitOptions.None);
+                    var midAndAfterClosing = beforeAndAfterOpening[1].Split(["|]"], 2, StringSplitOptions.None);
 
                     if (midAndAfterClosing.Length == 1)
                     {

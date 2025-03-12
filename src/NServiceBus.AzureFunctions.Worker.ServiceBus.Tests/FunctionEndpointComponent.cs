@@ -14,6 +14,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTesting.Customization;
     using NServiceBus.AcceptanceTesting.Support;
+    using Transport.AzureServiceBus;
     using Conventions = AcceptanceTesting.Customization.Conventions;
 
     abstract class FunctionEndpointComponent : IComponentBehavior
@@ -23,11 +24,16 @@
                 new FunctionRunner(
                     testMessages,
                     CustomizeConfiguration,
+                    CustomizeHostBuilder,
                     OnStartCore,
                     runDescriptor.ScenarioContext,
+                    PublisherMetadata,
                     GetType()));
 
-        public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; set; } = _ => { };
+        public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; init; } = _ => { };
+        public Action<IHostBuilder> CustomizeHostBuilder { private get; init; } = _ => { };
+
+        public PublisherMetadata PublisherMetadata { get; } = new PublisherMetadata();
 
         public void AddTestMessage(object body, IDictionary<string, object> userProperties = null) =>
             testMessages.Add(new TestMessage
@@ -40,13 +46,15 @@
 
         Task OnStartCore(IFunctionEndpoint functionEndpoint, FunctionContext functionContext) => OnStart(functionEndpoint, functionContext);
 
-        IList<TestMessage> testMessages = [];
+        readonly IList<TestMessage> testMessages = [];
 
         class FunctionRunner(
             IList<TestMessage> messages,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
+            Action<IHostBuilder> hostBuilderCustomization,
             Func<IFunctionEndpoint, FunctionContext, Task> onStart,
             ScenarioContext scenarioContext,
+            PublisherMetadata publisherMetadata,
             Type functionComponentType)
             : ComponentRunner
         {
@@ -55,16 +63,32 @@
             public override async Task Start(CancellationToken cancellationToken = default)
             {
                 var hostBuilder = Host.CreateDefaultBuilder();
-                hostBuilder.ConfigureServices(services =>
+                _ = hostBuilder.ConfigureServices(services =>
                 {
                     // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
                     services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
                 });
+
+                hostBuilderCustomization(hostBuilder);
+
                 hostBuilder.UseNServiceBus(Name, (configuration, triggerConfiguration) =>
                 {
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 
                     endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
+
+                    if (triggerConfiguration.Transport.Topology is TopicPerEventTopology topology)
+                    {
+                        topology.OverrideSubscriptionNameFor(Name, Name.Shorten());
+
+                        foreach (var eventType in publisherMetadata.Publishers.SelectMany(p => p.Events))
+                        {
+                            topology.PublishTo(eventType, eventType.ToTopicName());
+                            topology.SubscribeTo(eventType, eventType.ToTopicName());
+                        }
+                    }
+
+                    endpointConfiguration.EnforcePublisherMetadataRegistration(Name, publisherMetadata);
 
                     endpointConfiguration.Recoverability()
                         .Immediate(i => i.NumberOfRetries(0))
@@ -73,14 +97,14 @@
                             // track messages sent to the error queue to fail the test
                             .OnMessageSentToErrorQueue((failedMessage, ct) =>
                             {
-                                scenarioContext.FailedMessages.AddOrUpdate(
+                                _ = scenarioContext.FailedMessages.AddOrUpdate(
                                     Name,
-                                    new[] { failedMessage },
+                                    [failedMessage],
                                     (_, fm) =>
                                     {
-                                        var messages = fm.ToList();
-                                        messages.Add(failedMessage);
-                                        return messages;
+                                        var failedMessages = fm.ToList();
+                                        failedMessages.Add(failedMessage);
+                                        return failedMessages;
                                     });
                                 return Task.CompletedTask;
                             }));

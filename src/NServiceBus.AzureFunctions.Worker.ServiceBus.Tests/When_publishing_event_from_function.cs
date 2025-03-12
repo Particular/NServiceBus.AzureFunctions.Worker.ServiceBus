@@ -26,7 +26,7 @@
 
         class InsideSubscriber : EndpointConfigurationBuilder
         {
-            public InsideSubscriber() => EndpointSetup<DefaultEndpoint>();
+            public InsideSubscriber() => EndpointSetup<DefaultEndpoint>(_ => { }, metadata => metadata.RegisterPublisherFor<InsideEvent>(typeof(PublishingFunction)));
 
             class EventHandler(Context testContext) : IHandleMessages<InsideEvent>
             {
@@ -40,7 +40,11 @@
 
         class PublishingFunction : FunctionEndpointComponent
         {
-            public PublishingFunction() => AddTestMessage(new TriggerMessage());
+            public PublishingFunction()
+            {
+                PublisherMetadata.RegisterPublisherFor<InsideEvent>(typeof(PublishingFunction));
+                AddTestMessage(new TriggerMessage());
+            }
 
             class PublishingHandler : IHandleMessages<TriggerMessage>
             {
