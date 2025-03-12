@@ -121,20 +121,17 @@
                 services.AddAzureClientsCore();
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated on startup.
+                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated.
                 // The transport still has to validate the options because options validators are only executed when the options are resolved.
                 _ = services.AddSingleton<IValidateOptions<MigrationTopologyOptions>, MigrationTopologyOptionsValidator>();
                 _ = services.AddOptions<MigrationTopologyOptions>()
 #pragma warning restore CS0618 // Type or member is obsolete
-                    .BindConfiguration("AzureServiceBus:MigrationTopologyOptions")
-                    .ValidateOnStart();
+                    .BindConfiguration("AzureServiceBus:MigrationTopologyOptions");
 
-                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated on startup.
+                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated.
                 // The transport still has to validate the options because options validators are only executed when the options are resolved.
                 _ = services.AddSingleton<IValidateOptions<TopologyOptions>, TopologyOptionsValidator>();
-                _ = services.AddOptions<TopologyOptions>()
-                    .BindConfiguration("AzureServiceBus:TopologyOptions")
-                    .ValidateOnStart();
+                _ = services.AddOptions<TopologyOptions>().BindConfiguration("AzureServiceBus:TopologyOptions");
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, connectionName);
 
