@@ -6,11 +6,9 @@
     using Azure.Messaging.ServiceBus;
     using AzureFunctions.Worker.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Extensions.DependencyInjection;
 
     sealed class InternalFunctionEndpoint : IFunctionEndpoint
     {
-        [ActivatorUtilitiesConstructor]
         internal InternalFunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessTransport serverlessTransport, IServiceProvider serviceProvider)
         {
             this.serverlessTransport = serverlessTransport;
