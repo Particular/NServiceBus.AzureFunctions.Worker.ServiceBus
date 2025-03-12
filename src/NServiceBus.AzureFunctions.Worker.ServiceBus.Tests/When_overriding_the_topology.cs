@@ -28,7 +28,8 @@
 
         class InsideSubscriber : EndpointConfigurationBuilder
         {
-            public InsideSubscriber() => EndpointSetup<DefaultEndpoint>(_ => { }, metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(PublishingFunction)));
+            public InsideSubscriber() => EndpointSetup<DefaultEndpoint>(_ => { },
+                metadata => metadata.RegisterPublisherFor<MyEvent>(typeof(PublishingFunction)));
 
             class EventHandler(Context testContext) : IHandleMessages<MyEvent>
             {
@@ -49,9 +50,10 @@
                 {
                     var customSettings = new Dictionary<string, string>
                     {
-                        {"AzureServiceBusTopologyOptions", $$"""{ "$type": "migration-topology-options", "TopicToPublishTo": "bundle-1", "TopicToSubscribeOn": "bundle-1", "PublishedEventToTopicsMap": { "{{typeof(MyEvent).FullName}}": "{{typeof(MyEvent).ToTopicName()}}" } }"""},
+                        { "AzureServiceBus:MigrationTopologyOptions:TopicToPublishTo", "bundle-1" },
+                        { "AzureServiceBus:MigrationTopologyOptions:TopicToSubscribeOn", "bundle-1" },
+                        { $"AzureServiceBus:MigrationTopologyOptions:PublishedEventToTopicsMap:{typeof(MyEvent).FullName}", $"{typeof(MyEvent).ToTopicName()}" },
                     };
-
                     _ = config.AddInMemoryCollection(customSettings);
                 });
                 AddTestMessage(new TriggerMessage());
@@ -59,7 +61,8 @@
 
             class PublishingHandler : IHandleMessages<TriggerMessage>
             {
-                public Task Handle(TriggerMessage message, IMessageHandlerContext context) => context.Publish(new MyEvent());
+                public Task Handle(TriggerMessage message, IMessageHandlerContext context) =>
+                    context.Publish(new MyEvent());
             }
         }
 

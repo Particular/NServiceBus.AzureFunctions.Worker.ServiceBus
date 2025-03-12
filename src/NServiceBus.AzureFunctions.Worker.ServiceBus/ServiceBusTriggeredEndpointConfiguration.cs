@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using AzureFunctions.Worker.ServiceBus;
     using Configuration.AdvancedExtensibility;
@@ -64,10 +63,18 @@
             }
 
             TopicTopology topicTopology = TopicTopology.Default;
-            var topologyJson = configuration?.GetValue<string>("AzureServiceBusTopologyOptions");
-            if (topologyJson is not null)
+            var topologyOptionsSection = configuration?.GetSection("AzureServiceBus:TopologyOptions");
+            if (topologyOptionsSection.Exists())
             {
-                topicTopology = TopicTopology.FromOptions(JsonSerializer.Deserialize(topologyJson, TopologyOptionsSerializationContext.Default.TopologyOptions));
+                topicTopology = TopicTopology.FromOptions(topologyOptionsSection.Get<TopologyOptions>());
+            }
+            // Migration options take precedence over topology options. We are not doing additional checks here for now.
+            var migrationOptionsSection = configuration?.GetSection("AzureServiceBus:MigrationTopologyOptions");
+            if (migrationOptionsSection.Exists())
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                topicTopology = TopicTopology.FromOptions(migrationOptionsSection.Get<MigrationTopologyOptions>());
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             Transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", topicTopology);

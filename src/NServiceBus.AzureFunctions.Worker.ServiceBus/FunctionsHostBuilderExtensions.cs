@@ -6,7 +6,9 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
     using NServiceBus.AzureFunctions.Worker.ServiceBus;
+    using Transport.AzureServiceBus;
 
     /// <summary>
     /// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IHostBuilder"/>.
@@ -95,7 +97,7 @@
             Assembly callingAssembly,
             Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
             string connectionString = null) =>
-            hostBuilder.ConfigureServices((hostBuilderContext, serviceCollection) =>
+            hostBuilder.ConfigureServices((hostBuilderContext, services) =>
             {
                 var configuration = hostBuilderContext.Configuration;
                 var triggerAttribute = callingAssembly
@@ -115,8 +117,24 @@
 - Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
                 }
 
-                serviceCollection.AddHostedService<InitializationHost>();
-                serviceCollection.AddAzureClientsCore();
+                _ = services.AddHostedService<InitializationHost>();
+                services.AddAzureClientsCore();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated on startup.
+                // The transport still has to validate the options because options validators are only executed when the options are resolved.
+                _ = services.AddSingleton<IValidateOptions<MigrationTopologyOptions>, MigrationTopologyOptionsValidator>();
+                _ = services.AddOptions<MigrationTopologyOptions>()
+#pragma warning restore CS0618 // Type or member is obsolete
+                    .BindConfiguration("AzureServiceBus:MigrationTopologyOptions")
+                    .ValidateOnStart();
+
+                // Validator is registered here in case the user wants to use the options directly. This makes sure that the options are validated on startup.
+                // The transport still has to validate the options because options validators are only executed when the options are resolved.
+                _ = services.AddSingleton<IValidateOptions<TopologyOptions>, TopologyOptionsValidator>();
+                _ = services.AddOptions<TopologyOptions>()
+                    .BindConfiguration("AzureServiceBus:TopologyOptions")
+                    .ValidateOnStart();
 
                 var functionEndpointConfiguration = new ServiceBusTriggeredEndpointConfiguration(endpointName, configuration, connectionString, connectionName);
 
@@ -128,18 +146,19 @@
                 // This has to be done here to allow NServiceBus to register components in the service collection being passed in
                 var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
                     functionEndpointConfiguration.AdvancedConfiguration,
-                    serviceCollection);
+                    services);
 
-                serviceCollection.AddSingleton(startableEndpoint);
-                serviceCollection.AddSingleton(serverlessTransport);
+                _ = services.AddSingleton(startableEndpoint);
+                _ = services.AddSingleton(serverlessTransport);
 
                 // we are manually resolving all dependencies of FunctionEndpoint since Serverless transport is internal and we run into constructor selection issues if not
-                serviceCollection.AddSingleton(sp => new FunctionEndpoint(
+                _ = services.AddSingleton(sp => new FunctionEndpoint(
                     sp.GetRequiredService<IStartableEndpointWithExternallyManagedContainer>(),
                     sp.GetRequiredService<ServerlessTransport>(),
                     sp));
 
-                serviceCollection.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
+                _ = services.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
+                return;
 
                 string TryResolveBindingExpression()
                 {
