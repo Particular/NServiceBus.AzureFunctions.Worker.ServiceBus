@@ -22,7 +22,7 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(CancellationToken.None)
+            await InitializeEndpointIfNecessary(cancellationToken)
                 .ConfigureAwait(false);
 
             await messageProcessor.Process(message, messageActions, cancellationToken)
