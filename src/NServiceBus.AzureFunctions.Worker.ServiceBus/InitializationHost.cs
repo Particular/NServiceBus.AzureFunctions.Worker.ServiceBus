@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Hosting;
 
-    class InitializationHost(FunctionEndpoint functionEndpoint) : IHostedService
+    class InitializationHost(InternalFunctionEndpoint functionEndpoint) : IHostedService
     {
         public Task StartAsync(CancellationToken cancellationToken = default) => functionEndpoint.InitializeEndpointIfNecessary(cancellationToken);
 
