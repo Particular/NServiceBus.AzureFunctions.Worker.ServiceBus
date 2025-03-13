@@ -1,7 +1,6 @@
-namespace NServiceBus.AzureFunctions.Worker.ServiceBus
+namespace NServiceBus.AzureFunctions.Worker.ServiceBus;
+
+static class TransportMessageHeaders
 {
-    static class TransportMessageHeaders
-    {
-        public const string TransportEncoding = "NServiceBus.Transport.Encoding";
-    }
+    public const string TransportEncoding = "NServiceBus.Transport.Encoding";
 }

@@ -1,20 +1,19 @@
-﻿namespace NServiceBus
+﻿namespace NServiceBus;
+
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+static class DeterministicGuid
 {
-    using System;
-    using System.Security.Cryptography;
-    using System.Text;
-
-    static class DeterministicGuid
+    public static Guid Create(string data)
     {
-        public static Guid Create(string data)
-        {
-            var inputBytes = Encoding.Default.GetBytes(data);
+        var inputBytes = Encoding.Default.GetBytes(data);
 
-            // use MD5 hash to get a 16-byte hash of the string
-            var hashBytes = MD5.HashData(inputBytes);
+        // use MD5 hash to get a 16-byte hash of the string
+        var hashBytes = MD5.HashData(inputBytes);
 
-            // generate a guid from the hash:
-            return new Guid(hashBytes);
-        }
+        // generate a guid from the hash:
+        return new Guid(hashBytes);
     }
 }
