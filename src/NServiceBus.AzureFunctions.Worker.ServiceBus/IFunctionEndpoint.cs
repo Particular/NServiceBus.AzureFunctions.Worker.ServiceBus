@@ -1,8 +1,6 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
@@ -17,29 +15,7 @@
         /// <summary>
         /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
         /// </summary>
-        Task Process(
-            ServiceBusReceivedMessage message,
-            ServiceBusMessageActions messageActions,
-            FunctionContext functionContext,
-            CancellationToken cancellationToken = default) =>
-            Process(message.Body.ToArray(), message.ApplicationProperties.ToDictionary(),
-                message.MessageId, message.DeliveryCount,
-                message.ReplyTo, message.CorrelationId, functionContext,
-                cancellationToken);
-
-        /// <summary>
-        /// Processes a message received from an AzureServiceBus trigger using the NServiceBus message pipeline.
-        /// </summary>
-        [ObsoleteEx(Message = "Change the function signature to accept a ServiceBusReceivedMessage and the ServiceBusMessageActions instead of binding to individual elements of the ServiceBusReceivedMessage.", TreatAsErrorFromVersion = "5.0.0", RemoveInVersion = "6.0.0", ReplacementTypeOrMember = "Process(ServiceBusReceiveMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default)")]
-        Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            FunctionContext functionContext,
-            CancellationToken cancellationToken = default);
+        Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sends the provided message.

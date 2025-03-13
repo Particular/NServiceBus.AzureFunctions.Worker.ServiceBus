@@ -149,12 +149,12 @@
                 _ = services.AddSingleton(serverlessTransport);
 
                 // we are manually resolving all dependencies of FunctionEndpoint since Serverless transport is internal and we run into constructor selection issues if not
-                _ = services.AddSingleton(sp => new FunctionEndpoint(
+                _ = services.AddSingleton(sp => new InternalFunctionEndpoint(
                     sp.GetRequiredService<IStartableEndpointWithExternallyManagedContainer>(),
                     sp.GetRequiredService<ServerlessTransport>(),
                     sp));
 
-                _ = services.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<FunctionEndpoint>());
+                _ = services.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<InternalFunctionEndpoint>());
                 return;
 
                 string TryResolveBindingExpression()

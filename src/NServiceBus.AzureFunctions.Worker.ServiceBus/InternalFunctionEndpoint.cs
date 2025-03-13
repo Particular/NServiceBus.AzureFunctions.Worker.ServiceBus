@@ -1,21 +1,15 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using AzureFunctions.Worker.ServiceBus;
     using Microsoft.Azure.Functions.Worker;
 
-    /// <summary>
-    /// An NServiceBus endpoint hosted in Azure Function which does not receive messages automatically but only handles
-    /// messages explicitly passed to it by the caller.
-    /// </summary>
-    [ObsoleteEx(TreatAsErrorFromVersion = "6", RemoveInVersion = "7", ReplacementTypeOrMember = nameof(IFunctionEndpoint))]
-    public class FunctionEndpoint : IFunctionEndpoint
+    sealed class InternalFunctionEndpoint : IFunctionEndpoint
     {
-        internal FunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessTransport serverlessTransport, IServiceProvider serviceProvider)
+        internal InternalFunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessTransport serverlessTransport, IServiceProvider serviceProvider)
         {
             this.serverlessTransport = serverlessTransport;
             this.serverlessTransport.ServiceProvider = serviceProvider;
@@ -28,27 +22,12 @@
         {
             FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-            await InitializeEndpointIfNecessary(CancellationToken.None)
+            await InitializeEndpointIfNecessary(cancellationToken)
                 .ConfigureAwait(false);
 
             await messageProcessor.Process(message, messageActions, cancellationToken)
                 .ConfigureAwait(false);
         }
-
-        /// <inheritdoc />
-        [ObsoleteEx(Message = "Change the function signature to accept a ServiceBusReceivedMessage and the ServiceBusMessageActions instead of binding to individual elements of the ServiceBusReceivedMessage.", TreatAsErrorFromVersion = "5.0.0", RemoveInVersion = "6.0.0", ReplacementTypeOrMember = "Process(ServiceBusReceiveMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default)")]
-        public Task Process(
-            byte[] body,
-            IDictionary<string, object> userProperties,
-            string messageId,
-            int deliveryCount,
-            string replyTo,
-            string correlationId,
-            FunctionContext functionContext,
-            CancellationToken cancellationToken = default) =>
-            Process(ServiceBusModelFactory.ServiceBusReceivedMessage(BinaryData.FromBytes(body),
-                properties: userProperties, messageId: messageId, deliveryCount: deliveryCount,
-                correlationId: correlationId, replyTo: replyTo), default, functionContext, cancellationToken);
 
         internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken = default)
         {
