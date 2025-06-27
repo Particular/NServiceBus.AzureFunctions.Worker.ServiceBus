@@ -110,21 +110,13 @@ public class TriggerFunctionGenerator : IIncrementalGenerator
         using NServiceBus;
 
         [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-        public class FunctionEndpointTrigger
+        public class FunctionEndpointTrigger(IFunctionEndpoint endpoint)
         {
-                readonly IFunctionEndpoint endpoint;
-
-                public FunctionEndpointTrigger(IFunctionEndpoint endpoint)
-                {
-                    this.endpoint = endpoint;
-                }
-
-                [Function("{{triggerFunctionName}}")]
-                public async Task Run(
-                    [ServiceBusTrigger("{{attributeValues.EndpointName}}"{{connection}})] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
-                {
-                    await endpoint.Process(message, messageActions, context, cancellationToken);
-                }
+            [Function("{{triggerFunctionName}}")]
+            public async Task Run([ServiceBusTrigger("{{attributeValues.EndpointName}}"{{connection}})] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
+            {
+                await endpoint.Process(message, messageActions, context, cancellationToken);
+            }
         }
         """;
 
