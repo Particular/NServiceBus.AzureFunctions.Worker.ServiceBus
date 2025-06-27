@@ -7,19 +7,11 @@ using Microsoft.Azure.Functions.Worker;
 using NServiceBus;
 
 [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-public class FunctionEndpointTrigger
+public class FunctionEndpointTrigger(IFunctionEndpoint endpoint)
 {
-        readonly IFunctionEndpoint endpoint;
-
-        public FunctionEndpointTrigger(IFunctionEndpoint endpoint)
-        {
-            this.endpoint = endpoint;
-        }
-
-        [Function("NServiceBusFunctionEndpointTrigger-endpoint")]
-        public async Task Run(
-            [ServiceBusTrigger("endpoint")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
-        {
-            await endpoint.Process(message, messageActions, context, cancellationToken);
-        }
+    [Function("NServiceBusFunctionEndpointTrigger-endpoint")]
+    public async Task Run([ServiceBusTrigger("endpoint")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
+    {
+        await endpoint.Process(message, messageActions, context, cancellationToken);
+    }
 }
