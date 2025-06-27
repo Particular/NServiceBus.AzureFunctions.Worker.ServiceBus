@@ -75,12 +75,12 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
         static void Analyze(SyntaxNodeAnalysisContext context)
         {
-            if (!(context.Node is InvocationExpressionSyntax invocationExpression))
+            if (context.Node is not InvocationExpressionSyntax invocationExpression)
             {
                 return;
             }
 
-            if (!(invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpression))
+            if (invocationExpression.Expression is not MemberAccessExpressionSyntax memberAccessExpression)
             {
                 return;
             }
@@ -96,7 +96,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
         static void AnalyzeTransport(SyntaxNodeAnalysisContext context)
         {
-            if (!(context.Node is MemberAccessExpressionSyntax memberAccess))
+            if (context.Node is not MemberAccessExpressionSyntax memberAccess)
             {
                 return;
             }
@@ -109,12 +109,12 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccess, context.CancellationToken);
 
-            if (!(memberAccessSymbol.Symbol is IPropertySymbol propertySymbol))
+            if (memberAccessSymbol.Symbol is not IPropertySymbol propertySymbol)
             {
                 return;
             }
 
-            if (propertySymbol.ContainingType.ToString() == "NServiceBus.AzureServiceBusTransport" || propertySymbol.ContainingType.ToString() == "NServiceBus.Transport.TransportDefinition")
+            if (propertySymbol.ContainingType.ToString() is "NServiceBus.AzureServiceBusTransport" or "NServiceBus.Transport.TransportDefinition")
             {
                 context.ReportDiagnostic(diagnosticDescriptor, memberAccess);
 
@@ -130,7 +130,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
 
-            if (!(memberAccessSymbol.Symbol is IMethodSymbol methodSymbol))
+            if (memberAccessSymbol.Symbol is not IMethodSymbol methodSymbol)
             {
                 return;
             }
@@ -150,12 +150,12 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
 
-            if (!(memberAccessSymbol.Symbol is IMethodSymbol methodSymbol))
+            if (memberAccessSymbol.Symbol is not IMethodSymbol methodSymbol)
             {
                 return;
             }
 
-            if (methodSymbol.ReceiverType.ToString() == "NServiceBus.SendOptions" || methodSymbol.ReceiverType.ToString() == "NServiceBus.ReplyOptions")
+            if (methodSymbol.ReceiverType.ToString() is "NServiceBus.SendOptions" or "NServiceBus.ReplyOptions")
             {
                 context.ReportDiagnostic(diagnosticDescriptor, invocationExpression);
             }
@@ -170,7 +170,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
 
-            if (!(memberAccessSymbol.Symbol is IMethodSymbol methodSymbol))
+            if (memberAccessSymbol.Symbol is not IMethodSymbol methodSymbol)
             {
                 return;
             }
