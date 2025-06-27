@@ -1,108 +1,106 @@
-﻿namespace NServiceBus.AzureFunctions.Worker.Analyzer
+﻿#nullable enable
+
+namespace NServiceBus.AzureFunctions.Worker.Analyzer;
+
+using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+
+[Generator]
+public class TriggerFunctionGenerator : IIncrementalGenerator
 {
-    using System.Linq;
-    using System.Text;
-    using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Microsoft.CodeAnalysis.Text;
-
-    [Generator]
-    public class TriggerFunctionGenerator : ISourceGenerator
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        public void Initialize(GeneratorInitializationContext context)
+        var attribute = context.SyntaxProvider.ForAttributeWithMetadataName("NServiceBus.NServiceBusTriggerFunctionAttribute", (_, _) => true, (context, _) => GetAttributeValues(context));
+
+        context.RegisterSourceOutput(attribute, (context, attributeValues) =>
         {
-            context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
-        }
-
-        class SyntaxReceiver : ISyntaxContextReceiver
-        {
-            internal string endpointName;
-            internal string triggerFunctionName;
-            internal string connection;
-            internal bool attributeFound;
-            internal bool isInvalidBindingExpression = false;
-
-            public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
-            {
-                if (context.Node is AttributeSyntax attributeSyntax
-                    && IsNServiceBusEndpointNameAttribute(context.SemanticModel.GetTypeInfo(attributeSyntax).Type?.ToDisplayString()))
-                {
-                    attributeFound = true;
-
-                    // Assign guaranteed endpoint/queue name and handle the defaults
-                    endpointName = AttributeParameterAtPosition(0);
-                    triggerFunctionName = $"NServiceBusFunctionEndpointTrigger-{endpointName}";
-
-                    var attributeParametersCount = AttributeParametersCount();
-
-                    if (attributeParametersCount == 1)
-                    {
-                        if (IsBindingExpression(endpointName))
-                        {
-                            isInvalidBindingExpression = true;
-                        }
-                        return;
-                    }
-
-                    var triggerFunctionNameAttribute = attributeSyntax.ArgumentList.Arguments.FirstOrDefault(arg => arg.GetFirstToken().ValueText == "TriggerFunctionName");
-                    if (triggerFunctionNameAttribute != null)
-                    {
-                        triggerFunctionName = context.SemanticModel.GetConstantValue(triggerFunctionNameAttribute.Expression).Value?.ToString();
-                    }
-
-                    var connectionAttribute = attributeSyntax.ArgumentList.Arguments.FirstOrDefault(arg => arg.GetFirstToken().ValueText == "Connection");
-                    if (connectionAttribute != null)
-                    {
-                        connection = context.SemanticModel.GetConstantValue(connectionAttribute.Expression).Value?.ToString();
-                    }
-                }
-
-                bool IsNServiceBusEndpointNameAttribute(string value) => value?.Equals("NServiceBus.NServiceBusTriggerFunctionAttribute") ?? false;
-                string AttributeParameterAtPosition(int position) => context.SemanticModel.GetConstantValue(attributeSyntax.ArgumentList.Arguments[position].Expression).Value?.ToString();
-                int AttributeParametersCount() => attributeSyntax.ArgumentList.Arguments.Count;
-                bool IsBindingExpression(string endpointName) => !string.IsNullOrWhiteSpace(endpointName) && endpointName[0] == '%' && endpointName[0] == endpointName[endpointName.Length - 1];
-            }
-        }
-
-        public void Execute(GeneratorExecutionContext context)
-        {
-            // Short circuit if this is a different syntax receiver
-            if (context.SyntaxContextReceiver is not SyntaxReceiver syntaxReceiver)
-            {
-                return;
-            }
-
-            // Skip processing if no attribute was found
-            if (!syntaxReceiver.attributeFound)
-            {
-                return;
-            }
-
             // Generate an error if empty/null/space is used as endpoint name
-            if (string.IsNullOrWhiteSpace(syntaxReceiver.endpointName))
+            if (string.IsNullOrWhiteSpace(attributeValues.EndpointName))
             {
-                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidEndpointNameError, Location.None, syntaxReceiver.endpointName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidEndpointNameError, Location.None, attributeValues.EndpointName));
                 return;
             }
 
             // Generate an error if a binding expression is provided with no trigger function name
-            if (syntaxReceiver.isInvalidBindingExpression)
+            if (!attributeValues.TriggerFunctionNameSet && IsBindingExpression(attributeValues.EndpointName))
             {
-                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidBindingExpression, Location.None, syntaxReceiver.endpointName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidBindingExpression, Location.None, attributeValues.EndpointName));
                 return;
             }
 
             // Generate an error if empty/null/space is used as trigger function name
-            if (string.IsNullOrWhiteSpace(syntaxReceiver.triggerFunctionName))
+            if (attributeValues.TriggerFunctionNameSet && string.IsNullOrWhiteSpace(attributeValues.TriggerFunctionName))
             {
-                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidTriggerFunctionNameError, Location.None, syntaxReceiver.triggerFunctionName));
+                context.ReportDiagnostic(Diagnostic.Create(AzureFunctionsDiagnostics.InvalidTriggerFunctionNameError, Location.None, attributeValues.TriggerFunctionName));
                 return;
             }
 
-            var connectionParam = string.IsNullOrWhiteSpace(syntaxReceiver.connection)
-                ? ""
-                : $", Connection=\"{syntaxReceiver.connection}\"";
-            var source =
+            context.AddSource("NServiceBus_FunctionEndpointTrigger.g.cs", SourceText.From(Source(attributeValues), Encoding.UTF8));
+        });
+    }
+
+    readonly record struct AttributeValues
+    {
+        public AttributeValues(string? endpointName, string? triggerFunctionName, bool triggerFunctionNameSet, string? connection)
+        {
+            EndpointName = endpointName;
+            TriggerFunctionName = triggerFunctionName;
+            TriggerFunctionNameSet = triggerFunctionNameSet;
+            Connection = connection;
+        }
+
+        public readonly string? EndpointName;
+        public readonly string? TriggerFunctionName;
+        public readonly bool TriggerFunctionNameSet;
+        public readonly string? Connection;
+    }
+
+    static AttributeValues GetAttributeValues(GeneratorAttributeSyntaxContext context)
+    {
+        string? endpointName = null;
+        string? triggerFunctionName = null;
+        bool triggerFunctionNameSet = false;
+        string? connection = null;
+
+        foreach (var attribute in context.Attributes)
+        {
+            foreach (var argument in attribute.ConstructorArguments)
+            {
+                endpointName = argument.Value?.ToString();
+            }
+
+            foreach (var argument in attribute.NamedArguments)
+            {
+                if (argument.Key == "TriggerFunctionName")
+                {
+                    triggerFunctionName = argument.Value.Value?.ToString();
+                    triggerFunctionNameSet = true;
+                }
+                else if (argument.Key == "Connection")
+                {
+                    connection = argument.Value.Value?.ToString();
+                }
+            }
+        }
+
+        return new AttributeValues(endpointName, triggerFunctionName, triggerFunctionNameSet, connection);
+    }
+
+    static bool IsBindingExpression(string? endpointName) => endpointName is not null && !string.IsNullOrWhiteSpace(endpointName) && endpointName[0] == '%' && endpointName[0] == endpointName[endpointName.Length - 1];
+
+    static string Source(AttributeValues attributeValues)
+    {
+        var triggerFunctionName = attributeValues.TriggerFunctionName ?? $"NServiceBusFunctionEndpointTrigger-{attributeValues.EndpointName}";
+
+        string? connection = null;
+
+        if (attributeValues.Connection is not null)
+        {
+            connection = $", Connection=\"{attributeValues.Connection}\"";
+        }
+
+        var source =
 $@"// <autogenerated/>
 using System.Collections.Generic;
 using System.Threading;
@@ -121,14 +119,14 @@ public class FunctionEndpointTrigger
             this.endpoint = endpoint;
         }}
 
-        [Function(""{syntaxReceiver.triggerFunctionName}"")]
+        [Function(""{triggerFunctionName}"")]
         public async Task Run(
-            [ServiceBusTrigger(""{syntaxReceiver.endpointName}""{connectionParam})] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
+            [ServiceBusTrigger(""{attributeValues.EndpointName}""{connection})] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
         {{
             await endpoint.Process(message, messageActions, context, cancellationToken);
         }}
 }}";
-            context.AddSource("NServiceBus__FunctionEndpointTrigger", SourceText.From(source, Encoding.UTF8));
-        }
+
+        return source;
     }
 }
