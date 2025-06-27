@@ -67,7 +67,7 @@
         public void Execute(GeneratorExecutionContext context)
         {
             // Short circuit if this is a different syntax receiver
-            if (!(context.SyntaxContextReceiver is SyntaxReceiver syntaxReceiver))
+            if (context.SyntaxContextReceiver is not SyntaxReceiver syntaxReceiver)
             {
                 return;
             }
