@@ -58,29 +58,25 @@ public class TriggerFunctionGenerator : IIncrementalGenerator
 
     static AttributeValues GetAttributeValues(GeneratorAttributeSyntaxContext context)
     {
-        string? endpointName = null;
+        var attribute = context.Attributes[0];
+
+        var constructorArgument = attribute.ConstructorArguments[0];
+        var endpointName = constructorArgument.Value?.ToString();
+
         string? triggerFunctionName = null;
         bool triggerFunctionNameSet = false;
         string? connection = null;
 
-        foreach (var attribute in context.Attributes)
+        foreach (var argument in attribute.NamedArguments)
         {
-            foreach (var argument in attribute.ConstructorArguments)
+            if (argument.Key == "TriggerFunctionName")
             {
-                endpointName = argument.Value?.ToString();
+                triggerFunctionName = argument.Value.Value?.ToString();
+                triggerFunctionNameSet = true;
             }
-
-            foreach (var argument in attribute.NamedArguments)
+            else if (argument.Key == "Connection")
             {
-                if (argument.Key == "TriggerFunctionName")
-                {
-                    triggerFunctionName = argument.Value.Value?.ToString();
-                    triggerFunctionNameSet = true;
-                }
-                else if (argument.Key == "Connection")
-                {
-                    connection = argument.Value.Value?.ToString();
-                }
+                connection = argument.Value.Value?.ToString();
             }
         }
 
