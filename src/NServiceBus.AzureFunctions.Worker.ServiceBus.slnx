@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../.github/workflows/ci.yml" />
+    <File Path="../.github/workflows/release.yml" />
+    <File Path="Custom.Build.props" />
+  </Folder>
+  <Project Path="ManualTests.HostV4/ManualTests.HostV4.csproj" />
+  <Project Path="NServiceBus.AzureFunctions.Worker.Analyzer.Tests/NServiceBus.AzureFunctions.Worker.Analyzer.Tests.csproj" />
+  <Project Path="NServiceBus.AzureFunctions.Worker.Analyzer/NServiceBus.AzureFunctions.Worker.Analyzer.csproj" />
+  <Project Path="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests/NServiceBus.AzureFunctions.Worker.ServiceBus.Tests.csproj" />
+  <Project Path="NServiceBus.AzureFunctions.Worker.ServiceBus/NServiceBus.AzureFunctions.Worker.ServiceBus.csproj" />
+</Solution>
