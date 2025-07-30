@@ -5,8 +5,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MinVerMinimumMajorMinor>6.0</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
     <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
 </Project>
