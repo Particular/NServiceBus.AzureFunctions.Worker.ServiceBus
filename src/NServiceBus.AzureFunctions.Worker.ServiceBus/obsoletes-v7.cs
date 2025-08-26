@@ -7,8 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
+using Particular.Obsoletes;
 
-[ObsoleteEx(TreatAsErrorFromVersion = "6", RemoveInVersion = "7", ReplacementTypeOrMember = nameof(IFunctionEndpoint))]
+[ObsoleteMetadata(TreatAsErrorFromVersion = "6", RemoveInVersion = "7", ReplacementTypeOrMember = nameof(IFunctionEndpoint))]
+[Obsolete("Use 'IFunctionEndpoint' instead. Will be removed in version 7.0.0.", true)]
 public class FunctionEndpoint : IFunctionEndpoint
 {
     public Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
