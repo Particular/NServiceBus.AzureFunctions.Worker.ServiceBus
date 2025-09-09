@@ -70,4 +70,44 @@ class Foo
 
         return Assert(diagnosticId, source);
     }
+
+    [Test]
+    public Task DiagnosticIsReportedForLogDiagnostics()
+    {
+        var source =
+            @"using NServiceBus;
+using System;
+class Foo
+{
+    void Bar(ServiceBusTriggeredEndpointConfiguration endpointConfig)
+    {
+        [|endpointConfig.LogDiagnostics()|];
+    }
+}";
+
+        return Assert(LogDiagnosticsNotRecommendedId, source);
+    }
+
+    [Test]
+    public Task DiagnosticIsNotReportedForLogDiagnosticsOnOtherClass()
+    {
+        var source =
+            @"using NServiceBus;
+using System;
+
+class SomeOtherClass
+{
+    internal void LogDiagnostics() { }
+}
+
+class Foo
+{
+    void Bar(SomeOtherClass otherClass)
+    {
+        otherClass.LogDiagnostics();
+    }
+}";
+
+        return Assert(LogDiagnosticsNotRecommendedId, source);
+    }
 }

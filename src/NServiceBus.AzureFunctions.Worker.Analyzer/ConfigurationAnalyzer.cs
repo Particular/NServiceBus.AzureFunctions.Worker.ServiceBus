@@ -25,7 +25,8 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             AzureFunctionsDiagnostics.PrefetchCountNotAllowed,
             AzureFunctionsDiagnostics.PrefetchMultiplierNotAllowed,
             AzureFunctionsDiagnostics.TimeToWaitBeforeTriggeringCircuitBreakerNotAllowed,
-            AzureFunctionsDiagnostics.TransportTransactionModeNotAllowed
+            AzureFunctionsDiagnostics.TransportTransactionModeNotAllowed,
+            AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended
         );
 
         static readonly Dictionary<string, DiagnosticDescriptor> NotAllowedEndpointConfigurationMethods
@@ -83,6 +84,8 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             AnalyzeSendAndReplyOptions(context, invocationExpression, memberAccessExpression);
 
             AnalyzeTransportExtensions(context, invocationExpression, memberAccessExpression);
+
+            AnalyzeLogDiagnostics(context, invocationExpression, memberAccessExpression);
         }
 
         static void AnalyzeTransport(SyntaxNodeAnalysisContext context)
@@ -169,6 +172,26 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             if (methodSymbol.ReceiverType.ToString() == "NServiceBus.TransportExtensions<NServiceBus.AzureServiceBusTransport>")
             {
                 context.ReportDiagnostic(diagnosticDescriptor, invocationExpression);
+            }
+        }
+
+        static void AnalyzeLogDiagnostics(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, MemberAccessExpressionSyntax memberAccessExpression)
+        {
+            if (memberAccessExpression.Name.Identifier.Text != "LogDiagnostics")
+            {
+                return;
+            }
+
+            var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
+
+            if (!(memberAccessSymbol.Symbol is IMethodSymbol methodSymbol))
+            {
+                return;
+            }
+
+            if (methodSymbol.ReceiverType.ToString() == "NServiceBus.ServiceBusTriggeredEndpointConfiguration")
+            {
+                context.ReportDiagnostic(AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended, invocationExpression);
             }
         }
     }
