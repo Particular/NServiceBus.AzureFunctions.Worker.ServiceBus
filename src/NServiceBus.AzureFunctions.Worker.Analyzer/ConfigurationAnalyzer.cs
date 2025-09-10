@@ -59,6 +59,12 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
                 ["Transactions"] = AzureFunctionsDiagnostics.TransportTransactionModeNotAllowed
             };
 
+        static readonly Dictionary<string, DiagnosticDescriptor> NotRecommendedEndpointConfigurationMethods
+            = new Dictionary<string, DiagnosticDescriptor>
+            {
+                ["LogDiagnostics"] = AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended
+            };
+
         public override void Initialize(AnalysisContext context)
         {
             context.EnableConcurrentExecution();
@@ -177,21 +183,17 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
         static void AnalyzeLogDiagnostics(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, MemberAccessExpressionSyntax memberAccessExpression)
         {
-            if (memberAccessExpression.Name.Identifier.Text != "LogDiagnostics")
+            if (!NotRecommendedEndpointConfigurationMethods.TryGetValue(memberAccessExpression.Name.Identifier.Text, out var diagnosticDescriptor))
             {
                 return;
             }
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
 
-            if (!(memberAccessSymbol.Symbol is IMethodSymbol methodSymbol))
+            if ((memberAccessSymbol.Symbol is IMethodSymbol methodSymbol)
+                && (methodSymbol.ReceiverType.ToString() == "NServiceBus.ServiceBusTriggeredEndpointConfiguration"))
             {
-                return;
-            }
-
-            if (methodSymbol.ReceiverType.ToString() == "NServiceBus.ServiceBusTriggeredEndpointConfiguration")
-            {
-                context.ReportDiagnostic(AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended, invocationExpression);
+                context.ReportDiagnostic(diagnosticDescriptor, invocationExpression);
             }
         }
     }

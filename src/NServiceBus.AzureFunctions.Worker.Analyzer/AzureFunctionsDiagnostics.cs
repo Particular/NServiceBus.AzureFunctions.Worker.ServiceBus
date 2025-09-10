@@ -177,8 +177,8 @@
 
         internal static readonly DiagnosticDescriptor LogDiagnosticsNotRecommended = new DiagnosticDescriptor(
              id: LogDiagnosticsNotRecommendedId,
-             title: "LogDiagnostics is not recommended",
-             messageFormat: "Use 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
+             title: "LogDiagnostics is not recommended in Azure Functions",
+             messageFormat: "'LogDiagnostics' is not recommended in Azure Functions. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
              category: DiagnosticCategory,
              defaultSeverity: DiagnosticSeverity.Warning,
              isEnabledByDefault: true,
