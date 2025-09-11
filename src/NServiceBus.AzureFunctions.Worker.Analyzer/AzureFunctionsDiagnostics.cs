@@ -21,6 +21,7 @@
         public const string PrefetchCountNotAllowedId = "NSBWFUNC015";
         public const string PrefetchMultiplierNotAllowedId = "NSBWFUNC016";
         public const string TimeToWaitBeforeTriggeringCircuitBreakerNotAllowedId = "NSBWFUNC017";
+        public const string LogDiagnosticsNotRecommendedId = "NSBWFUNC018";
 
         const string DiagnosticCategory = "NServiceBus.AzureFunctions";
 
@@ -172,6 +173,17 @@
              category: DiagnosticCategory,
              defaultSeverity: DiagnosticSeverity.Error,
              isEnabledByDefault: true
+            );
+
+        internal static readonly DiagnosticDescriptor LogDiagnosticsNotRecommended = new DiagnosticDescriptor(
+             id: LogDiagnosticsNotRecommendedId,
+             title: "LogDiagnostics is not recommended in Azure Functions",
+             messageFormat: "'LogDiagnostics' is not recommended in Azure Functions. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
+             category: DiagnosticCategory,
+             defaultSeverity: DiagnosticSeverity.Warning,
+             isEnabledByDefault: true,
+             description: "'LogDiagnostics()' in Azure Functions only outputs to the console and will not create a diagnostics file. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' instead for full control over how and where diagnostics information is written.",
+             helpLinkUri: "https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/#configuration-custom-diagnostics"
             );
     }
 }
