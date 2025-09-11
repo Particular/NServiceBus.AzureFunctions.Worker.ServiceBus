@@ -176,13 +176,13 @@
             );
 
         internal static readonly DiagnosticDescriptor LogDiagnosticsInfo = new DiagnosticDescriptor(
-             id: LogDiagnosticsInfoId,
-             title: "'LogDiagnostics()' in Azure Functions only outputs to the console and will not create a diagnostics file",
-             messageFormat: "'LogDiagnostics()' in Azure Functions only outputs to the console and will not create a diagnostics file. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
-             category: DiagnosticCategory,
-             defaultSeverity: DiagnosticSeverity.Info,
-             isEnabledByDefault: true,
-             helpLinkUri: "https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/#configuration-custom-diagnostics"
-            );
+            id: LogDiagnosticsInfoId,
+            title: "Default logging with 'LogDiagnostics()' will log to the built-in Azure Functions logs",
+            messageFormat: "In Azure Functions, console output to the built-in logs is not persisted and may result in the loss of the diagnostic information. Consider using 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
+            category: DiagnosticCategory,
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            helpLinkUri: "https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/#configuration-startup-diagnostics"
+        );
     }
 }
