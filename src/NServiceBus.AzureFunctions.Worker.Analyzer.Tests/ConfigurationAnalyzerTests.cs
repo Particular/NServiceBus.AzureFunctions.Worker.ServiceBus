@@ -85,7 +85,7 @@ class Foo
     }
 }";
 
-        return Assert(LogDiagnosticsNotRecommendedId, source);
+        return Assert(LogDiagnosticsInfoId, source);
     }
 
     [Test]
@@ -108,6 +108,6 @@ class Foo
     }
 }";
 
-        return Assert(LogDiagnosticsNotRecommendedId, source);
+        return Assert(LogDiagnosticsInfoId, source);
     }
 }

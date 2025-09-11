@@ -26,7 +26,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             AzureFunctionsDiagnostics.PrefetchMultiplierNotAllowed,
             AzureFunctionsDiagnostics.TimeToWaitBeforeTriggeringCircuitBreakerNotAllowed,
             AzureFunctionsDiagnostics.TransportTransactionModeNotAllowed,
-            AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended
+            AzureFunctionsDiagnostics.LogDiagnosticsInfo
         );
 
         static readonly Dictionary<string, DiagnosticDescriptor> NotAllowedEndpointConfigurationMethods
@@ -59,10 +59,10 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
                 ["Transactions"] = AzureFunctionsDiagnostics.TransportTransactionModeNotAllowed
             };
 
-        static readonly Dictionary<string, DiagnosticDescriptor> NotRecommendedEndpointConfigurationMethods
+        static readonly Dictionary<string, DiagnosticDescriptor> InfoEndpointConfigurationMethods
             = new Dictionary<string, DiagnosticDescriptor>
             {
-                ["LogDiagnostics"] = AzureFunctionsDiagnostics.LogDiagnosticsNotRecommended
+                ["LogDiagnostics"] = AzureFunctionsDiagnostics.LogDiagnosticsInfo
             };
 
         public override void Initialize(AnalysisContext context)
@@ -183,7 +183,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
         static void AnalyzeLogDiagnostics(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocationExpression, MemberAccessExpressionSyntax memberAccessExpression)
         {
-            if (!NotRecommendedEndpointConfigurationMethods.TryGetValue(memberAccessExpression.Name.Identifier.Text, out var diagnosticDescriptor))
+            if (!InfoEndpointConfigurationMethods.TryGetValue(memberAccessExpression.Name.Identifier.Text, out var diagnosticDescriptor))
             {
                 return;
             }
