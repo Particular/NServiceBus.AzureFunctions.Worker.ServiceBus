@@ -21,7 +21,7 @@
         public const string PrefetchCountNotAllowedId = "NSBWFUNC015";
         public const string PrefetchMultiplierNotAllowedId = "NSBWFUNC016";
         public const string TimeToWaitBeforeTriggeringCircuitBreakerNotAllowedId = "NSBWFUNC017";
-        public const string LogDiagnosticsNotRecommendedId = "NSBWFUNC018";
+        public const string LogDiagnosticsInfoId = "NSBWFUNC018";
 
         const string DiagnosticCategory = "NServiceBus.AzureFunctions";
 
@@ -175,15 +175,14 @@
              isEnabledByDefault: true
             );
 
-        internal static readonly DiagnosticDescriptor LogDiagnosticsNotRecommended = new DiagnosticDescriptor(
-             id: LogDiagnosticsNotRecommendedId,
-             title: "LogDiagnostics is not recommended in Azure Functions",
-             messageFormat: "'LogDiagnostics' is not recommended in Azure Functions. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
-             category: DiagnosticCategory,
-             defaultSeverity: DiagnosticSeverity.Warning,
-             isEnabledByDefault: true,
-             description: "'LogDiagnostics()' in Azure Functions only outputs to the console and will not create a diagnostics file. Use 'AdvancedConfiguration.CustomDiagnosticsWriter' instead for full control over how and where diagnostics information is written.",
-             helpLinkUri: "https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/#configuration-custom-diagnostics"
-            );
+        internal static readonly DiagnosticDescriptor LogDiagnosticsInfo = new DiagnosticDescriptor(
+            id: LogDiagnosticsInfoId,
+            title: "Default logging with 'LogDiagnostics()' will log to the built-in Azure Functions logs",
+            messageFormat: "In Azure Functions, console output to the built-in logs is not persisted and may result in the loss of the diagnostic information. Consider using 'AdvancedConfiguration.CustomDiagnosticsWriter' for more control over diagnostics output.",
+            category: DiagnosticCategory,
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            helpLinkUri: "https://docs.particular.net/nservicebus/hosting/azure-functions-service-bus/#configuration-startup-diagnostics"
+        );
     }
 }
