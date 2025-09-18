@@ -30,7 +30,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
         );
 
         static readonly Dictionary<string, DiagnosticDescriptor> NotAllowedEndpointConfigurationMethods
-            = new Dictionary<string, DiagnosticDescriptor>
+            = new()
             {
                 ["PurgeOnStartup"] = AzureFunctionsDiagnostics.PurgeOnStartupNotAllowed,
                 ["LimitMessageProcessingConcurrencyTo"] = AzureFunctionsDiagnostics.LimitMessageProcessingToNotAllowed,
@@ -42,14 +42,14 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             };
 
         static readonly Dictionary<string, DiagnosticDescriptor> NotAllowedSendAndReplyOptions
-            = new Dictionary<string, DiagnosticDescriptor>
+            = new()
             {
                 ["RouteReplyToThisInstance"] = AzureFunctionsDiagnostics.RouteReplyToThisInstanceNotAllowed,
                 ["RouteToThisInstance"] = AzureFunctionsDiagnostics.RouteToThisInstanceNotAllowed,
             };
 
         static readonly Dictionary<string, DiagnosticDescriptor> NotAllowedTransportSettings
-            = new Dictionary<string, DiagnosticDescriptor>
+            = new()
             {
                 ["MaxAutoLockRenewalDuration"] = AzureFunctionsDiagnostics.MaxAutoLockRenewalDurationNotAllowed,
                 ["PrefetchCount"] = AzureFunctionsDiagnostics.PrefetchCountNotAllowed,
@@ -60,7 +60,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
             };
 
         static readonly Dictionary<string, DiagnosticDescriptor> InfoEndpointConfigurationMethods
-            = new Dictionary<string, DiagnosticDescriptor>
+            = new()
             {
                 ["LogDiagnostics"] = AzureFunctionsDiagnostics.LogDiagnosticsInfo
             };
@@ -190,8 +190,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
 
             var memberAccessSymbol = context.SemanticModel.GetSymbolInfo(memberAccessExpression, context.CancellationToken);
 
-            if ((memberAccessSymbol.Symbol is IMethodSymbol methodSymbol)
-                && (methodSymbol.ReceiverType.ToString() == "NServiceBus.ServiceBusTriggeredEndpointConfiguration"))
+            if ((memberAccessSymbol.Symbol is IMethodSymbol methodSymbol) && (methodSymbol.ReceiverType.ToString() == "NServiceBus.ServiceBusTriggeredEndpointConfiguration"))
             {
                 context.ReportDiagnostic(diagnosticDescriptor, invocationExpression);
             }
