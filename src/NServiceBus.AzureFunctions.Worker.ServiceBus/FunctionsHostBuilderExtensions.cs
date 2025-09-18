@@ -11,12 +11,12 @@ using NServiceBus.AzureFunctions.Worker.ServiceBus;
 using Transport.AzureServiceBus;
 
 /// <summary>
-/// Provides extension methods to configure a <see cref="FunctionEndpoint"/> using <see cref="IHostBuilder"/>.
+/// Provides extension methods to configure a <see cref="IFunctionEndpoint"/> using <see cref="IHostBuilder"/>.
 /// </summary>
 public static partial class FunctionsHostBuilderExtensions
 {
     /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
     /// </summary>
     public static IHostBuilder UseNServiceBus(
         this IHostBuilder hostBuilder,
@@ -29,7 +29,7 @@ public static partial class FunctionsHostBuilderExtensions
     }
 
     /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
     /// </summary>
     public static IHostBuilder UseNServiceBus(
         this IHostBuilder hostBuilder,
@@ -41,7 +41,7 @@ public static partial class FunctionsHostBuilderExtensions
     }
 
     /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
     /// </summary>
     public static IHostBuilder UseNServiceBus(
         this IHostBuilder hostBuilder,
@@ -56,7 +56,7 @@ public static partial class FunctionsHostBuilderExtensions
     }
 
     /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
     /// </summary>
     public static IHostBuilder UseNServiceBus(
         this IHostBuilder hostBuilder,
@@ -70,7 +70,7 @@ public static partial class FunctionsHostBuilderExtensions
     }
 
     /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="FunctionEndpoint"/> via dependency injection.
+    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
     /// </summary>
     public static IHostBuilder UseNServiceBus(
         this IHostBuilder hostBuilder,

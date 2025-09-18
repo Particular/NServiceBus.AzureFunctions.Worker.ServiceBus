@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NServiceBus.snk</AssemblyOriginatorKeyFile>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddPropsFileToPackage</TargetsForTfmSpecificContentInPackage>
@@ -12,10 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.50.0-preview1" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.23.0" />
-    <PackageReference Include="NServiceBus" Version="9.2.7" />
-    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="5.0.0" />
+    <PackageReference Include="NServiceBus" Version="10.0.0-alpha.6" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="6.0.0-alpha.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Worker.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.8/cs/NServiceBus.AzureFunctions.Worker.Analyzer.dll" Visible="false" />
+    <None Include="..\NServiceBus.AzureFunctions.Worker.Analyzer\bin\$(Configuration)\$(AnalyzerTargetFramework)\NServiceBus.AzureFunctions.Worker.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs/NServiceBus.AzureFunctions.Worker.Analyzer.dll" Visible="false" />
   </ItemGroup>
 
   <Target Name="AddPropsFileToPackage">
