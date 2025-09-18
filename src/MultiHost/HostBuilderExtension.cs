@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
+    // It might even be possible to source generate this entire method
     public static void AddNServiceBus(this IServiceCollection services, Action<EndpointConfiguration>? customize = null)
     {
         var endpointConfiguration = new EndpointConfiguration("NotEvenUsed");
@@ -22,7 +23,7 @@ public static class ServiceCollectionExtensions
     }
 }
 
-class CommonEndpointConfigurationProvider(EndpointConfiguration commonEndpointConfiguration)
+public class CommonEndpointConfigurationProvider(EndpointConfiguration commonEndpointConfiguration)
 {
     public EndpointConfiguration CommonEndpointConfiguration { get; init; } = commonEndpointConfiguration;
 }

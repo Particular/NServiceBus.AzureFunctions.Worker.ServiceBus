@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHost", "MultiHost\MultiHost.csproj", "{C6311530-2A76-436E-AEBA-1C27F359C40D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBusPlayground", "NServiceBusPlayground\NServiceBusPlayground.csproj", "{40D08C70-8379-4348-A55B-834B324D6F7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40D08C70-8379-4348-A55B-834B324D6F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40D08C70-8379-4348-A55B-834B324D6F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40D08C70-8379-4348-A55B-834B324D6F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40D08C70-8379-4348-A55B-834B324D6F7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
