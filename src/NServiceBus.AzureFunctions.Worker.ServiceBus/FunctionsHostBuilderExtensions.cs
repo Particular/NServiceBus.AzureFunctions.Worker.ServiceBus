@@ -15,59 +15,62 @@ using Transport.AzureServiceBus;
 /// </summary>
 public static class FunctionsHostBuilderExtensions
 {
-    /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
-    /// </summary>
-    public static IHostBuilder UseNServiceBus(this IHostBuilder hostBuilder, Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+    extension(IHostBuilder hostBuilder)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
-        RegisterEndpointFactory(hostBuilder, null, callingAssembly, (_, c) => configurationFactory?.Invoke(c));
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public IHostBuilder UseNServiceBus(Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+        {
+            var callingAssembly = Assembly.GetCallingAssembly();
+            RegisterEndpointFactory(hostBuilder, null, callingAssembly, (_, c) => configurationFactory?.Invoke(c));
 
-        return hostBuilder;
-    }
+            return hostBuilder;
+        }
 
-    /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
-    /// </summary>
-    public static IHostBuilder UseNServiceBus(this IHostBuilder hostBuilder, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
-    {
-        var callingAssembly = Assembly.GetCallingAssembly();
-        RegisterEndpointFactory(hostBuilder, null, callingAssembly, configurationFactory);
-        return hostBuilder;
-    }
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public IHostBuilder UseNServiceBus(Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        {
+            var callingAssembly = Assembly.GetCallingAssembly();
+            RegisterEndpointFactory(hostBuilder, null, callingAssembly, configurationFactory);
+            return hostBuilder;
+        }
 
-    /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
-    /// </summary>
-    public static IHostBuilder UseNServiceBus(this IHostBuilder hostBuilder, string endpointName, string connectionString = null, Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public IHostBuilder UseNServiceBus(string endpointName, string connectionString = null, Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
-        RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c), connectionString);
-        return hostBuilder;
-    }
+            RegisterEndpointFactory(hostBuilder, endpointName, null, (_, c) => configurationFactory?.Invoke(c), connectionString);
+            return hostBuilder;
+        }
 
-    /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
-    /// </summary>
-    public static IHostBuilder UseNServiceBus(this IHostBuilder hostBuilder, string endpointName, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public IHostBuilder UseNServiceBus(string endpointName, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
-        RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory);
-        return hostBuilder;
-    }
+            RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory);
+            return hostBuilder;
+        }
 
-    /// <summary>
-    /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
-    /// </summary>
-    public static IHostBuilder UseNServiceBus(this IHostBuilder hostBuilder, string endpointName, string connectionString, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        /// <summary>
+        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// </summary>
+        public IHostBuilder UseNServiceBus(string endpointName, string connectionString, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory, connectionString);
-        return hostBuilder;
+            RegisterEndpointFactory(hostBuilder, endpointName, null, configurationFactory, connectionString);
+            return hostBuilder;
+        }
     }
 
     // We are currently not exposing the connectionName parameter over the public API. The reason is that
