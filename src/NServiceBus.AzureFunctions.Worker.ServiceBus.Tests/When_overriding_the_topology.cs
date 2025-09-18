@@ -46,7 +46,7 @@ public class When_overriding_the_topology
         public PublishingFunction()
         {
             PublisherMetadata.RegisterPublisherFor<MyEvent>(typeof(PublishingFunction));
-            CustomizeHostBuilder = hostBuilder => hostBuilder.ConfigureHostConfiguration(config =>
+            CustomizeHostBuilder = builder =>
             {
                 var customSettings = new Dictionary<string, string>
                 {
@@ -54,8 +54,8 @@ public class When_overriding_the_topology
                     { "AzureServiceBus:MigrationTopologyOptions:TopicToSubscribeOn", "bundle-1" },
                     { $"AzureServiceBus:MigrationTopologyOptions:PublishedEventToTopicsMap:{typeof(MyEvent).FullName}", $"{typeof(MyEvent).ToTopicName()}" },
                 };
-                _ = config.AddInMemoryCollection(customSettings);
-            });
+                _ = builder.Configuration.AddInMemoryCollection(customSettings);
+            };
             AddTestMessage(new TriggerMessage());
         }
 
