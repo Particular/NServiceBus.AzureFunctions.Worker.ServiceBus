@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.AzureFunctions.Worker.Analyzer.Tests", "NServiceBus.AzureFunctions.Worker.Analyzer.Tests\NServiceBus.AzureFunctions.Worker.Analyzer.Tests.csproj", "{9569AB2C-1F1C-489A-974C-F3D19B54F0B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHost", "MultiHost\MultiHost.csproj", "{C6311530-2A76-436E-AEBA-1C27F359C40D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{9569AB2C-1F1C-489A-974C-F3D19B54F0B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9569AB2C-1F1C-489A-974C-F3D19B54F0B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9569AB2C-1F1C-489A-974C-F3D19B54F0B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6311530-2A76-436E-AEBA-1C27F359C40D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
