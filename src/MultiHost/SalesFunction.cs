@@ -24,6 +24,9 @@ public partial class SalesFunction([FromKeyedServices(nameof(SalesFunction))] Fu
     public async partial Task Sales(ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default)
     {
+        // Because we generate this you can essentially add a decorator chain of IConfigureEndpoint implementations
+        // that for example adds specific stuff to the endpoint configuration like source generator discovered handlers
+        // and other things.
         await endpoint.Process(message, messageActions, this, cancellationToken).ConfigureAwait(false);
     }
 }
@@ -34,21 +37,21 @@ public interface IConfigureEndpoint
     void Configure(EndpointConfiguration endpointConfiguration);
 }
 
-public class FunctionEndpoint
+// In the current version this object does send and receive but technically we could now totally split this responsibility
+// and have a FunctionReceiver and a FunctionSender or just use IMessageSession with a sendonly endpoint or do we foresee
+// specific routing being necessary per function?
+public sealed class FunctionEndpoint(string functionName, Action<EndpointConfiguration> customizeConfig) : IAsyncDisposable
 {
     IMessageProcessor? messageProcessor;
-    SemaphoreSlim semaphoreLock;
-
-    public FunctionEndpoint(CommonEndpointConfigurationProvider configurationProvider)
-    {
-
-    }
+    SemaphoreSlim semaphoreLock = new(1, 1);
+    ServiceProvider serviceProvider;
+    IEndpointInstance endpoint;
 
     public async Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, IConfigureEndpoint endpoint = null,
         CancellationToken cancellationToken = default) => await Console.Out
         .WriteLineAsync($"Processing message: {message.MessageId}").ConfigureAwait(false);
 
-    internal async Task InitializeEndpointIfNecessary(CancellationToken cancellationToken = default)
+    internal async Task InitializeEndpointIfNecessary(IConfigureEndpoint configureEndpoint, CancellationToken cancellationToken = default)
     {
         if (messageProcessor == null)
         {
@@ -57,7 +60,23 @@ public class FunctionEndpoint
             {
                 if (messageProcessor == null)
                 {
-                    endpoint = await endpointFactory().ConfigureAwait(false);
+                    var endpointConfiguration = new EndpointConfiguration(functionName);
+                    // Here we have access to the full service provider and can basically achieve almost anything
+                    // so the serverless transport can get less complicated
+
+                    // Dependencies registered here will be available in the function endpoint handlers
+                    customizeConfig(endpointConfiguration);
+                    configureEndpoint.Configure(endpointConfiguration);
+
+                    // here we can cobble out types out of the settings and configure it properly
+
+                    var serviceCollection = new ServiceCollection();
+
+                    var startableEndpoint = EndpointWithExternallyManagedContainer.Create(endpointConfiguration, serviceCollection);
+
+                    serviceProvider = serviceCollection.BuildServiceProvider();
+
+                    endpoint = await startableEndpoint.Start(serviceProvider, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                     messageProcessor = serverlessTransport.MessageProcessor;
                 }
@@ -67,5 +86,12 @@ public class FunctionEndpoint
                 semaphoreLock.Release();
             }
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // needs proper implementation
+        await endpoint.Stop().ConfigureAwait(false);
+        await serviceProvider.DisposeAsync().ConfigureAwait(false);
     }
 }
