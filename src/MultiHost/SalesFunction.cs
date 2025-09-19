@@ -24,13 +24,17 @@ public partial class SalesFunction
         routing.RouteToEndpoint(typeof(PlaceOrder), "sales");
     }
 
+    // The drawback of having this thing here is that we need to share CTOR args with the user and that might lead to troubles when they want to inject their own stuff
     [Function("SalesAPI")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
         HttpRequestData request,
         FunctionContext executionContext)
     {
+        // with TX session enabled, these 3 operations would be "atomic"
         await session.Send(new PlaceOrder()).ConfigureAwait(false);
+        //await session.Send(new SomeOtherMessage()).ConfigureAwait(false);
+        //await cosmosDB.SaveStuff(new Order());
 
         return request.CreateResponse(HttpStatusCode.OK);
     }
@@ -40,7 +44,7 @@ public partial class BillingFunction
 {
     [Function(nameof(BillingFunction))]
     public partial Task Billing(
-        [ServiceBusTrigger("billing", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
+        [ServiceBusTrigger("billing", Connection = "ServiceBusConnection2", AutoCompleteMessages = false)] //Using a separate namespace would need the bridge for the individual endpoints to talk to each other
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
 
