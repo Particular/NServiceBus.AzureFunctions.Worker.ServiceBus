@@ -1,24 +1,12 @@
 namespace MultiHost;
 
+using System.Net;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
 using NServiceBus.Configuration.AdvancedExtensibility;
-
-public partial class BillingFunction
-{
-    [Function(nameof(BillingFunction))]
-    public partial Task Billing(
-        [ServiceBusTrigger("billing", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
-        ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
-
-    public void Configure(AzureServiceBusTransport transport, RoutingSettings<AzureServiceBusTransport> routing, EndpointConfiguration endpointConfiguration)
-    {
-        endpointConfiguration.AddHandler<OrderAcceptedHandler>();
-    }
-}
 
 public partial class SalesFunction
 {
@@ -35,6 +23,31 @@ public partial class SalesFunction
 
         routing.RouteToEndpoint(typeof(PlaceOrder), "sales");
     }
+
+    [Function("SalesAPI")]
+    public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
+        HttpRequestData request,
+        FunctionContext executionContext)
+    {
+        await session.Send(new PlaceOrder()).ConfigureAwait(false);
+
+        return request.CreateResponse(HttpStatusCode.OK);
+    }
+}
+
+public partial class BillingFunction
+{
+    [Function(nameof(BillingFunction))]
+    public partial Task Billing(
+        [ServiceBusTrigger("billing", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
+        ServiceBusReceivedMessage message,
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+
+    public void Configure(AzureServiceBusTransport transport, RoutingSettings<AzureServiceBusTransport> routing, EndpointConfiguration endpointConfiguration)
+    {
+        endpointConfiguration.AddHandler<OrderAcceptedHandler>();
+    }
 }
 
 public partial class BillingFunction([FromKeyedServices(nameof(BillingFunction))] FunctionEndpoint endpoint) : IConfigureEndpoint
@@ -45,20 +58,18 @@ public partial class BillingFunction([FromKeyedServices(nameof(BillingFunction))
         // Because we generate this you can essentially add a decorator chain of IConfigureEndpoint implementations
         // that for example adds specific stuff to the endpoint configuration like source generator discovered handlers
         // and other things.
-        await endpoint.Process(message, messageActions, this as IConfigureEndpoint, cancellationToken).ConfigureAwait(false);
+        await endpoint.Process(message, messageActions, this, cancellationToken).ConfigureAwait(false);
     }
 }
 
-public partial class SalesFunction([FromKeyedServices(nameof(SalesFunction))] FunctionEndpoint endpoint) : IConfigureEndpoint
+public partial class SalesFunction([FromKeyedServices(nameof(SalesFunction))] FunctionEndpoint endpoint, [FromKeyedServices(nameof(SalesFunction))] IMessageSession session) : IConfigureEndpoint
 {
     public async partial Task Sales(ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default)
-    {
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default) =>
         // Because we generate this you can essentially add a decorator chain of IConfigureEndpoint implementations
         // that for example adds specific stuff to the endpoint configuration like source generator discovered handlers
         // and other things.
-        await endpoint.Process(message, messageActions, this as IConfigureEndpoint, cancellationToken).ConfigureAwait(false);
-    }
+        await endpoint.Process(message, messageActions, this, cancellationToken).ConfigureAwait(false);
 }
 
 // Maybe not even needed if we are clever or we only implement it when the function enpoint has a COnfigure method
