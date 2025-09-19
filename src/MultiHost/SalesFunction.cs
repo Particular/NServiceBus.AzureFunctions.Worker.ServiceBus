@@ -4,6 +4,21 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Configuration.AdvancedExtensibility;
+
+public partial class BillingFunction
+{
+    [Function(nameof(BillingFunction))]
+    public partial Task Billing(
+        [ServiceBusTrigger("billing", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
+        ServiceBusReceivedMessage message,
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+
+    public void Configure(AzureServiceBusTransport transport, RoutingSettings<AzureServiceBusTransport> routing, EndpointConfiguration endpointConfiguration)
+    {
+        endpointConfiguration.AddHandler<OrderAcceptedHandler>();
+    }
+}
 
 public partial class SalesFunction
 {
@@ -13,9 +28,24 @@ public partial class SalesFunction
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
 
-    public void Configure(EndpointConfiguration endpointConfiguration)
+    public void Configure(AzureServiceBusTransport transport, RoutingSettings<AzureServiceBusTransport> routing, EndpointConfiguration endpointConfiguration)
     {
-        endpointConfiguration.AddHandler<OrderAcceptedHandler>();
+        endpointConfiguration.AddHandler<PlaceOrderHandler>();
+        endpointConfiguration.AddSaga<OrderFullfillmentPolicy>();
+
+        routing.RouteToEndpoint(typeof(PlaceOrder), "sales");
+    }
+}
+
+public partial class BillingFunction([FromKeyedServices(nameof(BillingFunction))] FunctionEndpoint endpoint) : IConfigureEndpoint
+{
+    public async partial Task Billing(ServiceBusReceivedMessage message,
+        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default)
+    {
+        // Because we generate this you can essentially add a decorator chain of IConfigureEndpoint implementations
+        // that for example adds specific stuff to the endpoint configuration like source generator discovered handlers
+        // and other things.
+        await endpoint.Process(message, messageActions, this as IConfigureEndpoint, cancellationToken).ConfigureAwait(false);
     }
 }
 
@@ -27,14 +57,14 @@ public partial class SalesFunction([FromKeyedServices(nameof(SalesFunction))] Fu
         // Because we generate this you can essentially add a decorator chain of IConfigureEndpoint implementations
         // that for example adds specific stuff to the endpoint configuration like source generator discovered handlers
         // and other things.
-        await endpoint.Process(message, messageActions, this, cancellationToken).ConfigureAwait(false);
+        await endpoint.Process(message, messageActions, this as IConfigureEndpoint, cancellationToken).ConfigureAwait(false);
     }
 }
 
 // Maybe not even needed if we are clever or we only implement it when the function enpoint has a COnfigure method
 public interface IConfigureEndpoint
 {
-    void Configure(EndpointConfiguration endpointConfiguration);
+    void Configure(AzureServiceBusTransport transport, RoutingSettings<AzureServiceBusTransport> routing, EndpointConfiguration endpointConfiguration);
 }
 
 // In the current version this object does send and receive but technically we could now totally split this responsibility
@@ -51,6 +81,9 @@ public sealed class FunctionEndpoint(string functionName, Action<EndpointConfigu
         CancellationToken cancellationToken = default) => await Console.Out
         .WriteLineAsync($"Processing message: {message.MessageId}").ConfigureAwait(false);
 
+    // The semaphore lock crap can also be avoided by also emitting a hosted service that does the initialization
+    // this is just for demonstration purposes
+    // Benefits you can immediate feedback when you have configuration issues.
     internal async Task InitializeEndpointIfNecessary(IConfigureEndpoint configureEndpoint, CancellationToken cancellationToken = default)
     {
         if (messageProcessor == null)
@@ -60,13 +93,14 @@ public sealed class FunctionEndpoint(string functionName, Action<EndpointConfigu
             {
                 if (messageProcessor == null)
                 {
+                    var transport = new AzureServiceBusTransport("TBD", TopicTopology.Default);
                     var endpointConfiguration = new EndpointConfiguration(functionName);
                     // Here we have access to the full service provider and can basically achieve almost anything
                     // so the serverless transport can get less complicated
 
                     // Dependencies registered here will be available in the function endpoint handlers
                     customizeConfig(endpointConfiguration);
-                    configureEndpoint.Configure(endpointConfiguration);
+                    configureEndpoint.Configure(transport, new RoutingSettings<AzureServiceBusTransport>(endpointConfiguration.GetSettings()), endpointConfiguration);
 
                     // here we can cobble out types out of the settings and configure it properly
 
