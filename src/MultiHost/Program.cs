@@ -12,7 +12,9 @@ builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.Services.ConfigureFunctionsApplicationInsights();
 builder.Services.AddNServiceBus(configuration =>
 {
+    // these setting will be applied to all functions
     configuration.UsePersistence<LearningPersistence>();
+    //configuration.UseTransport()//this should not be done at this level
 });
 
 IHost host = builder.Build();
