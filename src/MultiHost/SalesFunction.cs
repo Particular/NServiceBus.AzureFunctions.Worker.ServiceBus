@@ -123,7 +123,7 @@ public sealed class FunctionEndpoint(string functionName, Action<EndpointConfigu
 
                     endpoint = await startableEndpoint.Start(serviceProvider, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                    messageProcessor = serverlessTransport.MessageProcessor;
+                    messageProcessor = new ServerlessTransport(transport,"TBD", "TBD").MessageProcessor;
                 }
             }
             finally
