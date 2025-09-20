@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 public static class ServiceCollectionExtensions
 {
     // It might even be possible to source generate this entire method or we seperate it into a generated method and a core method
+    // Should we also pass in the service collection of the endpoint here too? Or we could pass on the initialization context as the base type
+    // we also need to think about the expectation of DI registrations and the split brain between service collection here vs collection per endpont
+    // and what needs to be forwarded https://github.com/Particular/docs.particular.net/pull/4813/files
     public static void AddNServiceBus(this IServiceCollection services, Action<EndpointConfiguration>? customize = null)
     {
         // Generated part?
