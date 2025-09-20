@@ -51,6 +51,7 @@ public partial class SalesFunction : IConfigureEndpoint
 
     public SalesFunction() {}
 
+    // We could make these partial and register on the root DI. Then you can inject stuff into Configure
     public class SalesInitializationContext : InitializationContext;
 
     public async partial Task Sales(ServiceBusReceivedMessage message,
