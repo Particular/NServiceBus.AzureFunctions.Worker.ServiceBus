@@ -1,5 +1,4 @@
 namespace MultiHost;
 
-public class PlaceOrder : ICommand
-{
-}
+[BelongsTo(nameof(SalesFunction.Sales))]
+public class PlaceOrder : ICommand;
