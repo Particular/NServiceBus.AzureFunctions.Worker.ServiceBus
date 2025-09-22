@@ -20,7 +20,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public IHostApplicationBuilder UseNServiceBus(Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+        public IHostApplicationBuilder AddNServiceBus(Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
             var callingAssembly = Assembly.GetCallingAssembly();
             RegisterEndpointFactory(builder, null, callingAssembly, (_, c) => configurationFactory?.Invoke(c));
@@ -31,7 +31,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public IHostApplicationBuilder UseNServiceBus(Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        public IHostApplicationBuilder AddNServiceBus(Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             var callingAssembly = Assembly.GetCallingAssembly();
             RegisterEndpointFactory(builder, null, callingAssembly, configurationFactory);
@@ -42,7 +42,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public IHostApplicationBuilder UseNServiceBus(string endpointName, string connectionString = null, Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
+        public IHostApplicationBuilder AddNServiceBus(string endpointName, string connectionString = null, Action<ServiceBusTriggeredEndpointConfiguration> configurationFactory = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
@@ -53,7 +53,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public IHostApplicationBuilder UseNServiceBus(string endpointName, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        public IHostApplicationBuilder AddNServiceBus(string endpointName, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
 
@@ -64,7 +64,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
         /// </summary>
-        public IHostApplicationBuilder UseNServiceBus(string endpointName, string connectionString, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
+        public IHostApplicationBuilder AddNServiceBus(string endpointName, string connectionString, Action<IConfiguration, ServiceBusTriggeredEndpointConfiguration> configurationFactory)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(endpointName);
             ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
@@ -98,7 +98,7 @@ public static class FunctionsHostApplicationBuilderExtensions
             throw new Exception($@"Endpoint name cannot be determined automatically. Use one of the following options to specify endpoint name:
 - Use `{nameof(NServiceBusTriggerFunctionAttribute)}(endpointName)` to generate a trigger
 - Use `{nameof(NServiceBusTriggerFunctionAttribute)}(%ENDPOINT_NAME%, TriggerFunctionName = triggerName)` to use a setting or environment variable
-- Use `functionsHostBuilder.UseNServiceBus(endpointName, configuration)`");
+- Use `functionsHostBuilder.AddNServiceBus(endpointName, configuration)`");
         }
 
         _ = services.AddHostedService<InitializationHost>();

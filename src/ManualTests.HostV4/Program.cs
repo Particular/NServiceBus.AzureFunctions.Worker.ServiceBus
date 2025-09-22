@@ -6,7 +6,7 @@ using NServiceBus;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
-builder.UseNServiceBus(c =>
+builder.AddNServiceBus(c =>
 {
     c.Routing.RouteToEndpoint(typeof(TriggerMessage), "FunctionsTestEndpoint2");
     c.AdvancedConfiguration.EnableInstallers();

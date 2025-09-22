@@ -69,7 +69,7 @@
 
                 hostBuilderCustomization(builder);
 
-                builder.UseNServiceBus(Name, (configuration, triggerConfiguration) =>
+                builder.AddNServiceBus(Name, (configuration, triggerConfiguration) =>
                 {
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 

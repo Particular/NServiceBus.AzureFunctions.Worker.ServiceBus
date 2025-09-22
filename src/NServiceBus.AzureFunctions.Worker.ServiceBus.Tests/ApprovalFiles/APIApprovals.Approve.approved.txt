@@ -3,23 +3,23 @@ namespace NServiceBus
 {
     public static class FunctionsHostApplicationBuilderExtensions
     {
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, string connectionString, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, string connectionString = null, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, string connectionString, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, string endpointName, string connectionString = null, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
         public sealed class <G>$605D8CCF64349EA050C790D67C500BD9
         {
             [System.Runtime.CompilerServices.ExtensionMarker("<M>$6A88ABDA462C17BA6C9142C2A21FF572")]
-            public Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+            public Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
             [System.Runtime.CompilerServices.ExtensionMarker("<M>$6A88ABDA462C17BA6C9142C2A21FF572")]
-            public Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+            public Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
             [System.Runtime.CompilerServices.ExtensionMarker("<M>$6A88ABDA462C17BA6C9142C2A21FF572")]
-            public Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+            public Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(string endpointName, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
             [System.Runtime.CompilerServices.ExtensionMarker("<M>$6A88ABDA462C17BA6C9142C2A21FF572")]
-            public Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(string endpointName, string connectionString, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
+            public Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(string endpointName, string connectionString, System.Action<Microsoft.Extensions.Configuration.IConfiguration, NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory) { }
             [System.Runtime.CompilerServices.ExtensionMarker("<M>$6A88ABDA462C17BA6C9142C2A21FF572")]
-            public Microsoft.Extensions.Hosting.IHostApplicationBuilder UseNServiceBus(string endpointName, string connectionString = null, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
+            public Microsoft.Extensions.Hosting.IHostApplicationBuilder AddNServiceBus(string endpointName, string connectionString = null, System.Action<NServiceBus.ServiceBusTriggeredEndpointConfiguration> configurationFactory = null) { }
             public static class <M>$6A88ABDA462C17BA6C9142C2A21FF572 { }
         }
     }
