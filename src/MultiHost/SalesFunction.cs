@@ -20,6 +20,11 @@ public partial class SalesFunction
         // Daniel this is is very low ceremony and not a lot of boiler plate code. The benefits of this outweights
         // any auto open approach that the functions host currently implements because that requires still to do
         // Assembly.GetEntryAssembly().GetTypes() which has impacts on trimming and startup time
+        //
+        // an additional benefit of having an explicit API call is that when there are special cases we can extend the generated code
+        // with more options. For example when someone wants all discovered handlers but has a cross cutting handler that doesn't need to be added
+        // for this one they could do something like this: context.AddHandlers(options => options.Exclude<MyCrossCuttingHandler>()); or however that
+        // API might look like
         context.AddHandlers();
         context.AddSagas();
 
