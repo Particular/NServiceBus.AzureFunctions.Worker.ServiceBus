@@ -17,6 +17,9 @@ public partial class SalesFunction
 
     partial void Configure(SalesInitializationContext context)
     {
+        // Daniel this is is very low ceremony and not a lot of boiler plate code. The benefits of this outweights
+        // any auto open approach that the functions host currently implements because that requires still to do
+        // Assembly.GetEntryAssembly().GetTypes() which has impacts on trimming and startup time
         context.AddHandlers();
         context.AddSagas();
 
