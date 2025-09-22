@@ -10,7 +10,7 @@ public partial class SalesFunction : IConfigureEndpoint
     readonly IMessageSession session;
 
     public SalesFunction([FromKeyedServices(nameof(Sales))] FunctionEndpoint endpoint,
-        [FromKeyedServices(nameof(SalesFunction))] IMessageSession session)
+        [FromKeyedServices(nameof(Sales))] IMessageSession session)
     {
         this.endpoint = endpoint;
         this.session = session;
