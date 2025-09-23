@@ -1,11 +1,13 @@
 namespace MultiHost;
 
+using System.ComponentModel;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 
 public partial class FunctionUsingHttpFactory : IConfigureEndpoint
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     readonly FunctionEndpoint endpoint;
     readonly IMessageSession session;
 
