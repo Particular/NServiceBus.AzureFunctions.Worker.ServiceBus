@@ -31,7 +31,7 @@
                     GetType()));
 
         public Action<ServiceBusTriggeredEndpointConfiguration> CustomizeConfiguration { private get; init; } = _ => { };
-        public Action<IHostBuilder> CustomizeHostBuilder { private get; init; } = _ => { };
+        public Action<IHostApplicationBuilder> CustomizeHostBuilder { private get; init; } = _ => { };
 
         public PublisherMetadata PublisherMetadata { get; } = new PublisherMetadata();
 
@@ -51,7 +51,7 @@
         class FunctionRunner(
             IList<TestMessage> messages,
             Action<ServiceBusTriggeredEndpointConfiguration> configurationCustomization,
-            Action<IHostBuilder> hostBuilderCustomization,
+            Action<IHostApplicationBuilder> hostBuilderCustomization,
             Func<IFunctionEndpoint, FunctionContext, Task> onStart,
             ScenarioContext scenarioContext,
             PublisherMetadata publisherMetadata,
@@ -62,16 +62,14 @@
 
             public override async Task Start(CancellationToken cancellationToken = default)
             {
-                var hostBuilder = Host.CreateDefaultBuilder();
-                _ = hostBuilder.ConfigureServices(services =>
-                {
-                    // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
-                    services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
-                });
+                var builder = Host.CreateApplicationBuilder([]);
 
-                hostBuilderCustomization(hostBuilder);
+                // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
+                builder.Services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
 
-                hostBuilder.UseNServiceBus(Name, (configuration, triggerConfiguration) =>
+                hostBuilderCustomization(builder);
+
+                builder.AddNServiceBus(Name, (configuration, triggerConfiguration) =>
                 {
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 
@@ -118,7 +116,7 @@
                     configurationCustomization(triggerConfiguration);
                 });
 
-                host = hostBuilder.Build();
+                host = builder.Build();
                 await host.StartAsync(cancellationToken);
 
                 endpoint = host.Services.GetRequiredService<IFunctionEndpoint>();
