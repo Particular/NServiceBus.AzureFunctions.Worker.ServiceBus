@@ -9,7 +9,7 @@ public partial class BillingFunctions
     public partial Task Billing(
         [ServiceBusTrigger("billing", Connection = "ServiceBusConnection2", AutoCompleteMessages = false)] //Using a separate namespace would need the bridge for the individual endpoints to talk to each other
         ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default);
 
     partial void Configure(BillingInitializationContext context)
     {
@@ -20,7 +20,7 @@ public partial class BillingFunctions
     public partial Task Invoices(
         [ServiceBusTrigger("invoices", Connection = "ServiceBusConnection2", AutoCompleteMessages = false)] //Using a separate namespace would need the bridge for the individual endpoints to talk to each other
         ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default);
 
     partial void Configure(InvoicesInitializationContext context)
     {

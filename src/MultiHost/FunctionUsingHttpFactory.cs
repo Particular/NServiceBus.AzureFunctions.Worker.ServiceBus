@@ -20,7 +20,7 @@ public partial class FunctionUsingHttpFactory
     public partial Task Sales(
         [ServiceBusTrigger("blah", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
         Azure.Messaging.ServiceBus.ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default);
 
     partial void Configure(SalesInitializationContext context)
     {

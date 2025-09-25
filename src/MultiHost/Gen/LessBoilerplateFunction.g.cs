@@ -9,6 +9,7 @@ public partial class LessBoilerplateFunction : IConfigureEndpoint
     // Would this actually work though, as is? Because the Functions metadata generator
     // would not see this at all, so would our own source generator need to create another
     // metadata provider that provides this information to the Functions runtime instead?
+    // We can also not use parameter injection because that is not supported
     [Function("Finance")]
     public async Task _ExecuteFunction(
         [ServiceBusTrigger("finance-queue", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
@@ -16,9 +17,10 @@ public partial class LessBoilerplateFunction : IConfigureEndpoint
         ServiceBusMessageActions messageActions,
         [FromKeyedServices(nameof(LessBoilerplateFunction))] FunctionEndpoint endpoint,
         [FromKeyedServices(nameof(LessBoilerplateFunction))] IMessageSession session,
+        FunctionContext context,
         CancellationToken cancellationToken = default)
     {
-        await endpoint.Process(message, messageActions, cancellationToken).ConfigureAwait(false);
+        await endpoint.Process(context, message, messageActions, cancellationToken).ConfigureAwait(false);
     }
 
     // We could make these partial and register on the root DI. Then you can inject stuff into Configure

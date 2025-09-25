@@ -13,7 +13,7 @@ public partial class SalesFunction
     public partial Task Sales(
         [ServiceBusTrigger("sales", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
         Azure.Messaging.ServiceBus.ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default);
 
     partial void Configure(SalesInitializationContext context)
     {
@@ -36,7 +36,7 @@ public partial class SalesFunction
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
         HttpRequestData request,
-        FunctionContext executionContext)
+        FunctionContext context)
     {
         // with TX session enabled, these 3 operations would be "atomic"
         await session.Send(new PlaceOrder()).ConfigureAwait(false);

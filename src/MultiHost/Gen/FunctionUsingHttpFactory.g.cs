@@ -26,8 +26,8 @@ public partial class FunctionUsingHttpFactory : IConfigureEndpoint
     public class SalesInitializationContext : InitializationContext;
 
     public async partial Task Sales(ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default) =>
-        await endpoint.Process(message, messageActions, cancellationToken).ConfigureAwait(false);
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default) =>
+        await endpoint.Process(context, message, messageActions, cancellationToken).ConfigureAwait(false);
 
     partial void Configure(SalesInitializationContext context);
 
