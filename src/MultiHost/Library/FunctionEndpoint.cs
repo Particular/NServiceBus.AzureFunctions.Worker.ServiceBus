@@ -8,7 +8,7 @@ using Microsoft.Azure.Functions.Worker;
 // specific routing being necessary per function?
 public sealed class FunctionEndpoint(Func<ServiceBusReceivedMessage, ServiceBusMessageActions, CancellationToken, Task> processor)
 {
-    public async Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
+    public async Task Process(FunctionContext context, ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken = default)
     {
         await processor(message, messageActions, cancellationToken).ConfigureAwait(false);

@@ -23,9 +23,9 @@ public partial class BillingFunctions : IConfigureEndpoint
     public class BillingInitializationContext : InitializationContext;
 
     public async partial Task Billing(ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default)
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {
-        await billing.Process(message, messageActions, cancellationToken).ConfigureAwait(false);
+        await billing.Process(context, message, messageActions, cancellationToken).ConfigureAwait(false);
     }
 
     partial void Configure(BillingInitializationContext context);
@@ -33,9 +33,9 @@ public partial class BillingFunctions : IConfigureEndpoint
     public class InvoicesInitializationContext : InitializationContext;
 
     public async partial Task Invoices(ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default)
+        ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {
-        await invoices.Process(message, messageActions, cancellationToken).ConfigureAwait(false);
+        await invoices.Process(context, message, messageActions, cancellationToken).ConfigureAwait(false);
     }
 
     partial void Configure(InvoicesInitializationContext context);
