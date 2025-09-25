@@ -10,6 +10,7 @@ builder.ConfigureFunctionsWebApplication();
 builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.Services.ConfigureFunctionsApplicationInsights();
 builder.Services.AddNServiceBus(configuration =>
+builder.AddNServiceBus(configuration =>
 {
     // these setting will be applied to all functions
     configuration.UsePersistence<LearningPersistence>();
