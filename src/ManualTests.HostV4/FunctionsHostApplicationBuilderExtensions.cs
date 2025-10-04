@@ -13,15 +13,16 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// </summary>
         public IHostApplicationBuilder AddNServiceBus2(Action<EndpointConfiguration> commonConfiguration = null)
         {
+            IConfigureEndpoint salesFunctions = new SalesFunctions();
             var startable = MultiEndpoint.Create(builder.Services, mc =>
                 {
                     var sales= mc.AddEndpoint("sales");
 
-                    sales.UseSerialization<SystemJsonSerializer>();
-                    sales.UseTransport(new LearningTransport());
+                    salesFunctions.Configure(sales);
                 }
             );
 
+            builder.Services.AddSingleton(salesFunctions);
             builder.Services.AddSingleton(startable);
             builder.Services.AddHostedService<MultiEndpointHostedService>();
             return builder;
@@ -29,14 +30,16 @@ public static class FunctionsHostApplicationBuilderExtensions
     }
 }
 
-public class BillingFunction : IConfigureEndpoint
-{
-}
-
 public class SalesFunctions : IConfigureEndpoint
 {
+    public void Configure(EndpointConfiguration endpointConfiguration)
+    {
+        endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+        endpointConfiguration.UseTransport(new LearningTransport());
+    }
 }
 
 public interface IConfigureEndpoint
 {
+    void Configure(EndpointConfiguration endpointConfiguration);
 }
