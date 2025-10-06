@@ -6,18 +6,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NServiceBus;
 
-class HttpSender([FromKeyedServices("sales")] IMessageSession messageSession)
+class HttpSender([FromKeyedServices("sales")] IMessageSession messageSession, ILogger<HttpSender> logger)
 {
     [Function("HttpSenderV4")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
-        HttpRequestData req,
-        FunctionContext executionContext)
+        HttpRequestData req)
     {
-        var logger = executionContext.GetLogger<HttpSender>();
         logger.LogInformation("C# HTTP trigger function received a request.");
 
-        await messageSession.Send(new TriggerMessage())
+        await messageSession.SendLocal(new TriggerMessage())
             .ConfigureAwait(false);
 
         var r = req.CreateResponse(HttpStatusCode.OK);

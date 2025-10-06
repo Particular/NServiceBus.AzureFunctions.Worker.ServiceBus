@@ -1,14 +1,12 @@
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using NServiceBus.Logging;
 
-public class SomeOtherMessageHandler : IHandleMessages<SomeOtherMessage>
+public class SomeOtherMessageHandler(ILogger<SomeOtherMessageHandler> logger) : IHandleMessages<SomeOtherMessage>
 {
-    static readonly ILog Log = LogManager.GetLogger<SomeOtherMessageHandler>();
-
     public Task Handle(SomeOtherMessage message, IMessageHandlerContext context)
     {
-        Log.Warn($"Handling {nameof(SomeOtherMessage)} in {nameof(SomeOtherMessageHandler)}");
+        logger.LogWarning($"Handling {nameof(SomeOtherMessage)} in {nameof(SomeOtherMessageHandler)}");
 
         return Task.CompletedTask;
     }
