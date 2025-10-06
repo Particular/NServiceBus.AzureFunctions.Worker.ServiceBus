@@ -1,13 +1,16 @@
+using System;
 using NServiceBus;
 
 class EndpointRegistry
 {
-    public static void RegisterEndpoints(MultiEndpointConfiguration multiEndpointConfiguration)
+    public static void RegisterEndpoints(MultiEndpointConfiguration multiEndpointConfiguration, Action<EndpointConfiguration> commonConfiguration = null)
     {
         // codegen
         IConfigureEndpoint salesFunctions = new SalesFunctions();
-        var sales = multiEndpointConfiguration.AddEndpoint("sales");
+        var salesConfiguration = multiEndpointConfiguration.AddEndpoint("sales");
 
-        salesFunctions.Configure(sales);
+        commonConfiguration?.Invoke(salesConfiguration);
+
+        salesFunctions.Configure(salesConfiguration);
     }
 }

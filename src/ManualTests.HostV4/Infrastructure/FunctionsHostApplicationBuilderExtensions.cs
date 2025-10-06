@@ -12,7 +12,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// </summary>
         public IHostApplicationBuilder AddNServiceBus2(Action<EndpointConfiguration> commonConfiguration = null)
         {
-            var startable = MultiEndpoint.Create(builder.Services, EndpointRegistry.RegisterEndpoints);
+            var startable = MultiEndpoint.Create(builder.Services, mc => EndpointRegistry.RegisterEndpoints(mc, commonConfiguration));
 
             builder.Services.AddSingleton(startable);
             builder.Services.AddHostedService<MultiEndpointHostedService>();
