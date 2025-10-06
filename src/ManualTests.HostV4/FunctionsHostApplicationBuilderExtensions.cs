@@ -8,7 +8,7 @@ public static class FunctionsHostApplicationBuilderExtensions
     extension(IHostApplicationBuilder builder)
     {
         /// <summary>
-        /// Configures an NServiceBus endpoint that can be injected into a function trigger as a <see cref="IFunctionEndpoint"/> via dependency injection.
+        /// TBD
         /// </summary>
         public IHostApplicationBuilder AddNServiceBus2(Action<EndpointConfiguration> commonConfiguration = null)
         {
