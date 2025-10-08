@@ -55,7 +55,6 @@ sealed class InternalFunctionEndpoint : IFunctionEndpoint
     {
         FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-        await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
         await endpoint.Send(message, options, cancellationToken).ConfigureAwait(false);
     }
 
@@ -68,7 +67,6 @@ sealed class InternalFunctionEndpoint : IFunctionEndpoint
     {
         FunctionsLoggerFactory.Instance.SetCurrentLogger(functionContext.GetLogger("NServiceBus"));
 
-        await InitializeEndpointIfNecessary(cancellationToken).ConfigureAwait(false);
         await endpoint.Send(messageConstructor, options, cancellationToken).ConfigureAwait(false);
     }
 
