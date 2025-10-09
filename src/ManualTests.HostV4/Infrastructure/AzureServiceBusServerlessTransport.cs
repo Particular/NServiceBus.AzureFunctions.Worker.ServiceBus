@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Transport;
 
+// this option requires all API on the azure servicebus transport to be carried over explicitly, other option is to inherit from AzureServiceBusTransport
 class AzureServiceBusServerlessTransport : TransportDefinition
 {
     public AzureServiceBusServerlessTransport(TopicTopology topology) : base(TransportTransactionMode.ReceiveOnly, true, true, true)
