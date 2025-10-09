@@ -2,6 +2,8 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
+using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Logging;
 
 public static class FunctionsHostApplicationBuilderExtensions
 {
@@ -10,10 +12,15 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// TBD
         /// </summary>
-        public IHostApplicationBuilder AddNServiceBus2(Action<EndpointConfiguration> commonConfiguration = null)
+        public IHostApplicationBuilder UseNServiceBus(Action<ServerLessOptions> configuration)
         {
-            var endpointRegistry = new EndpointRegistry();
-            var startable = MultiEndpoint.Create(builder.Services, mc => endpointRegistry.RegisterEndpoints(mc, commonConfiguration));
+            LogManager.UseFactory(FunctionsLoggerFactory.Instance);
+
+            var options = new ServerLessOptions();
+
+            configuration.Invoke(options);
+
+            var startable = MultiEndpoint.Create(builder.Services, mc => options.Apply(mc));
 
             builder.Services.AddSingleton(startable);
             builder.Services.AddHostedService<MultiEndpointHostedService>();
