@@ -3,7 +3,16 @@ using NServiceBus;
 
 public partial class ServerLessOptions
 {
-    public void Apply(MultiEndpointConfiguration mc)
+    public EndpointConfiguration ConfigureDefaultSendOnlyEndpoint(string endpointName)
+    {
+        var endpointConfiguration = ConfigureEndpoint(endpointName);
+
+        endpointConfiguration.SendOnly();
+
+        return endpointConfiguration;
+    }
+
+    internal void Apply(MultiEndpointConfiguration mc)
     {
         foreach (var function in functions)
         {
@@ -11,7 +20,7 @@ public partial class ServerLessOptions
         }
     }
 
-    public EndpointConfiguration ConfigureEndpoint(string endpointName)
+    EndpointConfiguration ConfigureEndpoint(string endpointName)
     {
         var endpointConfiguration = new EndpointConfiguration(endpointName);
 

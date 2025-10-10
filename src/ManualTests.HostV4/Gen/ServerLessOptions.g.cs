@@ -6,4 +6,9 @@ public partial class ServerLessOptions
     {
         return this.ConfigureEndpoint(nameof(SalesFunctions.CRMIntegration));
     }
+    
+    public EndpointConfiguration ConfigureOrdersEndpoint()
+    {
+        return this.ConfigureEndpoint(nameof(SalesFunctions.Orders));
+    }
 }

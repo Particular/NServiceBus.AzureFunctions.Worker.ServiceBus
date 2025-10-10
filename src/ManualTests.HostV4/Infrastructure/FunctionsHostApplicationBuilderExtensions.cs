@@ -13,6 +13,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// <summary>
         /// TBD
         /// </summary>
+        //codegen
         public IHostApplicationBuilder UseNServiceBus(Action<ServerLessOptions> configuration)
         {
             builder.Services.AddAzureClientsCore();
@@ -26,6 +27,7 @@ public static class FunctionsHostApplicationBuilderExtensions
 
             builder.Services.AddSingleton(startable);
             builder.Services.AddHostedService<MultiEndpointHostedService>();
+            
             return builder;
         }
     }
