@@ -21,18 +21,16 @@ builder.UseNServiceBus(options =>
 
     crmIntegrationEndpoint.UseSerialization<SystemJsonSerializer>();
     crmIntegrationEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
-    //crmIntegrationEndpoint.RegisterHandler<TriggerMessage, THandler>();
+    // We need a dedicated handler registration api
+    //crmIntegrationEndpoint.RegisterHandler<TriggerMessage, TriggerMessageHandler>();
 
 
-    var defaultEndpoint = options.ConfigureDefaultSendOnlyEndpoint("MyFunctionAppEndpoint");
+    var defaultEndpoint = options.ConfigureDefaultSendOnlyEndpoint("MyFunctionApp");
 
     defaultEndpoint.UseSerialization<SystemJsonSerializer>();
-    defaultEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
+    var defaultEndpointRouting = defaultEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
+
+    defaultEndpointRouting.RouteToEndpoint(typeof(TriggerMessage), "orders"); // should we add some stronly typed routing helpers here since me know the address or the servicebustriggers
 });
 
-var host = builder.Build();
-
-await host.RunAsync();
-
-
-// the other approach would be to inherit from the ASB transport to auto expose all properties and methods
+await builder.Build().RunAsync();
