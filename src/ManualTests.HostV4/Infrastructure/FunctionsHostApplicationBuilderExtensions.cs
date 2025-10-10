@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
@@ -14,6 +15,7 @@ public static class FunctionsHostApplicationBuilderExtensions
         /// </summary>
         public IHostApplicationBuilder UseNServiceBus(Action<ServerLessOptions> configuration)
         {
+            builder.Services.AddAzureClientsCore();
             LogManager.UseFactory(FunctionsLoggerFactory.Instance);
 
             var options = new ServerLessOptions();

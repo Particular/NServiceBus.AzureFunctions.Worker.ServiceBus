@@ -10,13 +10,15 @@ builder.UseNServiceBus(options =>
     //using nameof
     var ordersEndpoint = options.ConfigureEndpoint(nameof(SalesFunctions.Orders));
 
-    // we need an analyzer to prevent new AzureServiceBusTranport() to be used
+    ordersEndpoint.UseSerialization<SystemJsonSerializer>();
+    // we need an analyzer to prevent new AzureServiceBusTransport() to be used
     var routing = ordersEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
     routing.RouteToEndpoint(typeof(TriggerMessage), "orders");
 
     //using source generated method
     var crmIntegrationEndpoint = options.ConfigureCRMIntegrationEndpoint();
 
+    crmIntegrationEndpoint.UseSerialization<SystemJsonSerializer>();
     crmIntegrationEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
 // Optionally users can ask for a send onlky endpoint to be used, this endpoint will be a send-onlu and injectable as IMessageSession / ITransactionalSession  
 //    c.ConfigureDefaultSendOnlyEndpoint(c =>
