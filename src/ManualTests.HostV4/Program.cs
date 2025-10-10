@@ -4,7 +4,6 @@ using NServiceBus;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
-// This will be used for 1 function or multiple, ie we will always run in multi endpoint mode even though there is only one function
 builder.UseNServiceBus(options =>
 {
     var ordersEndpoint = options.ConfigureOrdersEndpoint();
