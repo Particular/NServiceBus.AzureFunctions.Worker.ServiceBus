@@ -1,3 +1,4 @@
-using Microsoft.Azure.Functions.Worker;
+using System;
 
-public class NServiceBusFunctionAttribute(string name) : FunctionAttribute(name);
+// we can't inherit from the FunctionAttribute since the native source gen won't trigger then
+public class NServiceBusFunctionAttribute() : Attribute;

@@ -5,7 +5,8 @@ using Microsoft.Azure.Functions.Worker;
 
 public partial class SalesFunctions
 {
-    [NServiceBusFunction(nameof(Orders))]
+    [NServiceBusFunction]
+    [Function(nameof(Orders))]
     // Also for the endpoint name should we treat the function name as the endpoint name and override the queue name to be the one in the trigger
     // for better clarity?
     public partial Task Orders(
@@ -14,7 +15,8 @@ public partial class SalesFunctions
         ServiceBusMessageActions messageActions, CancellationToken cancellationToken = default);
 
     // This is the opt-in way, should we consider opt-out?
-    [NServiceBusFunction(nameof(CRMIntegration))]
+    [NServiceBusFunction]
+    [Function(nameof(CRMIntegration))]
     public partial Task CRMIntegration(
         [ServiceBusTrigger("crm-integration", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
         Azure.Messaging.ServiceBus.ServiceBusReceivedMessage message,
