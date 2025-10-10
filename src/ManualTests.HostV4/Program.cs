@@ -29,7 +29,7 @@ builder.UseNServiceBus(options =>
     defaultEndpoint.UseSerialization<SystemJsonSerializer>();
     var defaultEndpointRouting = defaultEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
 
-    defaultEndpointRouting.RouteToEndpoint(typeof(TriggerMessage), "orders"); // should we add some stronly typed routing helpers here since me know the address or the servicebustriggers
+    defaultEndpointRouting.RouteToEndpoint(typeof(TriggerMessage), "orders"); // should we add some strongly typed routing helpers here since me know the address of the servicebus triggers
 });
 
 await builder.Build().RunAsync();
