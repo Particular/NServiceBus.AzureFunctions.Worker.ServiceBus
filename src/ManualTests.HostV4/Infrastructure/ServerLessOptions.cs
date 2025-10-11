@@ -5,11 +5,12 @@ public partial class ServerLessOptions
 {
     public EndpointConfiguration ConfigureDefaultSendOnlyEndpoint(string endpointName)
     {
-        var endpointConfiguration = ConfigureEndpoint(endpointName);
+        DefaultEndpointName = endpointName;
+        defaultSendOnlyEndpoint = new EndpointConfiguration(endpointName);
 
-        endpointConfiguration.SendOnly();
+        defaultSendOnlyEndpoint.SendOnly();
 
-        return endpointConfiguration;
+        return defaultSendOnlyEndpoint;
     }
 
     internal void Apply(MultiEndpointConfiguration mc)
@@ -17,6 +18,11 @@ public partial class ServerLessOptions
         foreach (var function in functions)
         {
             mc.AddEndpoint(function);
+        }
+
+        if (defaultSendOnlyEndpoint != null)
+        {
+            mc.AddEndpoint(defaultSendOnlyEndpoint);
         }
     }
 
@@ -29,5 +35,7 @@ public partial class ServerLessOptions
         return endpointConfiguration;
     }
 
+    internal string DefaultEndpointName;
+    EndpointConfiguration defaultSendOnlyEndpoint;
     readonly List<EndpointConfiguration> functions = [];
 }

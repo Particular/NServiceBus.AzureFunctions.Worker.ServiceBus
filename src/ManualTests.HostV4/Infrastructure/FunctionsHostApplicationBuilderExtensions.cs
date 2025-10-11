@@ -25,9 +25,14 @@ public static class FunctionsHostApplicationBuilderExtensions
 
             var startable = MultiEndpoint.Create(builder.Services, mc => options.Apply(mc));
 
+            if (options.DefaultEndpointName != null)
+            {
+                builder.Services.AddSingleton(sp => sp.GetRequiredKeyedService<IMessageSession>(options.DefaultEndpointName));
+            }
+
             builder.Services.AddSingleton(startable);
             builder.Services.AddHostedService<MultiEndpointHostedService>();
-            
+
             return builder;
         }
     }
