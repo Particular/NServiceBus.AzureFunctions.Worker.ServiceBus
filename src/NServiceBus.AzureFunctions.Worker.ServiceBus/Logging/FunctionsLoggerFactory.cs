@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ILoggerFactory = Logging.ILoggerFactory;
 
-class FunctionsLoggerFactory : ILoggerFactory
+public class FunctionsLoggerFactory : ILoggerFactory
 {
     public static FunctionsLoggerFactory Instance { get; } = new FunctionsLoggerFactory();
 

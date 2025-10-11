@@ -2,22 +2,22 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NServiceBus;
 
-
-class HttpSender(IFunctionEndpoint functionEndpoint)
+class HttpSender(IMessageSession defaultSession, [FromKeyedServices("sales")] IMessageSession salesSession, ILogger<HttpSender> logger)
 {
     [Function("HttpSenderV4")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequestData req,
-        FunctionContext executionContext)
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
+        HttpRequestData req)
     {
-        var logger = executionContext.GetLogger<HttpSender>();
         logger.LogInformation("C# HTTP trigger function received a request.");
 
-        await functionEndpoint.Send(new TriggerMessage(), executionContext)
-            .ConfigureAwait(false);
+        await salesSession.SendLocal(new TriggerMessage());
+
+        await defaultSession.SendLocal(new TriggerMessage());
 
         var r = req.CreateResponse(HttpStatusCode.OK);
         await r.WriteStringAsync($"{nameof(TriggerMessage)} sent.")
