@@ -2,16 +2,34 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Hosting;
 using NServiceBus;
 
-[assembly: NServiceBusTriggerFunction("FunctionsTestEndpoint2", TriggerFunctionName = "MyFunctionName")]
-
 var builder = FunctionsApplication.CreateBuilder(args);
 
-builder.AddNServiceBus(c =>
+builder.UseNServiceBus(options =>
 {
-    c.Routing.RouteToEndpoint(typeof(TriggerMessage), "FunctionsTestEndpoint2");
-    c.AdvancedConfiguration.EnableInstallers();
+    var ordersEndpoint = options.ConfigureOrdersEndpoint();
+
+    ordersEndpoint.UseSerialization<SystemJsonSerializer>();
+    // We need to validate that users don't call send only
+    //ordersEndpoint.SendOnly();
+
+    // we need an analyzer to prevent new AzureServiceBusTransport() to be used
+    var routing = ordersEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
+    routing.RouteToEndpoint(typeof(TriggerMessage), "orders");
+
+    var crmIntegrationEndpoint = options.ConfigureCRMIntegrationEndpoint();
+
+    crmIntegrationEndpoint.UseSerialization<SystemJsonSerializer>();
+    crmIntegrationEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
+    // We need a dedicated handler registration api
+    //crmIntegrationEndpoint.RegisterHandler<TriggerMessage, TriggerMessageHandler>();
+
+
+    var defaultEndpoint = options.ConfigureDefaultSendOnlyEndpoint("MyFunctionApp");
+
+    defaultEndpoint.UseSerialization<SystemJsonSerializer>();
+    var defaultEndpointRouting = defaultEndpoint.UseTransport(new AzureServiceBusServerlessTransport(TopicTopology.Default));
+
+    defaultEndpointRouting.RouteToEndpoint(typeof(TriggerMessage), "orders"); // should we add some strongly typed routing helpers here since me know the address of the servicebus triggers
 });
 
-var host = builder.Build();
-
-await host.RunAsync();
+await builder.Build().RunAsync();
