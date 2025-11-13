@@ -13,7 +13,7 @@ public static class Extensions
     {
         var types = endpointConfiguration.BuilderType.GetTypesScopedByTestClass();
         types = types.Union(endpointConfiguration.TypesToInclude);
-        return types.Where(t => !endpointConfiguration.TypesToExclude.Contains(t)).ToList();
+        return types;
     }
 
     public static IEnumerable<Type> GetTypesScopedByTestClass(this Type componentType)
