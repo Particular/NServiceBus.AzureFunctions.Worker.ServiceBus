@@ -18,7 +18,6 @@ class DefaultEndpoint : IEndpointSetupTemplate
     {
         var configuration = new EndpointConfiguration(endpointConfiguration.EndpointName);
 
-        configuration.TypesToIncludeInScan(endpointConfiguration.GetTypesScopedByTestClass());
         configuration.EnableInstallers();
 
         configuration.RegisterComponents(c => c
@@ -46,6 +45,8 @@ class DefaultEndpoint : IEndpointSetupTemplate
         _ = configuration.UseSerialization<SystemJsonSerializer>();
 
         await configurationBuilderCustomization(configuration);
+
+        configuration.ScanTypesForTest(endpointConfiguration);
 
         return configuration;
     }

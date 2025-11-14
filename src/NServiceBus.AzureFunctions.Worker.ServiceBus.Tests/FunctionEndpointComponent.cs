@@ -73,7 +73,9 @@
                 {
                     var endpointConfiguration = triggerConfiguration.AdvancedConfiguration;
 
-                    endpointConfiguration.TypesToIncludeInScan(functionComponentType.GetTypesScopedByTestClass());
+                    // This is bit of a hack but allows us to use the existing scanning component
+                    var customization = new EndpointCustomizationConfiguration { BuilderType = functionComponentType };
+                    endpointConfiguration.ScanTypesForTest(customization);
 
                     if (triggerConfiguration.Transport.Topology is TopicPerEventTopology topology)
                     {
