@@ -14,6 +14,7 @@ public class ConfigurationAnalyzerTests : AnalyzerTestFixture<ConfigurationAnaly
     [TestCase("PurgeOnStartup(true)", PurgeOnStartupNotAllowedId)]
     [TestCase("SetDiagnosticsPath(null)", SetDiagnosticsPathNotAllowedId)]
     [TestCase("UseTransport(new AzureServiceBusTransport(null, default(TopicTopology)))", UseTransportNotAllowedId)]
+    [TestCase("UseTransport<AzureServiceBusTransport>(null)", UseTransportNotAllowedId)]
     public Task DiagnosticIsReportedForEndpointConfiguration(string configuration, string diagnosticId)
     {
         var source =
@@ -41,6 +42,7 @@ class Foo
     [TestCase("PurgeOnStartup(true)", PurgeOnStartupNotAllowedId)]
     [TestCase("SetDiagnosticsPath(null)", SetDiagnosticsPathNotAllowedId)]
     [TestCase("UseTransport(new AzureServiceBusTransport(null, default(TopicTopology)))", UseTransportNotAllowedId)]
+    [TestCase("UseTransport<AzureServiceBusTransport>(null)", UseTransportNotAllowedId)]
     public Task DiagnosticIsNotReportedForOtherEndpointConfiguration(string configuration, string diagnosticId)
     {
         var source =
@@ -58,6 +60,7 @@ class SomeOtherClass
     internal void PurgeOnStartup(bool purge) {{ }}
     internal void SetDiagnosticsPath(string someProperty) {{ }}
     internal void UseTransport(AzureServiceBusTransport transport) {{ }}
+    internal void UseTransport<T>(string someProperty) {{ }}
 }}
 
 class Foo
