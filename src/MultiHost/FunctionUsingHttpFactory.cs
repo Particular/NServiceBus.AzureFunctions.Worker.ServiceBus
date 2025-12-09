@@ -3,6 +3,7 @@ namespace MultiHost;
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Sales;
 
 public partial class FunctionUsingHttpFactory
 {

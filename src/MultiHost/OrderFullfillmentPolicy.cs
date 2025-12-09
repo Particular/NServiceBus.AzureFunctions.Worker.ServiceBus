@@ -1,6 +1,5 @@
-namespace MultiHost;
+namespace Sales;
 
-[BelongsTo(nameof(SalesFunction.Sales))]
 public class OrderFullfillmentPolicy : Saga<OrderFullfillmentPolicyData>, IAmStartedByMessages<OrderPlaced>
 {
     protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OrderFullfillmentPolicyData> mapper) =>

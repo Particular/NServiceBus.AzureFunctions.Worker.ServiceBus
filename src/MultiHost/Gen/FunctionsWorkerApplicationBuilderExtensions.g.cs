@@ -1,6 +1,7 @@
 namespace MultiHost;
 
 using Azure.Messaging.ServiceBus;
+using Billing;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 

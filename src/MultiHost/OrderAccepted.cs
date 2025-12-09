@@ -1,4 +1,3 @@
-namespace MultiHost;
+namespace Billing;
 
-[BelongsTo(nameof(BillingFunctions.Billing))]
 public class OrderAccepted : IEvent;

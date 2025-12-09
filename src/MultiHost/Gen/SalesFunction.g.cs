@@ -1,8 +1,9 @@
-namespace MultiHost;
+namespace Sales;
 
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
+using MultiHost;
 
 public partial class SalesFunction : IConfigureEndpoint
 {

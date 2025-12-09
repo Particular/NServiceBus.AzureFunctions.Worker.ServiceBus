@@ -1,4 +1,4 @@
-namespace MultiHost;
+namespace Sales;
 
 public static partial class SalesInitializationContextExtensions
 {

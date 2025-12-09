@@ -1,5 +1,7 @@
 namespace MultiHost;
 
+using Sales;
+
 [NServiceBusEndpointFunction("Finance", QueueName = "finance-queue")]
 public partial class LessBoilerplateFunction
 {

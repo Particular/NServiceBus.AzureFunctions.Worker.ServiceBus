@@ -1,4 +1,4 @@
-namespace MultiHost;
+namespace Billing;
 
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
