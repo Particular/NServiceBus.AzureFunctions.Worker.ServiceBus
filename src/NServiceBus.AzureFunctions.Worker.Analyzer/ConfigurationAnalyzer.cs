@@ -135,7 +135,9 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer
                 return;
             }
 
-            if (methodSymbol.ReceiverType.ToString() == "NServiceBus.EndpointConfiguration")
+            var receiverType = methodSymbol.ReceiverType.ToString();
+
+            if (receiverType == "NServiceBus.EndpointConfiguration" || receiverType.EndsWith(".extension(NServiceBus.EndpointConfiguration)"))
             {
                 context.ReportDiagnostic(diagnosticDescriptor, invocationExpression);
             }
