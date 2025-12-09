@@ -5,8 +5,9 @@ namespace MultiEndpoint;
 
 public class ReceiverEndpoint
 {
+    [Function("ReceiverEndpoint")]
     public Task Receiver(
-        [ServiceBusTrigger("ReceiverEndpoint", Connection = "ServiceBusConnection", AutoCompleteMessages = false)]
+        [ServiceBusTrigger("ReceiverEndpoint", Connection = "AzureWebJobsServiceBus", AutoCompleteMessages = false)]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {
