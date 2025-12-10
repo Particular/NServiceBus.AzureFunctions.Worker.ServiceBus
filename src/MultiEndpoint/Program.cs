@@ -6,12 +6,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Logging;
 using NServiceBus.TransactionalSession;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
+LogManager.Use<DefaultFactory>().Level(LogLevel.Debug);
+
 builder.Sender();
 builder.Receiver();
+builder.AnotherReceiver();
 
 var host = builder.Build();
 
@@ -97,6 +101,48 @@ public static class ReceiverEndpointConfigurationExtensions
             new InitializationService("ReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
         builder.Services.AddKeyedSingleton<IMessageSession>("ReceiverEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
         builder.Services.AddKeyedSingleton<IMessageProcessor>("ReceiverEndpoint", (_, __) => new MessageProcessor(serverlessTransport));
+    }
+}
+
+public static class AnotherReceiverEndpointConfigurationExtensions
+{
+    public static void AnotherReceiver(this FunctionsApplicationBuilder builder)
+    {
+        builder.Services.AddAzureClientsCore();
+
+        var endpointConfiguration = new EndpointConfiguration("AnotherReceiverEndpoint");
+        endpointConfiguration.EnableOutbox();
+
+        endpointConfiguration.EnableInstallers();
+
+        var assemblyScanner = endpointConfiguration.AssemblyScanner();
+        assemblyScanner.Disable = true;
+
+        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+        persistence.EnableTransactionalSession();
+
+        endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+
+        // hardcoded handlers
+        endpointConfiguration.AddHandler<SomeEventMessageHandler>();
+
+        var transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", TopicTopology.Default)
+        {
+            TransportTransactionMode = TransportTransactionMode.ReceiveOnly
+        };
+        var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
+        endpointConfiguration.UseTransport(serverlessTransport);
+
+        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, "AnotherReceiverEndpoint");
+        var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
+            endpointConfiguration,
+            keyedServices);
+
+        // unfortunately AddHostedServices dedups
+        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
+            new InitializationService("AnotherReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
+        builder.Services.AddKeyedSingleton<IMessageSession>("AnotherReceiverEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
+        builder.Services.AddKeyedSingleton<IMessageProcessor>("AnotherReceiverEndpoint", (_, __) => new MessageProcessor(serverlessTransport));
     }
 }
 

@@ -1,13 +1,13 @@
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using NServiceBus;
 using NServiceBus.Logging;
 
-public class SomeEventMessageHandler(ILogger<SomeEventMessageHandler> logger) : IHandleMessages<SomeEvent>
+public class SomeEventMessageHandler() : IHandleMessages<SomeEvent>
 {
+    // using static logger here deliberately
+    static readonly ILog Log = LogManager.GetLogger<SomeOtherMessageHandler>();
+
     public Task Handle(SomeEvent message, IMessageHandlerContext context)
     {
-        logger.LogWarning($"Handling {nameof(SomeEvent)} in {nameof(SomeEventMessageHandler)}");
+        Log.Warn($"Handling {nameof(SomeEvent)} in {nameof(SomeEventMessageHandler)}");
 
         return Task.CompletedTask;
     }
