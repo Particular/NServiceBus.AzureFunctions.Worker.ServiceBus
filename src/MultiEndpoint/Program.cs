@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.Functions.Worker.Builder;
+﻿using Azure.Messaging.ServiceBus;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,12 +12,6 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.Sender();
 builder.Receiver();
-
-// builder.AddNServiceBus(c =>
-// {
-//     c.Routing.RouteToEndpoint(typeof(TriggerMessage), "FunctionsTestEndpoint2");
-//     c.AdvancedConfiguration.EnableInstallers();
-// });
 
 var host = builder.Build();
 
@@ -30,6 +26,9 @@ public static class SenderEndpointConfigurationExtensions
         var endpointConfiguration = new EndpointConfiguration("SenderEndpoint");
         endpointConfiguration.SendOnly();
         endpointConfiguration.EnableOutbox();
+
+        var assemblyScanner = endpointConfiguration.AssemblyScanner();
+        assemblyScanner.Disable = true;
 
         var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
         persistence.EnableTransactionalSession(new TransactionalSessionOptions
@@ -50,7 +49,9 @@ public static class SenderEndpointConfigurationExtensions
             endpointConfiguration,
             keyedServices);
 
-        builder.Services.AddHostedService(s=> new InitializationService("SenderEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
+        // unfortunately AddHostedServices dedups
+        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
+            new InitializationService("SenderEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
         builder.Services.AddKeyedSingleton<IMessageSession>("SenderEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
     }
 }
@@ -63,10 +64,21 @@ public static class ReceiverEndpointConfigurationExtensions
 
         var endpointConfiguration = new EndpointConfiguration("ReceiverEndpoint");
         endpointConfiguration.EnableOutbox();
+
+        endpointConfiguration.EnableInstallers();
+
+        var assemblyScanner = endpointConfiguration.AssemblyScanner();
+        assemblyScanner.Disable = true;
+
         var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
         persistence.EnableTransactionalSession();
 
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+
+        // hardcoded handlers
+        endpointConfiguration.AddHandler<TriggerMessageHandler>();
+        endpointConfiguration.AddHandler<SomeOtherMessageHandler>();
+        endpointConfiguration.AddHandler<SomeEventMessageHandler>();
 
         var transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", TopicTopology.Default)
         {
@@ -80,8 +92,11 @@ public static class ReceiverEndpointConfigurationExtensions
             endpointConfiguration,
             keyedServices);
 
-        builder.Services.AddHostedService(s=> new InitializationService("ReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
+        // unfortunately AddHostedServices dedups
+        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
+            new InitializationService("ReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
         builder.Services.AddKeyedSingleton<IMessageSession>("ReceiverEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
+        builder.Services.AddKeyedSingleton<IMessageProcessor>("ReceiverEndpoint", (_, __) => new MessageProcessor(serverlessTransport));
     }
 }
 
@@ -110,5 +125,19 @@ class InitializationService(
             await endpointInstance.Stop(cancellationToken);
             await keyedServices.DisposeAsync();
         }
+    }
+}
+
+public interface IMessageProcessor
+{
+    Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default);
+}
+
+class MessageProcessor(ServerlessTransport transport) : IMessageProcessor
+{
+    public Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
+        FunctionContext functionContext, CancellationToken cancellationToken = default)
+    {
+        return transport.MessageProcessor.Process(message, messageActions, cancellationToken);
     }
 }

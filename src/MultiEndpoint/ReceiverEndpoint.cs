@@ -1,9 +1,10 @@
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MultiEndpoint;
 
-public class ReceiverEndpoint
+public class ReceiverEndpoint([FromKeyedServices("ReceiverEndpoint")] IMessageProcessor processor)
 {
     [Function("ReceiverEndpoint")]
     public Task Receiver(
@@ -11,6 +12,6 @@ public class ReceiverEndpoint
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {
-        return Task.CompletedTask;
+        return processor.Process(message, messageActions, context, cancellationToken);
     }
 }
