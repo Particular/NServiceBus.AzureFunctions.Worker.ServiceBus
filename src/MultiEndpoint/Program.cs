@@ -1,6 +1,7 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
+using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +36,7 @@ public static class SenderEndpointConfigurationExtensions
         assemblyScanner.Disable = true;
 
         var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
         persistence.EnableTransactionalSession(new TransactionalSessionOptions
         {
             ProcessorEndpoint = "ReceiverEndpoint"
@@ -57,6 +59,8 @@ public static class SenderEndpointConfigurationExtensions
         builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
             new InitializationService("SenderEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
         builder.Services.AddKeyedSingleton<IMessageSession>("SenderEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
+
+        builder.UseMiddleware<TransactionalSessionMiddleware>();
     }
 }
 
@@ -75,6 +79,7 @@ public static class ReceiverEndpointConfigurationExtensions
         assemblyScanner.Disable = true;
 
         var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
         persistence.EnableTransactionalSession();
 
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
@@ -185,5 +190,26 @@ class MessageProcessor(ServerlessTransport transport) : IMessageProcessor
         FunctionContext functionContext, CancellationToken cancellationToken = default)
     {
         return transport.MessageProcessor.Process(message, messageActions, cancellationToken);
+    }
+}
+
+public class TransactionalSessionMiddleware : IFunctionsWorkerMiddleware
+{
+    public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
+    {
+        // brutally hardcoded for now
+        if (context.FunctionDefinition.Name != "HttpSenderV4Transactional")
+        {
+            await next(context);
+            return;
+        }
+
+        // this is a little weird, but it works
+        await using var transactionalSession = context.InstanceServices.GetRequiredKeyedService<ITransactionalSession>("SenderEndpoint");
+        await transactionalSession.Open(new MongoOpenSessionOptions(), context.CancellationToken);
+
+        await next(context);
+
+        await transactionalSession.Commit(context.CancellationToken);
     }
 }
