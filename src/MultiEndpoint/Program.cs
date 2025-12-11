@@ -1,18 +1,16 @@
-﻿using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using MultiEndpoint;
 using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
-using NServiceBus.Logging;
 using NServiceBus.TransactionalSession;
 
 var builder = FunctionsApplication.CreateBuilder(args);
-
-LogManager.Use<DefaultFactory>().Level(LogLevel.Debug);
 
 builder.Sender();
 builder.Receiver();
@@ -28,7 +26,8 @@ public static class SenderEndpointConfigurationExtensions
     {
         builder.Services.AddAzureClientsCore();
 
-        var endpointConfiguration = new EndpointConfiguration("SenderEndpoint");
+        var serviceKey = "SenderEndpoint";
+        var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.SendOnly();
         endpointConfiguration.EnableOutbox();
 
@@ -50,15 +49,15 @@ public static class SenderEndpointConfigurationExtensions
         var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
         endpointConfiguration.UseTransport(serverlessTransport);
 
-        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, "SenderEndpoint");
+        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
         var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
             endpointConfiguration,
             keyedServices);
 
+        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, serverlessTransport, serviceKey, keyedServices));
         // unfortunately AddHostedServices dedups
-        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
-            new InitializationService("SenderEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
-        builder.Services.AddKeyedSingleton<IMessageSession>("SenderEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
+        builder.Services.AddSingleton<IHostedService, NServiceBusHostedService>(s => new NServiceBusHostedService(s.GetRequiredKeyedService<EndpointStarter>(serviceKey)));
+        builder.Services.AddKeyedSingleton<IMessageSession>(serviceKey, (sp, key) => new HostAwareMessageSession(sp.GetRequiredKeyedService<EndpointStarter>(key)));
 
         builder.UseMiddleware<TransactionalSessionMiddleware>();
     }
@@ -70,7 +69,9 @@ public static class ReceiverEndpointConfigurationExtensions
     {
         builder.Services.AddAzureClientsCore();
 
-        var endpointConfiguration = new EndpointConfiguration("ReceiverEndpoint");
+        var serviceKey = "ReceiverEndpoint";
+
+        var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.EnableOutbox();
 
         endpointConfiguration.EnableInstallers();
@@ -96,16 +97,16 @@ public static class ReceiverEndpointConfigurationExtensions
         var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
         endpointConfiguration.UseTransport(serverlessTransport);
 
-        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, "ReceiverEndpoint");
+        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
         var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
             endpointConfiguration,
             keyedServices);
 
+        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, serverlessTransport, serviceKey, keyedServices));
         // unfortunately AddHostedServices dedups
-        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
-            new InitializationService("ReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
-        builder.Services.AddKeyedSingleton<IMessageSession>("ReceiverEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
-        builder.Services.AddKeyedSingleton<IMessageProcessor>("ReceiverEndpoint", (_, __) => new MessageProcessor(serverlessTransport));
+        builder.Services.AddSingleton<IHostedService, NServiceBusHostedService>(sp => new NServiceBusHostedService(sp.GetRequiredKeyedService<EndpointStarter>(serviceKey)));
+        builder.Services.AddKeyedSingleton<IMessageSession>(serviceKey, (sp, key) => new HostAwareMessageSession(sp.GetRequiredKeyedService<EndpointStarter>(key)));
+        builder.Services.AddKeyedSingleton<IMessageProcessor>(serviceKey, (sp, key) => new MessageProcessor(serverlessTransport, sp.GetRequiredKeyedService<EndpointStarter>(key)));
     }
 }
 
@@ -115,7 +116,8 @@ public static class AnotherReceiverEndpointConfigurationExtensions
     {
         builder.Services.AddAzureClientsCore();
 
-        var endpointConfiguration = new EndpointConfiguration("AnotherReceiverEndpoint");
+        var serviceKey = "AnotherReceiverEndpoint";
+        var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.EnableOutbox();
 
         endpointConfiguration.EnableInstallers();
@@ -138,58 +140,16 @@ public static class AnotherReceiverEndpointConfigurationExtensions
         var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
         endpointConfiguration.UseTransport(serverlessTransport);
 
-        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, "AnotherReceiverEndpoint");
+        var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
         var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
             endpointConfiguration,
             keyedServices);
 
+        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, serverlessTransport, serviceKey, keyedServices));
         // unfortunately AddHostedServices dedups
-        builder.Services.AddSingleton<IHostedService, InitializationService>(s =>
-            new InitializationService("AnotherReceiverEndpoint", keyedServices, s, startableEndpoint, serverlessTransport));
-        builder.Services.AddKeyedSingleton<IMessageSession>("AnotherReceiverEndpoint", (_, __) => startableEndpoint.MessageSession.Value);
-        builder.Services.AddKeyedSingleton<IMessageProcessor>("AnotherReceiverEndpoint", (_, __) => new MessageProcessor(serverlessTransport));
-    }
-}
-
-class InitializationService(
-    string serviceKey,
-    KeyedServiceCollectionAdapter services,
-    IServiceProvider provider,
-    IStartableEndpointWithExternallyManagedContainer startableEndpoint,
-    ServerlessTransport serverlessTransport) : IHostedService
-{
-    private IEndpointInstance? endpointInstance;
-    private KeyedServiceProviderAdapter? keyedServices;
-
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        keyedServices = new KeyedServiceProviderAdapter(provider, serviceKey, services);
-        serverlessTransport.ServiceProvider = keyedServices;
-
-        endpointInstance = await startableEndpoint.Start(keyedServices, cancellationToken);
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        if (endpointInstance != null && keyedServices != null)
-        {
-            await endpointInstance.Stop(cancellationToken);
-            await keyedServices.DisposeAsync();
-        }
-    }
-}
-
-public interface IMessageProcessor
-{
-    Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext functionContext, CancellationToken cancellationToken = default);
-}
-
-class MessageProcessor(ServerlessTransport transport) : IMessageProcessor
-{
-    public Task Process(ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions,
-        FunctionContext functionContext, CancellationToken cancellationToken = default)
-    {
-        return transport.MessageProcessor.Process(message, messageActions, cancellationToken);
+        builder.Services.AddSingleton<IHostedService, NServiceBusHostedService>(sp => new NServiceBusHostedService(sp.GetRequiredKeyedService<EndpointStarter>(serviceKey)));
+        builder.Services.AddKeyedSingleton<IMessageSession>(serviceKey, (sp, key) => new HostAwareMessageSession(sp.GetRequiredKeyedService<EndpointStarter>(key)));
+        builder.Services.AddKeyedSingleton<IMessageProcessor>(serviceKey, (sp, key) => new MessageProcessor(serverlessTransport, sp.GetRequiredKeyedService<EndpointStarter>(key)));
     }
 }
 
