@@ -6,11 +6,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MultiEndpoint;
+using MultiEndpoint.Logging;
 using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Logging;
 using NServiceBus.TransactionalSession;
+using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 var builder = FunctionsApplication.CreateBuilder(args);
+
+// as early as possible
+LogManager.UseFactory(FunctionsLoggerFactory.Instance);
+
+builder.Logging.AddSystemdConsole(options => options.IncludeScopes = true);
+
+builder.Services.AddHostedService<InitializeLogger>();
 
 builder.Sender();
 builder.Receiver();
@@ -171,5 +181,39 @@ public class TransactionalSessionMiddleware : IFunctionsWorkerMiddleware
         await next(context);
 
         await transactionalSession.Commit(context.CancellationToken);
+    }
+}
+
+public class InitializeLogger(ILoggerFactory loggerFactory) : IHostedLifecycleService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task StartingAsync(CancellationToken cancellationToken)
+    {
+        FunctionsLoggerFactory.Instance.SetLoggerFactory(loggerFactory);
+        return Task.CompletedTask;
+    }
+
+    public Task StartedAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task StoppingAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task StoppedAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

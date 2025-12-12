@@ -1,3 +1,4 @@
+using MultiEndpoint.Logging;
 using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
 
@@ -24,11 +25,10 @@ sealed class EndpointStarter(
                 return endpoint;
             }
 
-            // LogManager.UseFactory(new LoggerFactory(loggerFactory));
-            // deferredLoggerFactory.FlushAll(loggerFactory);
-
             keyedServices = new KeyedServiceProviderAdapter(serviceProvider, serviceKey, services);
             serverlessTransport.ServiceProvider = keyedServices;
+
+            FunctionsLoggerFactory.Instance.SetName(serviceKey);
 
             endpoint = await startableEndpoint.Start(keyedServices, cancellationToken).ConfigureAwait(false);
 
