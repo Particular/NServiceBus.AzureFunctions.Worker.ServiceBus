@@ -17,7 +17,20 @@ var builder = FunctionsApplication.CreateBuilder(args);
 // as early as possible
 LogManager.UseFactory(FunctionsLoggerFactory.Instance);
 
-builder.Logging.AddSystemdConsole(options => options.IncludeScopes = true);
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.IncludeScopes = true;
+    options.TimestampFormat = "[HH:mm:ss] ";
+    options.UseUtcTimestamp = true;
+    options.SingleLine = true;
+});
+// builder.Logging.AddSystemdConsole(options =>
+// {
+//     options.IncludeScopes = true;
+//     options.TimestampFormat = "[HH:mm:ss] ";
+//     options.UseUtcTimestamp = true;
+// });
+// builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 
 builder.Services.AddHostedService<InitializeLogger>();
 

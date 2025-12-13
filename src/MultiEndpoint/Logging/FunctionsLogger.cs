@@ -288,7 +288,9 @@ class FunctionsLogger : ILog
 
 public sealed class NameSlot
 {
-    public string Name;
+    public required string Format;
+
+    public required object[] Args;
 
     public readonly ConcurrentQueue<(LogLevel level, string? message)> DeferredMessageLogs = new();
 

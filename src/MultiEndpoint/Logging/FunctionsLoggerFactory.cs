@@ -36,7 +36,11 @@ public class FunctionsLoggerFactory : ILoggerFactory
     public NameScope PushName(string name)
     {
         var previous = slot.Value;
-        slot.Value = slots.GetOrAdd($"[{name}]",static name => new NameSlot { Name = name });
+        slot.Value = slots.GetOrAdd(name, static endpoint => new NameSlot
+        {
+            Format = "Endpoint = {Endpoint}",
+            Args = [endpoint],
+        });
         return new NameScope(this, slot, previous);
     }
 
