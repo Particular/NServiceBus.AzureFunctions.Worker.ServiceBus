@@ -16,15 +16,9 @@ public class FunctionsLoggerFactory : ILoggerFactory
     readonly AsyncLocal<string> nameSlot = new();
     Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory;
 
-    public ILog GetLogger(Type type)
-    {
-        return loggers.GetOrAdd(type.FullName, name => new FunctionsLogger(nameSlot, loggerFactory, name));
-    }
+    public ILog GetLogger(Type type) => loggers.GetOrAdd(type.FullName, name => new FunctionsLogger(nameSlot, loggerFactory, name));
 
-    public ILog GetLogger(string name)
-    {
-        return loggers.GetOrAdd(name, name => new FunctionsLogger(nameSlot, loggerFactory, name));
-    }
+    public ILog GetLogger(string name) => loggers.GetOrAdd(name, name => new FunctionsLogger(nameSlot, loggerFactory, name));
 
     public void SetLoggerFactory(Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
     {
@@ -36,8 +30,15 @@ public class FunctionsLoggerFactory : ILoggerFactory
         }
     }
 
-    public void SetName(string name)
+    public NameScope PushName(string name)
     {
+        var previous = nameSlot.Value;
         nameSlot.Value = name;
+        return new NameScope(nameSlot, previous);
+    }
+
+    public readonly struct NameScope(AsyncLocal<string> slot, string? previous) : IDisposable
+    {
+        public void Dispose() => slot.Value = previous;
     }
 }

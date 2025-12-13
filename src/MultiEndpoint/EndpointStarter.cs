@@ -9,6 +9,8 @@ sealed class EndpointStarter(
     string serviceKey,
     KeyedServiceCollectionAdapter services) : IAsyncDisposable
 {
+    public string ServiceKey => serviceKey;
+
     public async ValueTask<IEndpointInstance> GetOrStart(CancellationToken cancellationToken = default)
     {
         if (endpoint != null)
@@ -28,8 +30,7 @@ sealed class EndpointStarter(
             keyedServices = new KeyedServiceProviderAdapter(serviceProvider, serviceKey, services);
             serverlessTransport.ServiceProvider = keyedServices;
 
-            FunctionsLoggerFactory.Instance.SetName(serviceKey);
-
+            using var _ = FunctionsLoggerFactory.Instance.PushName(ServiceKey);
             endpoint = await startableEndpoint.Start(keyedServices, cancellationToken).ConfigureAwait(false);
 
             return endpoint;

@@ -70,17 +70,41 @@ class LoggerAdapter(ILogger logger, AsyncLocal<string> name) : ILog
         logger.LogWarning(format, args);
     }
 
-    public void Error(string? message) => logger.LogError(message);
+    public void Error(string? message)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogError(message);
+    }
 
-    public void Error(string? message, Exception? exception) => logger.LogError(exception, message);
+    public void Error(string? message, Exception? exception)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogError(exception, message);
+    }
 
-    public void ErrorFormat(string format, params object?[] args) => logger.LogError(format, args);
+    public void ErrorFormat(string format, params object?[] args)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogError(format, args);
+    }
 
-    public void Fatal(string? message) => logger.LogCritical(message);
+    public void Fatal(string? message)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogCritical(message);
+    }
 
-    public void Fatal(string? message, Exception? exception) => logger.LogCritical(exception, message);
+    public void Fatal(string? message, Exception? exception)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogCritical(exception, message);
+    }
 
-    public void FatalFormat(string format, params object?[] args) => logger.LogCritical(format, args);
+    public void FatalFormat(string format, params object?[] args)
+    {
+        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        logger.LogCritical(format, args);
+    }
 
     readonly ILogger logger = logger ?? throw new ArgumentNullException(nameof(logger));
 }
