@@ -8,7 +8,7 @@ public class AnotherReceiverEndpoint([FromKeyedServices("AnotherReceiverEndpoint
 {
     [Function("AnotherReceiverEndpoint")]
     public Task Receiver(
-        [ServiceBusTrigger("AnotherReceiverEndpoint", Connection = "AzureWebJobsServiceBus", AutoCompleteMessages = false)]
+        [ServiceBusTrigger("AnotherReceiverEndpoint", Connection = "AzureWebJobsServiceBus", AutoCompleteMessages = true)]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {

@@ -30,7 +30,9 @@ sealed class EndpointStarter(
             keyedServices = new KeyedServiceProviderAdapter(serviceProvider, serviceKey, services);
             serverlessTransport.ServiceProvider = keyedServices;
 
-            using var _ = FunctionsLoggerFactory.Instance.PushName(ServiceKey);
+            using var scope = FunctionsLoggerFactory.Instance.PushName(ServiceKey);
+            scope.Flush();
+
             endpoint = await startableEndpoint.Start(keyedServices, cancellationToken).ConfigureAwait(false);
 
             return endpoint;
@@ -48,6 +50,7 @@ sealed class EndpointStarter(
             return;
         }
 
+        using var scope = FunctionsLoggerFactory.Instance.PushName(ServiceKey);
         if (endpoint != null)
         {
             await endpoint.Stop().ConfigureAwait(false);

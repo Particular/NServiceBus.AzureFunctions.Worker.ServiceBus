@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MultiEndpoint;
 using NServiceBus.TransactionalSession;
 
 class HttpSenderTransactional([FromKeyedServices("SenderEndpoint")] ITransactionalSession session, ILogger<HttpSender> logger)

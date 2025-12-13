@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using NServiceBus.Logging;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-class LoggerAdapter(ILogger logger, AsyncLocal<string> name) : ILog
+class LoggerAdapter(ILogger logger, AsyncLocal<NameSlot> slot) : ILog
 {
     public bool IsDebugEnabled => logger.IsEnabled(LogLevel.Debug);
 
@@ -18,91 +18,91 @@ class LoggerAdapter(ILogger logger, AsyncLocal<string> name) : ILog
 
     public void Debug(string? message)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogDebug(message);
     }
 
     public void Debug(string? message, Exception? exception)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogDebug(exception, message);
     }
 
     public void DebugFormat(string format, params object?[] args)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogDebug(format, args);
     }
 
     public void Info(string? message)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogInformation(message);
     }
 
     public void Info(string? message, Exception? exception)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogInformation(exception, message);
     }
 
     public void InfoFormat(string format, params object?[] args)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogInformation(format, args);
     }
 
     public void Warn(string? message)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogWarning(message);
     }
 
     public void Warn(string? message, Exception? exception)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogWarning(exception, message);
     }
 
     public void WarnFormat(string format, params object?[] args)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogWarning(format, args);
     }
 
     public void Error(string? message)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogError(message);
     }
 
     public void Error(string? message, Exception? exception)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogError(exception, message);
     }
 
     public void ErrorFormat(string format, params object?[] args)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogError(format, args);
     }
 
     public void Fatal(string? message)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogCritical(message);
     }
 
     public void Fatal(string? message, Exception? exception)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogCritical(exception, message);
     }
 
     public void FatalFormat(string format, params object?[] args)
     {
-        using var scope = logger.BeginScope(name.Value ?? string.Empty);
+        using var scope = logger.BeginScope(slot.Value?.Name ?? string.Empty);
         logger.LogCritical(format, args);
     }
 

@@ -1,3 +1,3 @@
-﻿using NServiceBus;
+﻿namespace MultiEndpoint;
 
 public class TriggerMessage : IMessage;

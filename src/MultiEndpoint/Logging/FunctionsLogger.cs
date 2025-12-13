@@ -7,32 +7,36 @@ using LogLevel = NServiceBus.Logging.LogLevel;
 
 class FunctionsLogger : ILog
 {
-    readonly ThreadLocal<Slot> slots = new(static () => new Slot());
     LoggerAdapter? logger;
-    readonly AsyncLocal<string> nameSlot;
+    readonly AsyncLocal<NameSlot> slot;
     readonly string loggerName;
 
-    public FunctionsLogger(AsyncLocal<string> nameSlot, ILoggerFactory? loggerFactory, string loggerName)
+    public FunctionsLogger(AsyncLocal<NameSlot> slot, ILoggerFactory? loggerFactory, string loggerName)
     {
-        this.nameSlot = nameSlot;
+        this.slot = slot;
         this.loggerName = loggerName;
 
         if (loggerFactory != null)
         {
-            logger = new LoggerAdapter(loggerFactory.CreateLogger(this.loggerName), this.nameSlot);
+            logger = new LoggerAdapter(loggerFactory.CreateLogger(this.loggerName), this.slot);
         }
     }
 
     public void Flush(ILoggerFactory loggerFactory)
     {
-        logger = new LoggerAdapter(loggerFactory.CreateLogger(loggerName), nameSlot);
+        logger ??= new LoggerAdapter(loggerFactory.CreateLogger(loggerName), slot);
 
-        Flush(logger, slots.Value);
+        Flush(logger, slot.Value);
     }
 
-    static void Flush(LoggerAdapter logger, Slot slot)
+    static void Flush(LoggerAdapter logger, NameSlot? nameSlot)
     {
-        while (slot.DeferredMessageLogs.TryDequeue(out var entry))
+        if (nameSlot == null)
+        {
+            return;
+        }
+
+        while (nameSlot.DeferredMessageLogs.TryDequeue(out var entry))
         {
             switch (entry.level)
             {
@@ -56,7 +60,7 @@ class FunctionsLogger : ILog
             }
         }
 
-        while (slot.DeferredExceptionLogs.TryDequeue(out var entry))
+        while (nameSlot.DeferredExceptionLogs.TryDequeue(out var entry))
         {
             switch (entry.level)
             {
@@ -80,7 +84,7 @@ class FunctionsLogger : ILog
             }
         }
 
-        while (slot.DeferredFormatLogs.TryDequeue(out var entry))
+        while (nameSlot.DeferredFormatLogs.TryDequeue(out var entry))
         {
             switch (entry.level)
             {
@@ -113,7 +117,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredMessageLogs.Enqueue((LogLevel.Debug, message));
+        slot.Value.DeferredMessageLogs.Enqueue((LogLevel.Debug, message));
     }
 
     public void Debug(string? message, Exception? exception)
@@ -124,7 +128,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredExceptionLogs.Enqueue((LogLevel.Debug, message, exception));
+        slot.Value.DeferredExceptionLogs.Enqueue((LogLevel.Debug, message, exception));
     }
 
     public void DebugFormat(string format, params object?[] args)
@@ -135,7 +139,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Debug, format, args));
+        slot.Value.DeferredFormatLogs.Enqueue((LogLevel.Debug, format, args));
     }
 
     public void Info(string? message)
@@ -146,7 +150,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredMessageLogs.Enqueue((LogLevel.Info, message));
+        slot.Value.DeferredMessageLogs.Enqueue((LogLevel.Info, message));
     }
 
     public void Info(string? message, Exception? exception)
@@ -157,7 +161,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredExceptionLogs.Enqueue((LogLevel.Info, message, exception));
+        slot.Value.DeferredExceptionLogs.Enqueue((LogLevel.Info, message, exception));
     }
 
     public void InfoFormat(string format, params object?[] args)
@@ -168,7 +172,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Info, format, args));
+        slot.Value.DeferredFormatLogs.Enqueue((LogLevel.Info, format, args));
     }
 
     public void Warn(string? message)
@@ -179,7 +183,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredMessageLogs.Enqueue((LogLevel.Warn, message));
+        slot.Value.DeferredMessageLogs.Enqueue((LogLevel.Warn, message));
     }
 
     public void Warn(string? message, Exception? exception)
@@ -190,7 +194,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredExceptionLogs.Enqueue((LogLevel.Warn, message, exception));
+        slot.Value.DeferredExceptionLogs.Enqueue((LogLevel.Warn, message, exception));
     }
 
     public void WarnFormat(string format, params object?[] args)
@@ -201,7 +205,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Warn, format, args));
+        slot.Value.DeferredFormatLogs.Enqueue((LogLevel.Warn, format, args));
     }
 
     public void Error(string? message)
@@ -212,7 +216,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredMessageLogs.Enqueue((LogLevel.Error, message));
+        slot.Value.DeferredMessageLogs.Enqueue((LogLevel.Error, message));
     }
 
     public void Error(string? message, Exception? exception)
@@ -223,7 +227,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredExceptionLogs.Enqueue((LogLevel.Error, message, exception));
+        slot.Value.DeferredExceptionLogs.Enqueue((LogLevel.Error, message, exception));
     }
 
     public void ErrorFormat(string format, params object?[] args)
@@ -234,7 +238,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Error, format, args));
+        slot.Value.DeferredFormatLogs.Enqueue((LogLevel.Error, format, args));
     }
 
     public void Fatal(string? message)
@@ -245,7 +249,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredMessageLogs.Enqueue((LogLevel.Fatal, message));
+        slot.Value.DeferredMessageLogs.Enqueue((LogLevel.Fatal, message));
     }
 
     public void Fatal(string? message, Exception? exception)
@@ -256,7 +260,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredExceptionLogs.Enqueue((LogLevel.Fatal, message, exception));
+        slot.Value.DeferredExceptionLogs.Enqueue((LogLevel.Fatal, message, exception));
     }
 
     public void FatalFormat(string format, params object?[] args)
@@ -267,7 +271,7 @@ class FunctionsLogger : ILog
             return;
         }
 
-        slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Fatal, format, args));
+        slot.Value.DeferredFormatLogs.Enqueue((LogLevel.Fatal, format, args));
     }
 
     // capturing everything just in case when the logger is not yet set
@@ -280,14 +284,16 @@ class FunctionsLogger : ILog
     public bool IsErrorEnabled => logger == null || logger.IsErrorEnabled;
 
     public bool IsFatalEnabled => logger == null || logger.IsFatalEnabled;
+}
 
-    sealed class Slot
-    {
-        public readonly ConcurrentQueue<(LogLevel level, string? message)> DeferredMessageLogs = new();
+public sealed class NameSlot
+{
+    public string Name;
 
-        public readonly ConcurrentQueue<(LogLevel level, string? message, Exception? exception)> DeferredExceptionLogs =
-            new();
+    public readonly ConcurrentQueue<(LogLevel level, string? message)> DeferredMessageLogs = new();
 
-        public readonly ConcurrentQueue<(LogLevel level, string format, object?[] args)> DeferredFormatLogs = new();
-    }
+    public readonly ConcurrentQueue<(LogLevel level, string? message, Exception? exception)> DeferredExceptionLogs =
+        new();
+
+    public readonly ConcurrentQueue<(LogLevel level, string format, object?[] args)> DeferredFormatLogs = new();
 }

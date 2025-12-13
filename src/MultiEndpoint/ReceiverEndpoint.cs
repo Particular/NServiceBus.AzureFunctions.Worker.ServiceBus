@@ -8,7 +8,7 @@ public class ReceiverEndpoint([FromKeyedServices("ReceiverEndpoint")] IMessagePr
 {
     [Function("ReceiverEndpoint")]
     public Task Receiver(
-        [ServiceBusTrigger("ReceiverEndpoint", Connection = "AzureWebJobsServiceBus", AutoCompleteMessages = false)]
+        [ServiceBusTrigger("ReceiverEndpoint", Connection = "AzureWebJobsServiceBus", AutoCompleteMessages = true)]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken = default)
     {

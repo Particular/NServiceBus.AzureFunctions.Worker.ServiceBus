@@ -36,6 +36,9 @@ public static class SenderEndpointConfigurationExtensions
         builder.Services.AddAzureClientsCore();
 
         var serviceKey = "SenderEndpoint";
+
+        using var _ = FunctionsLoggerFactory.Instance.PushName(serviceKey);
+
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.SendOnly();
         endpointConfiguration.EnableOutbox();
@@ -79,6 +82,8 @@ public static class ReceiverEndpointConfigurationExtensions
         builder.Services.AddAzureClientsCore();
 
         var serviceKey = "ReceiverEndpoint";
+
+        using var _ = FunctionsLoggerFactory.Instance.PushName(serviceKey);
 
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.EnableOutbox();
@@ -126,6 +131,9 @@ public static class AnotherReceiverEndpointConfigurationExtensions
         builder.Services.AddAzureClientsCore();
 
         var serviceKey = "AnotherReceiverEndpoint";
+
+        using var _ = FunctionsLoggerFactory.Instance.PushName(serviceKey);
+
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.EnableOutbox();
 

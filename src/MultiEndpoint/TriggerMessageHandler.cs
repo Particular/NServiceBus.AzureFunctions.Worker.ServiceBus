@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿namespace MultiEndpoint;
+
+using Microsoft.Extensions.Logging;
 
 public class TriggerMessageHandler(ILogger<TriggerMessageHandler> logger) : IHandleMessages<TriggerMessage>
 {

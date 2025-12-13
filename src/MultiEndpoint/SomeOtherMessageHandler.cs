@@ -1,3 +1,5 @@
+namespace MultiEndpoint;
+
 using NServiceBus.Logging;
 
 public class SomeOtherMessageHandler : IHandleMessages<SomeOtherMessage>

@@ -1,6 +1,8 @@
+namespace MultiEndpoint;
+
 using NServiceBus.Logging;
 
-public class SomeEventMessageHandler() : IHandleMessages<SomeEvent>
+public class SomeEventMessageHandler : IHandleMessages<SomeEvent>
 {
     // using static logger here deliberately
     static readonly ILog Log = LogManager.GetLogger<SomeOtherMessageHandler>();

@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MultiEndpoint;
 
 
 class HttpSender([FromKeyedServices("SenderEndpoint")] IMessageSession session, ILogger<HttpSender> logger)
