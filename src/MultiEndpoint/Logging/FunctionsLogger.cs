@@ -204,7 +204,7 @@ class FunctionsLogger : ILog
         slots.Value.DeferredFormatLogs.Enqueue((LogLevel.Warn, format, args));
     }
 
-    public void Error(string message)
+    public void Error(string? message)
     {
         if (logger != null)
         {

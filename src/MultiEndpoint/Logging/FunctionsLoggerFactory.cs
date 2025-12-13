@@ -6,15 +6,15 @@ using ILoggerFactory = NServiceBus.Logging.ILoggerFactory;
 
 public class FunctionsLoggerFactory : ILoggerFactory
 {
-    private FunctionsLoggerFactory()
+    FunctionsLoggerFactory()
     {
     }
 
     public static FunctionsLoggerFactory Instance = new();
 
     ConcurrentDictionary<string, FunctionsLogger> loggers = new();
-    private readonly AsyncLocal<string> nameSlot = new();
-    private Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory;
+    readonly AsyncLocal<string> nameSlot = new();
+    Microsoft.Extensions.Logging.ILoggerFactory? loggerFactory;
 
     public ILog GetLogger(Type type)
     {
