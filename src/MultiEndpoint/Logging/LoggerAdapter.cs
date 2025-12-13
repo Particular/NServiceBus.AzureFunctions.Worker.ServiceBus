@@ -1,8 +1,8 @@
+namespace MultiEndpoint.Logging;
+
 using Microsoft.Extensions.Logging;
 using NServiceBus.Logging;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-
-namespace MultiEndpoint.Logging;
 
 class LoggerAdapter(ILogger logger, AsyncLocal<string> name) : ILog
 {

@@ -1,8 +1,8 @@
+namespace MultiEndpoint;
+
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
-
-namespace MultiEndpoint;
 
 public class ReceiverEndpoint([FromKeyedServices("ReceiverEndpoint")] IMessageProcessor processor)
 {

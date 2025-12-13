@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using NServiceBus;
-using NServiceBus.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 public class TriggerMessageHandler(ILogger<TriggerMessageHandler> logger) : IHandleMessages<TriggerMessage>
 {
@@ -9,7 +6,7 @@ public class TriggerMessageHandler(ILogger<TriggerMessageHandler> logger) : IHan
     {
         logger.LogWarning($"Handling {nameof(TriggerMessage)} in {nameof(TriggerMessageHandler)}");
 
-        await context.SendLocal(new SomeOtherMessage());
-        await context.Publish(new SomeEvent());
+        await context.SendLocal(new SomeOtherMessage()).ConfigureAwait(false);
+        await context.Publish(new SomeEvent()).ConfigureAwait(false);
     }
 }

@@ -8,6 +8,6 @@ class MessageProcessor(ServerlessTransport transport, EndpointStarter endpointSt
         FunctionContext functionContext, CancellationToken cancellationToken = default)
     {
         _ = await endpointStarter.GetOrStart(cancellationToken).ConfigureAwait(false);
-        await transport.MessageProcessor.Process(message, messageActions, cancellationToken);
+        await transport.MessageProcessor.Process(message, messageActions, cancellationToken).ConfigureAwait(false);
     }
 }

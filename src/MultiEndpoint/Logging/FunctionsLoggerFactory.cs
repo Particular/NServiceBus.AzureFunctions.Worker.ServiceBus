@@ -1,8 +1,8 @@
+namespace MultiEndpoint.Logging;
+
 using System.Collections.Concurrent;
 using NServiceBus.Logging;
 using ILoggerFactory = NServiceBus.Logging.ILoggerFactory;
-
-namespace MultiEndpoint.Logging;
 
 public class FunctionsLoggerFactory : ILoggerFactory
 {

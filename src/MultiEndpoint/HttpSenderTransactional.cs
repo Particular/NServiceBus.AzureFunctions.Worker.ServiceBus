@@ -14,7 +14,7 @@ class HttpSenderTransactional([FromKeyedServices("SenderEndpoint")] ITransaction
     {
         logger.LogInformation("C# HTTP trigger function received a request.");
 
-        await session.Send( "ReceiverEndpoint", new TriggerMessage());
+        await session.Send( "ReceiverEndpoint", new TriggerMessage()).ConfigureAwait(false);
 
         var r = req.CreateResponse(HttpStatusCode.OK);
         await r.WriteStringAsync($"{nameof(TriggerMessage)} sent.")

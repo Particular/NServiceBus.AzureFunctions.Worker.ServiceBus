@@ -1,9 +1,9 @@
+namespace MultiEndpoint.Services;
+
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
-
-namespace MultiEndpoint.Services;
 
 class KeyedServiceCollectionAdapter : IServiceCollection
 {

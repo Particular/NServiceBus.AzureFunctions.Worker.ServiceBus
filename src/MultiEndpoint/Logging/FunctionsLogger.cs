@@ -1,17 +1,16 @@
+namespace MultiEndpoint.Logging;
+
 using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
 using NServiceBus.Logging;
 using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 using LogLevel = NServiceBus.Logging.LogLevel;
 
-namespace MultiEndpoint.Logging;
-
-internal class FunctionsLogger : ILog
+class FunctionsLogger : ILog
 {
-    private readonly ThreadLocal<Slot> slots = new(static () => new Slot());
-    private LoggerAdapter? logger;
-    private readonly AsyncLocal<string> nameSlot;
-    private readonly string loggerName;
+    readonly ThreadLocal<Slot> slots = new(static () => new Slot());
+    LoggerAdapter? logger;
+    readonly AsyncLocal<string> nameSlot;
+    readonly string loggerName;
 
     public FunctionsLogger(AsyncLocal<string> nameSlot, ILoggerFactory? loggerFactory, string loggerName)
     {
@@ -20,15 +19,15 @@ internal class FunctionsLogger : ILog
 
         if (loggerFactory != null)
         {
-            this.logger = new LoggerAdapter(loggerFactory.CreateLogger(this.loggerName), this.nameSlot);
+            logger = new LoggerAdapter(loggerFactory.CreateLogger(this.loggerName), this.nameSlot);
         }
     }
 
     public void Flush(ILoggerFactory loggerFactory)
     {
-        this.logger = new LoggerAdapter(loggerFactory.CreateLogger(loggerName), nameSlot);
+        logger = new LoggerAdapter(loggerFactory.CreateLogger(loggerName), nameSlot);
 
-        Flush(this.logger, slots.Value);
+        Flush(logger, slots.Value);
     }
 
     static void Flush(LoggerAdapter logger, Slot slot)

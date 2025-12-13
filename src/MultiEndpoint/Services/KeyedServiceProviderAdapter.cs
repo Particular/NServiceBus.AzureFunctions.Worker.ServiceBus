@@ -1,7 +1,7 @@
+namespace MultiEndpoint.Services;
+
 using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
-
-namespace MultiEndpoint.Services;
 
 sealed class KeyedServiceProviderAdapter : IKeyedServiceProvider, ISupportRequiredService, IServiceProviderIsKeyedService, IDisposable, IAsyncDisposable
 {

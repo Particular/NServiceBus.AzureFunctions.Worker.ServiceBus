@@ -9,6 +9,6 @@ sealed class NServiceBusHostedService(EndpointStarter endpointStarter) : IHosted
 
     public async ValueTask DisposeAsync()
     {
-        await endpointStarter.DisposeAsync();
+        await endpointStarter.DisposeAsync().ConfigureAwait(false);
     }
 }

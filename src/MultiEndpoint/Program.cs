@@ -11,7 +11,6 @@ using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
 using NServiceBus.Logging;
 using NServiceBus.TransactionalSession;
-using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -28,7 +27,7 @@ builder.AnotherReceiver();
 
 var host = builder.Build();
 
-await host.RunAsync();
+await host.RunAsync().ConfigureAwait(false);
 
 public static class SenderEndpointConfigurationExtensions
 {
@@ -170,50 +169,17 @@ public class TransactionalSessionMiddleware : IFunctionsWorkerMiddleware
         // brutally hardcoded for now
         if (context.FunctionDefinition.Name != "HttpSenderV4Transactional")
         {
-            await next(context);
+            await next(context).ConfigureAwait(false);
             return;
         }
 
         // this is a little weird, but it works
-        await using var transactionalSession = context.InstanceServices.GetRequiredKeyedService<ITransactionalSession>("SenderEndpoint");
-        await transactionalSession.Open(new MongoOpenSessionOptions(), context.CancellationToken);
+        var transactionalSession = context.InstanceServices.GetRequiredKeyedService<ITransactionalSession>("SenderEndpoint");
+        await using var _ = transactionalSession.ConfigureAwait(false);
+        await transactionalSession.Open(new MongoOpenSessionOptions(), context.CancellationToken).ConfigureAwait(false);
 
-        await next(context);
+        await next(context).ConfigureAwait(false);
 
-        await transactionalSession.Commit(context.CancellationToken);
-    }
-}
-
-public class InitializeLogger(ILoggerFactory loggerFactory) : IHostedLifecycleService
-{
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StartingAsync(CancellationToken cancellationToken)
-    {
-        FunctionsLoggerFactory.Instance.SetLoggerFactory(loggerFactory);
-        return Task.CompletedTask;
-    }
-
-    public Task StartedAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StoppingAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StoppedAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        await transactionalSession.Commit(context.CancellationToken).ConfigureAwait(false);
     }
 }
