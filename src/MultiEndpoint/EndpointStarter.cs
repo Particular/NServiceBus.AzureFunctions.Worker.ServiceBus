@@ -5,7 +5,7 @@ using NServiceBus.AzureFunctions.Worker.ServiceBus;
 sealed class EndpointStarter(
     IStartableEndpointWithExternallyManagedContainer startableEndpoint,
     IServiceProvider serviceProvider,
-    ServerlessTransport serverlessTransport,
+    AzureServiceBusServerlessTransport azureServiceBusServerlessTransport,
     string serviceKey,
     KeyedServiceCollectionAdapter services) : IAsyncDisposable
 {
@@ -28,7 +28,7 @@ sealed class EndpointStarter(
             }
 
             keyedServices = new KeyedServiceProviderAdapter(serviceProvider, serviceKey, services);
-            serverlessTransport.ServiceProvider = keyedServices;
+            azureServiceBusServerlessTransport.ServiceProvider = keyedServices;
 
             using var scope = FunctionsLoggerFactory.Instance.PushName(ServiceKey);
             scope.Flush();
