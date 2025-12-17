@@ -8,7 +8,7 @@ public class TriggerMessageHandler(ILogger<TriggerMessageHandler> logger) : IHan
     {
         logger.LogWarning($"Handling {nameof(TriggerMessage)} in {nameof(TriggerMessageHandler)}");
 
-        await context.SendLocal(new SomeOtherMessage()).ConfigureAwait(false);
+        await context.Send(new SomeOtherMessage()).ConfigureAwait(false);
         await context.Publish(new SomeEvent()).ConfigureAwait(false);
     }
 }

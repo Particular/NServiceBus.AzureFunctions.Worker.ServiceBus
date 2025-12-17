@@ -9,8 +9,10 @@ using MultiEndpoint;
 using MultiEndpoint.Logging;
 using MultiEndpoint.Services;
 using NServiceBus.AzureFunctions.Worker.ServiceBus;
+using NServiceBus.Configuration.AdvancedExtensibility;
 using NServiceBus.Logging;
 using NServiceBus.TransactionalSession;
+using NServiceBus.Transport;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -54,24 +56,20 @@ public static class SenderEndpointConfigurationExtensions
 
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
         endpointConfiguration.SendOnly();
-        endpointConfiguration.EnableOutbox();
+        //endpointConfiguration.EnableOutbox();
 
         var assemblyScanner = endpointConfiguration.AssemblyScanner();
         assemblyScanner.Disable = true;
 
-        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
-        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
-        persistence.EnableTransactionalSession(new TransactionalSessionOptions
-        {
-            ProcessorEndpoint = "ReceiverEndpoint"
-        });
+//        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+//        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
+//        persistence.EnableTransactionalSession(new TransactionalSessionOptions
+//        {
+//            ProcessorEndpoint = "ReceiverEndpoint"
+//        });
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
-        var transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", TopicTopology.Default)
-        {
-            TransportTransactionMode = TransportTransactionMode.ReceiveOnly
-        };
-        var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
+        var serverlessTransport = new AzureServiceBusServerlessTransport();
         endpointConfiguration.UseTransport(serverlessTransport);
 
         var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
@@ -79,7 +77,7 @@ public static class SenderEndpointConfigurationExtensions
             endpointConfiguration,
             keyedServices);
 
-        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, serverlessTransport, serviceKey, keyedServices));
+        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, (AzureServiceBusServerlessTransport)endpointConfiguration.GetSettings().Get<TransportDefinition>(), serviceKey, keyedServices));
         // unfortunately AddHostedServices dedups
         builder.Services.AddSingleton<IHostedService, NServiceBusHostedService>(s => new NServiceBusHostedService(s.GetRequiredKeyedService<EndpointStarter>(serviceKey)));
         builder.Services.AddKeyedSingleton<IMessageSession>(serviceKey, (sp, key) => new HostAwareMessageSession(sp.GetRequiredKeyedService<EndpointStarter>(key)));
@@ -99,16 +97,16 @@ public static class ReceiverEndpointConfigurationExtensions
         using var _ = FunctionsLoggerFactory.Instance.PushName(serviceKey);
 
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
-        endpointConfiguration.EnableOutbox();
+        //endpointConfiguration.EnableOutbox();
 
         endpointConfiguration.EnableInstallers();
 
         var assemblyScanner = endpointConfiguration.AssemblyScanner();
         assemblyScanner.Disable = true;
 
-        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
-        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
-        persistence.EnableTransactionalSession();
+//        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+//        persistence.DatabaseName("SharedBetweenSenderAndReceiver");
+//        persistence.EnableTransactionalSession();
 
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
@@ -117,19 +115,18 @@ public static class ReceiverEndpointConfigurationExtensions
         endpointConfiguration.AddHandler<SomeOtherMessageHandler>();
         endpointConfiguration.AddHandler<SomeEventMessageHandler>();
 
-        var transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", TopicTopology.Default)
-        {
-            TransportTransactionMode = TransportTransactionMode.ReceiveOnly
-        };
-        var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
-        endpointConfiguration.UseTransport(serverlessTransport);
+        var serverlessTransport = new AzureServiceBusServerlessTransport();
+        var routing = endpointConfiguration.UseTransport(serverlessTransport);
+
+        //demo routing
+        routing.RouteToEndpoint(typeof(SomeOtherMessage), serviceKey);
 
         var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
         var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
             endpointConfiguration,
             keyedServices);
 
-        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, serverlessTransport, serviceKey, keyedServices));
+        builder.Services.AddKeyedSingleton<EndpointStarter>(serviceKey, (sp, __) => new EndpointStarter(startableEndpoint, sp, (AzureServiceBusServerlessTransport)endpointConfiguration.GetSettings().Get<TransportDefinition>(), serviceKey, keyedServices));
         // unfortunately AddHostedServices dedups
         builder.Services.AddSingleton<IHostedService, NServiceBusHostedService>(sp => new NServiceBusHostedService(sp.GetRequiredKeyedService<EndpointStarter>(serviceKey)));
         builder.Services.AddKeyedSingleton<IMessageSession>(serviceKey, (sp, key) => new HostAwareMessageSession(sp.GetRequiredKeyedService<EndpointStarter>(key)));
@@ -148,26 +145,22 @@ public static class AnotherReceiverEndpointConfigurationExtensions
         using var _ = FunctionsLoggerFactory.Instance.PushName(serviceKey);
 
         var endpointConfiguration = new EndpointConfiguration(serviceKey);
-        endpointConfiguration.EnableOutbox();
+        //endpointConfiguration.EnableOutbox();
 
         endpointConfiguration.EnableInstallers();
 
         var assemblyScanner = endpointConfiguration.AssemblyScanner();
         assemblyScanner.Disable = true;
 
-        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
-        persistence.EnableTransactionalSession();
+//        var persistence = endpointConfiguration.UsePersistence<MongoPersistence>();
+//        persistence.EnableTransactionalSession();
 
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
 
         // hardcoded handlers
         endpointConfiguration.AddHandler<SomeEventMessageHandler>();
 
-        var transport = new AzureServiceBusTransport("TransportWillBeInitializedCorrectlyLater", TopicTopology.Default)
-        {
-            TransportTransactionMode = TransportTransactionMode.ReceiveOnly
-        };
-        var serverlessTransport = new ServerlessTransport(transport, null, "AzureWebJobsServiceBus");
+        var serverlessTransport = new AzureServiceBusServerlessTransport();
         endpointConfiguration.UseTransport(serverlessTransport);
 
         var keyedServices = new KeyedServiceCollectionAdapter(builder.Services, serviceKey);
