@@ -15,13 +15,9 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
     true,
     true)
 {
-    // HINT: This constant is defined in NServiceBus but is not exposed
-    const string MainReceiverId = "Main";
-    const string SendOnlyConfigKey = "Endpoint.SendOnly";
+    internal IMessageProcessor MessageProcessor { get; private set; }
 
-    public IMessageProcessor MessageProcessor { get; private set; }
-
-    public IServiceProvider ServiceProvider { get; set; }
+    internal IServiceProvider ServiceProvider { get; set; }
 
     public override async Task<TransportInfrastructure> Initialize(
         HostSettings hostSettings,
@@ -52,7 +48,7 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
         return serverlessTransportInfrastructure;
     }
 
-    public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => supportedTransactionModes;
+    public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => [TransportTransactionMode.ReceiveOnly];
 
     static AzureServiceBusTransport ConfigureTransportConnection(string connectionString, string connectionName, IConfiguration configuration, AzureComponentFactory azureComponentFactory)
     {
@@ -84,7 +80,8 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
         return new AzureServiceBusTransport(fullyQualifiedNamespace, credential, TopicTopology.Default);
     }
 
-    internal const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
-
-    readonly TransportTransactionMode[] supportedTransactionModes = [TransportTransactionMode.ReceiveOnly];
+    const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
+    // HINT: This constant is defined in NServiceBus but is not exposed
+    const string MainReceiverId = "Main";
+    const string SendOnlyConfigKey = "Endpoint.SendOnly";
 }
