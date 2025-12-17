@@ -15,8 +15,10 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
     true,
     true)
 {
-    internal IMessageProcessor MessageProcessor { get; private set; }
+    public string ServiceBusConnectionName { get; set; } = DefaultServiceBusConnectionName;
+    public string? ConnectionString { get; set; } = null;
 
+    internal IMessageProcessor MessageProcessor { get; private set; }
     internal IServiceProvider ServiceProvider { get; set; }
 
     public override async Task<TransportInfrastructure> Initialize(
@@ -25,10 +27,7 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
         string[] sendingAddresses,
         CancellationToken cancellationToken = default)
     {
-        var configuredTransport = ConfigureTransportConnection(null,
-            DefaultServiceBusConnectionName,
-            ServiceProvider.GetRequiredService<IConfiguration>(),
-            ServiceProvider.GetRequiredService<AzureComponentFactory>());
+        var configuredTransport = BuildUnderlyingTransportDefinition();
 
         var baseTransportInfrastructure = await configuredTransport.Initialize(
                 hostSettings,
@@ -39,7 +38,7 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
 
         var serverlessTransportInfrastructure = new ServerlessTransportInfrastructure(baseTransportInfrastructure);
 
-        var isSendOnly = hostSettings.CoreSettings.GetOrDefault<bool>(SendOnlyConfigKey);
+        var isSendOnly = hostSettings.CoreSettings != null && hostSettings.CoreSettings.GetOrDefault<bool>(SendOnlyConfigKey);
 
         MessageProcessor = isSendOnly
             ? new SendOnlyMessageProcessor()
@@ -50,18 +49,20 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
 
     public override IReadOnlyCollection<TransportTransactionMode> GetSupportedTransactionModes() => [TransportTransactionMode.ReceiveOnly];
 
-    static AzureServiceBusTransport ConfigureTransportConnection(string connectionString, string connectionName, IConfiguration configuration, AzureComponentFactory azureComponentFactory)
+    AzureServiceBusTransport BuildUnderlyingTransportDefinition()
     {
-        if (connectionString != null)
+        if (!string.IsNullOrWhiteSpace(ConnectionString))
         {
-            return new AzureServiceBusTransport(connectionString, TopicTopology.Default);
+            return new AzureServiceBusTransport(ConnectionString, TopicTopology.Default);
         }
 
-        var serviceBusConnectionName = string.IsNullOrWhiteSpace(connectionName) ? DefaultServiceBusConnectionName : connectionName;
-        IConfigurationSection connectionSection = configuration.GetSection(serviceBusConnectionName);
+        var configuration = ServiceProvider.GetRequiredService<IConfiguration>();
+        // Look for a section OR an actual value 
+        // https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cqueue%2Cextensionv5&pivots=programming-language-csharp#connections
+        IConfigurationSection connectionSection = configuration.GetSection(ServiceBusConnectionName);
         if (!connectionSection.Exists())
         {
-            throw new Exception($"Azure Service Bus connection string/section has not been configured. Specify a connection string through IConfiguration, an environment variable named {serviceBusConnectionName} or passing it to `UseNServiceBus(ENDPOINTNAME,CONNECTIONSTRING)`");
+            throw new Exception($"Azure Service Bus connection string/section has not been configured. Specify a connection string through IConfiguration, an environment variable named {ServiceBusConnectionName} or passing it to `new AzureServiceBusTransport(ConnectionString)`.`");
         }
 
         if (!string.IsNullOrWhiteSpace(connectionSection.Value))
@@ -69,11 +70,13 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
             return new AzureServiceBusTransport(connectionSection.Value, TopicTopology.Default);
         }
 
-        string fullyQualifiedNamespace = connectionSection["fullyQualifiedNamespace"];
+        string? fullyQualifiedNamespace = connectionSection["fullyQualifiedNamespace"];
         if (string.IsNullOrWhiteSpace(fullyQualifiedNamespace))
         {
             throw new Exception("Connection should have an 'fullyQualifiedNamespace' property or be a string representing a connection string.");
         }
+
+        var azureComponentFactory = ServiceProvider.GetRequiredService<AzureComponentFactory>();
 
         var credential = azureComponentFactory.CreateTokenCredential(connectionSection);
 
@@ -81,6 +84,7 @@ class AzureServiceBusServerlessTransport() : TransportDefinition(
     }
 
     const string DefaultServiceBusConnectionName = "AzureWebJobsServiceBus";
+
     // HINT: This constant is defined in NServiceBus but is not exposed
     const string MainReceiverId = "Main";
     const string SendOnlyConfigKey = "Endpoint.SendOnly";
