@@ -5,6 +5,7 @@
     <File Path="Custom.Build.props" />
   </Folder>
   <Project Path="ManualTests.HostV4/ManualTests.HostV4.csproj" />
+  <Project Path="MultiHost/MultiHost.csproj" />
   <Project Path="NServiceBus.AzureFunctions.Worker.Analyzer.Tests/NServiceBus.AzureFunctions.Worker.Analyzer.Tests.csproj" />
   <Project Path="NServiceBus.AzureFunctions.Worker.Analyzer/NServiceBus.AzureFunctions.Worker.Analyzer.csproj" />
   <Project Path="NServiceBus.AzureFunctions.Worker.ServiceBus.Tests/NServiceBus.AzureFunctions.Worker.ServiceBus.Tests.csproj" />
