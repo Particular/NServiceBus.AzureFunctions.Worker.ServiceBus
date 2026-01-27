@@ -20,7 +20,7 @@ class Logger(AsyncLocal<ILogger> logger) : ILog
         var concreteLogger = logger.Value;
         if (concreteLogger == null)
         {
-            deferredMessageLogs.Enqueue((level, message));
+            DeferredMessageLogs.Enqueue((level, message));
             return;
         }
         concreteLogger.Log(level, message);
@@ -31,7 +31,7 @@ class Logger(AsyncLocal<ILogger> logger) : ILog
         var concreteLogger = logger.Value;
         if (concreteLogger == null)
         {
-            deferredExceptionLogs.Enqueue((level, message, exception));
+            DeferredExceptionLogs.Enqueue((level, message, exception));
             return;
         }
         concreteLogger.Log(level, exception, message);
@@ -42,7 +42,7 @@ class Logger(AsyncLocal<ILogger> logger) : ILog
         var concreteLogger = logger.Value;
         if (concreteLogger == null)
         {
-            deferredFormatLogs.Enqueue((level, format, args));
+            DeferredFormatLogs.Enqueue((level, format, args));
             return;
         }
         concreteLogger.Log(level, format, args);
@@ -80,23 +80,23 @@ class Logger(AsyncLocal<ILogger> logger) : ILog
 
     internal void Flush(ILogger concreteLogger)
     {
-        while (deferredMessageLogs.TryDequeue(out var entry))
+        while (DeferredMessageLogs.TryDequeue(out var entry))
         {
             concreteLogger.Log(entry.level, entry.message);
         }
 
-        while (deferredExceptionLogs.TryDequeue(out var entry))
+        while (DeferredExceptionLogs.TryDequeue(out var entry))
         {
             concreteLogger.Log(entry.level, entry.exception, entry.message);
         }
 
-        while (deferredFormatLogs.TryDequeue(out var entry))
+        while (DeferredFormatLogs.TryDequeue(out var entry))
         {
             concreteLogger.Log(entry.level, entry.format, entry.args);
         }
     }
 
-    readonly ConcurrentQueue<(LogLevel level, string message)> deferredMessageLogs = new ConcurrentQueue<(LogLevel level, string message)>();
-    readonly ConcurrentQueue<(LogLevel level, string message, Exception exception)> deferredExceptionLogs = new ConcurrentQueue<(LogLevel level, string message, Exception exception)>();
-    readonly ConcurrentQueue<(LogLevel level, string format, object[] args)> deferredFormatLogs = new ConcurrentQueue<(LogLevel level, string format, object[] args)>();
+    readonly ConcurrentQueue<(LogLevel level, string message)> DeferredMessageLogs = new ConcurrentQueue<(LogLevel level, string message)>();
+    readonly ConcurrentQueue<(LogLevel level, string message, Exception exception)> DeferredExceptionLogs = new ConcurrentQueue<(LogLevel level, string message, Exception exception)>();
+    readonly ConcurrentQueue<(LogLevel level, string format, object[] args)> DeferredFormatLogs = new ConcurrentQueue<(LogLevel level, string format, object[] args)>();
 }
