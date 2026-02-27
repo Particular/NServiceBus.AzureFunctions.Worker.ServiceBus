@@ -68,7 +68,7 @@ namespace Foo
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
-            .Approve();
+            .Approve(callerMemberName: "BindingExpressionInEndpointName");
     }
 
     [Test]
