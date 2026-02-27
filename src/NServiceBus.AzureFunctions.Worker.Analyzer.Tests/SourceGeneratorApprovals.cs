@@ -6,15 +6,28 @@ using System.Collections.Immutable;
 using System.Linq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using Particular.AnalyzerTesting;
 using Particular.Approvals;
 
 [TestFixture]
 public class SourceGeneratorApprovals
 {
+    [SetUp]
+    public void Setup()
+    {
+        MetadataReference.CreateFromFile(typeof(FunctionContext).Assembly.Location);
+        MetadataReference.CreateFromFile(typeof(ServiceBusMessageActions).Assembly.Location);
+        MetadataReference.CreateFromFile(typeof(TriggerBindingAttribute).Assembly.Location);
+        MetadataReference.CreateFromFile(typeof(ServiceBusReceivedMessage).Assembly.Location);
+        MetadataReference.CreateFromFile(typeof(ServiceBusMessageActions).Assembly.Location);
+        MetadataReference.CreateFromFile(typeof(NServiceBusTriggerFunctionAttribute).Assembly.Location);
+    }
+
     [Test]
     public void UsingNamespace()
     {
@@ -30,9 +43,9 @@ namespace Foo
         public const string EndpointName = ""endpoint"";
     }
 }";
-        var (output, _) = GetGeneratedOutput(source);
-
-        Approver.Verify(output);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
@@ -48,54 +61,62 @@ namespace Foo
         public const string EndpointName = ""endpoint"";
     }
 }";
-        var (output, _) = GetGeneratedOutput(source);
-
-        Approver.Verify(output);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
     public void Endpoint_name_using_binding_expression_should_generate_compilation_error_when_no_trigger_function_is_given()
     {
         var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"")]";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidBindingExpressionId), Is.True);
+        // Approval shows AzureFunctionsDiagnostics.InvalidBindingExpressionId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .SuppressDiagnosticErrors()
+            .Approve();
     }
 
     [Test]
     public void Binding_expression_with_trigger_function_should_not_generate_error()
     {
         var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""%ENDPOINT_NAME%"", TriggerFunctionName = ""trigger"")]";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
 
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
     public void NameIsStringValue()
     {
         var source = @"[assembly: NServiceBus.NServiceBusTriggerFunction(""endpoint"")]";
-        var (output, _) = GetGeneratedOutput(source);
 
-        Approver.Verify(output);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
     public void No_attribute_should_not_generate_trigger_function()
     {
         var source = @"";
-        var (output, _) = GetGeneratedOutput(source);
 
-        Approver.Verify(output);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
     public void No_attribute_should_not_generate_compilation_error()
     {
         var source = @"using NServiceBus;";
-        var (_, diagnostics) = GetGeneratedOutput(source);
 
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False);
+        // Approval shows no generated output but no diagnostic errors
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [Test]
@@ -109,9 +130,9 @@ namespace Foo
 public class Startup
 {
 }";
-        var (output, _) = GetGeneratedOutput(source);
-
-        Approver.Verify(output);
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
 
     [TestCase("")]
@@ -123,9 +144,12 @@ using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(""" + endpointName + @""")]
 ";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
+        // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .SuppressDiagnosticErrors()
+            .Approve();
 
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId), Is.True);
     }
 
     [Test]
@@ -136,9 +160,11 @@ using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(null)]
 ";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
-
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidEndpointNameErrorId), Is.True);
+        // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .SuppressDiagnosticErrors()
+            .Approve();
     }
 
     [TestCase("")]
@@ -150,9 +176,11 @@ using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(""endpoint"", TriggerFunctionName = """ + triggerFunctionName + @""")]
 ";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
-
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId), Is.True);
+        // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .SuppressDiagnosticErrors()
+            .Approve();
     }
 
     [Test]
@@ -163,9 +191,11 @@ using NServiceBus;
 
 [assembly: NServiceBusTriggerFunction(""endpoint"", TriggerFunctionName = null)]
 ";
-        var (_, diagnostics) = GetGeneratedOutput(source, suppressGeneratedDiagnosticsErrors: true);
-
-        Assert.That(diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error && d.Id == AzureFunctionsDiagnostics.InvalidTriggerFunctionNameErrorId), Is.True);
+        // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .SuppressDiagnosticErrors()
+            .Approve();
     }
 
     [Test]
@@ -179,69 +209,13 @@ using NServiceBus;
 public class Startup
 {
 }";
-        var (output, _) = GetGeneratedOutput(source);
-
-        Approver.Verify(output);
+        // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
+        SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
+            .WithSource(source)
+            .Approve();
     }
+}
 
-    [OneTimeSetUp]
-    public void Init()
-    {
-        // For the unit tests to work, the compilation used by the source generator needs to know that NServiceBusTriggerFunction
-        // is an attribute from NServiceBus namespace and its full name is NServiceBus.NServiceBusTriggerFunctionAttribute.
-        // By referencing NServiceBusTriggerFunctionAttribute here, NServiceBus.AzureFunctions.Worker.ServiceBus is forced to load and participate in the compilation.
-        _ = new NServiceBusTriggerFunctionAttribute(endpointName: "test");
-    }
-
-    static (string output, ImmutableArray<Diagnostic> diagnostics) GetGeneratedOutput(string source, bool suppressGeneratedDiagnosticsErrors = false)
-    {
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var references = new List<MetadataReference>();
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        foreach (var assembly in assemblies)
-        {
-            if (!assembly.IsDynamic && !string.IsNullOrWhiteSpace(assembly.Location))
-            {
-                references.Add(MetadataReference.CreateFromFile(assembly.Location));
-            }
-        }
-
-        var compilation = Compile(new[]
-        {
-            syntaxTree
-        }, references);
-
-        var generator = new TriggerFunctionGenerator();
-
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var generateDiagnostics);
-
-        // add necessary references for the generated trigger
-        references.Add(MetadataReference.CreateFromFile(typeof(ServiceBusTriggerAttribute).Assembly.Location));
-        references.Add(MetadataReference.CreateFromFile(typeof(FunctionContext).Assembly.Location));
-        references.Add(MetadataReference.CreateFromFile(typeof(ServiceBusReceivedMessage).Assembly.Location));
-        references.Add(MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location));
-        Compile(outputCompilation.SyntaxTrees, references);
-
-        if (!suppressGeneratedDiagnosticsErrors)
-        {
-            Assert.That(generateDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error), Is.False, "Failed: " + generateDiagnostics.FirstOrDefault()?.GetMessage());
-        }
-
-        return (outputCompilation.SyntaxTrees.Last().ToString(), generateDiagnostics);
-    }
-
-    static CSharpCompilation Compile(IEnumerable<SyntaxTree> syntaxTrees, IEnumerable<MetadataReference> references)
-    {
-        var compilation = CSharpCompilation.Create("result", syntaxTrees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
-        // Verify the code compiled:
-        var compilationErrors = compilation
-            .GetDiagnostics()
-            .Where(d => d.Severity >= DiagnosticSeverity.Warning);
-        Assert.That(compilationErrors, Is.Empty, compilationErrors.FirstOrDefault()?.GetMessage());
-
-        return compilation;
-    }
+public class NServiceBusTriggerFunction
+{
 }

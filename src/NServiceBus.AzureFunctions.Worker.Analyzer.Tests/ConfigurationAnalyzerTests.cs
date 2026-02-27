@@ -1,12 +1,20 @@
 namespace NServiceBus.AzureFunctions.Worker.Analyzer.Tests;
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using NUnit.Framework;
+using Particular.AnalyzerTesting;
 using static AzureFunctionsDiagnostics;
 
 [TestFixture]
 public class ConfigurationAnalyzerTests : AnalyzerTestFixture<ConfigurationAnalyzer>
 {
+    protected override void ConfigureFixtureTests(AnalyzerTest test)
+    {
+        test.AddReferences(MetadataReference.CreateFromFile(typeof(ServiceBusTriggeredEndpointConfiguration).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(AzureServiceBusTransport).Assembly.Location));
+    }
+
     [TestCase("DefineCriticalErrorAction((errorContext, cancellationToken) => Task.CompletedTask)", DefineCriticalErrorActionNotAllowedId)]
     [TestCase("LimitMessageProcessingConcurrencyTo(5)", LimitMessageProcessingToNotAllowedId)]
     [TestCase("MakeInstanceUniquelyAddressable(null)", MakeInstanceUniquelyAddressableNotAllowedId)]
@@ -32,7 +40,7 @@ class Foo
     }}
 }}";
 
-        return Assert(diagnosticId, source);
+        return Assert(source, diagnosticId);
     }
 
     [TestCase("DefineCriticalErrorAction((errorContext, cancellationToken) => Task.CompletedTask)", DefineCriticalErrorActionNotAllowedId)]
@@ -71,7 +79,7 @@ class Foo
     }}
 }}";
 
-        return Assert(diagnosticId, source);
+        return Assert(source, diagnosticId);
     }
 
     [Test]
@@ -88,7 +96,7 @@ class Foo
     }
 }";
 
-        return Assert(LogDiagnosticsInfoId, source);
+        return Assert(source, LogDiagnosticsInfoId);
     }
 
     [Test]
@@ -111,6 +119,6 @@ class Foo
     }
 }";
 
-        return Assert(LogDiagnosticsInfoId, source);
+        return Assert(source, LogDiagnosticsInfoId);
     }
 }
