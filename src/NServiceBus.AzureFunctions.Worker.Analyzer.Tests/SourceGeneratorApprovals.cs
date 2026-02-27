@@ -1,18 +1,11 @@
 ﻿namespace NServiceBus.AzureFunctions.Worker.Analyzer.Tests;
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Abstractions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Particular.AnalyzerTesting;
-using Particular.Approvals;
 
 [TestFixture]
 public class SourceGeneratorApprovals
