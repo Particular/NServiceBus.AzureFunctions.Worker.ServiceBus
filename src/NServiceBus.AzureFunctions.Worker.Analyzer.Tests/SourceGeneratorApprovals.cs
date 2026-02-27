@@ -78,7 +78,7 @@ namespace Foo
 
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
-            .Approve();
+            .Approve(callerMemberName: "BindingExpressionWithTriggerFunction");
     }
 
     [Test]
