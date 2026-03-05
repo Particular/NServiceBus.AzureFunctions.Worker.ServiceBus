@@ -13,8 +13,8 @@ using NServiceBus;
 [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
 public class FunctionEndpointTrigger(IFunctionEndpoint endpoint)
 {
-    [Function("NServiceBusFunctionEndpointTrigger-endpoint")]
-    public async Task Run([ServiceBusTrigger("endpoint")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
+    [Function("trigger")]
+    public async Task Run([ServiceBusTrigger("%ENDPOINT_NAME%")] ServiceBusReceivedMessage message, ServiceBusMessageActions messageActions, FunctionContext context, CancellationToken cancellationToken)
     {
         await endpoint.Process(message, messageActions, context, cancellationToken);
     }

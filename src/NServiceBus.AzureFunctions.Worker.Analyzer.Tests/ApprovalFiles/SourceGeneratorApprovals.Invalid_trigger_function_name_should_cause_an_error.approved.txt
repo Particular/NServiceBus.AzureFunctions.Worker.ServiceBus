@@ -1,0 +1,2 @@
+// == Generator Diagnostics ============================================================================================
+error NSBWFUNC002: Trigger function name is invalid and cannot be used to generate trigger function

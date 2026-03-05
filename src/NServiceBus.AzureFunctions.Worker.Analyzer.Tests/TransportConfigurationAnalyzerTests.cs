@@ -2,6 +2,7 @@ namespace NServiceBus.AzureFunctions.Worker.Analyzer.Tests;
 
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Particular.AnalyzerTesting;
 using static AzureFunctionsDiagnostics;
 
 [TestFixture]
@@ -29,7 +30,7 @@ class Foo
     }}
 }}";
 
-        return Assert(diagnosticId, source);
+        return Assert(source, diagnosticId);
     }
 
     [TestCase("Transactions", "TransportTransactionMode.None", TransportTransactionModeNotAllowedId)]
@@ -51,7 +52,7 @@ class Foo
     }}
 }}";
 
-        return Assert(diagnosticId, source);
+        return Assert(source, diagnosticId);
     }
 
     [TestCase("MaxAutoLockRenewalDuration", "new System.TimeSpan(0, 0, 5, 0)", MaxAutoLockRenewalDurationNotAllowedId)]
@@ -83,6 +84,6 @@ class Foo
     }}
 }}";
 
-        return Assert(diagnosticId, source);
+        return Assert(source, diagnosticId);
     }
 }

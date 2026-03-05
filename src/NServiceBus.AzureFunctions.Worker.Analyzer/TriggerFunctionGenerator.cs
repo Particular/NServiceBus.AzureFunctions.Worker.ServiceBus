@@ -11,7 +11,8 @@ public class TriggerFunctionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var attribute = context.SyntaxProvider.ForAttributeWithMetadataName("NServiceBus.NServiceBusTriggerFunctionAttribute", (_, _) => true, (context, _) => GetAttributeValues(context));
+        var attribute = context.SyntaxProvider.ForAttributeWithMetadataName("NServiceBus.NServiceBusTriggerFunctionAttribute", (_, _) => true, (context, _) => GetAttributeValues(context))
+            .WithTrackingName(TrackingNames.AttributeValues);
 
         context.RegisterSourceOutput(attribute, (context, attributeValues) =>
         {
@@ -117,5 +118,11 @@ public class TriggerFunctionGenerator : IIncrementalGenerator
         """;
 
         return source;
+    }
+
+    internal static class TrackingNames
+    {
+        public const string AttributeValues = nameof(AttributeValues);
+        public static string[] All = [AttributeValues];
     }
 }
