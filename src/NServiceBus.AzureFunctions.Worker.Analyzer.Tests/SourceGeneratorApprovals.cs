@@ -38,6 +38,7 @@ namespace Foo
 }";
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -56,6 +57,7 @@ namespace Foo
 }";
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -68,6 +70,7 @@ namespace Foo
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
+            .Run()
             .Approve(callerMemberName: "BindingExpressionInEndpointName");
     }
 
@@ -78,6 +81,7 @@ namespace Foo
 
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve(callerMemberName: "BindingExpressionWithTriggerFunction");
     }
 
@@ -88,6 +92,7 @@ namespace Foo
 
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -98,6 +103,7 @@ namespace Foo
 
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -109,6 +115,7 @@ namespace Foo
         // Approval shows no generated output but no diagnostic errors
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -125,6 +132,7 @@ public class Startup
 }";
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 
@@ -141,6 +149,7 @@ using NServiceBus;
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
+            .Run()
             .Approve();
 
     }
@@ -157,6 +166,7 @@ using NServiceBus;
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
+            .Run()
             .Approve();
     }
 
@@ -173,6 +183,7 @@ using NServiceBus;
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
+            .Run()
             .Approve();
     }
 
@@ -188,6 +199,7 @@ using NServiceBus;
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
             .SuppressDiagnosticErrors()
+            .Run()
             .Approve();
     }
 
@@ -205,10 +217,9 @@ public class Startup
         // Approval shows no output and AzureFunctionsDiagnostics.InvalidEndpointNameErrorId diagnostic
         SourceGeneratorTest.ForIncrementalGenerator<TriggerFunctionGenerator>()
             .WithSource(source)
+            .Run()
             .Approve();
     }
 }
 
-public class NServiceBusTriggerFunction
-{
-}
+public class NServiceBusTriggerFunction;
