@@ -16,7 +16,7 @@
         public async Task SetUp()
         {
             var connectionString = Environment.GetEnvironmentVariable(ServerlessTransport.DefaultServiceBusConnectionName);
-            Assert.IsNotNull(connectionString, $"Environment variable '{ServerlessTransport.DefaultServiceBusConnectionName}' should be defined to run tests.");
+            Assert.That(connectionString, Is.Not.Null, $"Environment variable '{ServerlessTransport.DefaultServiceBusConnectionName}' should be defined to run tests.");
 
             adminClient = new ServiceBusAdministrationClient(connectionString);
 
@@ -36,7 +36,7 @@
                 .Done(c => c.EndpointsStarted)
                 .Run();
 
-            Assert.IsFalse(await adminClient.QueueExistsAsync(endpointNamingConvention), "Queues should not be created");
+            Assert.That((bool)await adminClient.QueueExistsAsync(endpointNamingConvention), Is.False, "Queues should not be created");
         }
 
         class FunctionWithoutInstallersEnabled : FunctionEndpointComponent
