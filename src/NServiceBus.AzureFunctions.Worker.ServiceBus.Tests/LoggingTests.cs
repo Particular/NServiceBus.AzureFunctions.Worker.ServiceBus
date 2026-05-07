@@ -49,7 +49,7 @@
 
             Assert.That(fakeLogger.CapturedLogs.Count, Is.EqualTo(1));
             fakeLogger.CapturedLogs.TryDequeue(out var capturedLog);
-            Assert.That(capturedLog.message, Is.EqualTo("Deferred message"));
+            Assert.That(capturedLog.message, Is.EqualTo("Forwarded message"));
         }
 
         [Test]
