@@ -17,7 +17,7 @@
                 .Done(c => c.HandlerInvocationCount > 0)
                 .Run();
 
-            Assert.AreEqual(1, context.HandlerInvocationCount);
+            Assert.Equals(1, context.HandlerInvocationCount);
             Assert.That(context.ReceivedMessageAvailable, Is.True);
         }
 
