@@ -14,7 +14,9 @@ using Transport.AzureServiceBus;
 /// </summary>
 public class ServiceBusTriggeredEndpointConfiguration
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     static ServiceBusTriggeredEndpointConfiguration() => LogManager.UseFactory(FunctionsLoggerFactory.Instance);
+#pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// The Azure Service Bus transport configuration.
