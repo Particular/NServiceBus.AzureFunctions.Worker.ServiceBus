@@ -87,10 +87,10 @@ public class PipelineInvokingMessageProcessorTests
         Assert.Multiple(() =>
         {
             Assert.That(errorContext.Exception, Is.SameAs(pipelineException));
-            Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
-            Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
+            Assert.That(errorContext.NativeMessageId, Is.SameAs(messageId));
+            Assert.That(errorContext.Body.ToArray(), Is.EqualTo(body.ToArray()));
         });
-        Assert.That(userProperties, Is.SubsetOf(errorContext.Message.Headers)); // the IncomingMessage has an additional MessageId header
+        Assert.That(userProperties, Is.SubsetOf(errorContext.Headers)); // the IncomingMessage has an additional MessageId header
         Assert.Multiple(() =>
         {
             Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
