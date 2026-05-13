@@ -20,8 +20,7 @@ class DefaultEndpoint : IEndpointSetupTemplate
 
         configuration.EnableInstallers();
 
-        configuration.RegisterComponents(c => c
-            .AddSingleton(runDescriptor.ScenarioContext.GetType(), runDescriptor.ScenarioContext));
+        runDescriptor.Services.AddScenarioContext(runDescriptor.ScenarioContext);
 
         var recoverability = configuration.Recoverability();
         recoverability.Delayed(delayed => delayed.NumberOfRetries(0));
