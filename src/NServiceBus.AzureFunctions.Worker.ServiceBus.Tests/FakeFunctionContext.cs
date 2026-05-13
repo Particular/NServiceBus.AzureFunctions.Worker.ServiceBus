@@ -41,5 +41,10 @@ class DummyLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel) => true;
 
-    public IDisposable BeginScope<TState>(TState state) => throw new NotImplementedException();
+    public IDisposable BeginScope<TState>(TState state) => new EmptyDisposable();
+
+    class EmptyDisposable : IDisposable
+    {
+        public void Dispose() { }
+    }
 }
