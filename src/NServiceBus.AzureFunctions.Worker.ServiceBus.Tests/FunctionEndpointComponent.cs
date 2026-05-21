@@ -67,6 +67,8 @@
                 // TODO Think about using a real logger or the NServiceBus.Testing logging infrastructure?
                 builder.Services.AddSingleton<ILoggerFactory>(new TestLoggingFactory());
 
+                builder.Services.AddScenarioContext(scenarioContext);
+
                 hostBuilderCustomization(builder);
 
                 builder.AddNServiceBus(Name, (configuration, triggerConfiguration) =>
@@ -108,8 +110,6 @@
                                     });
                                 return Task.CompletedTask;
                             }));
-
-                    endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
 
                     // enable installers to auto-create the input queue for tests
                     // in real Azure functions the input queue is assumed to exist

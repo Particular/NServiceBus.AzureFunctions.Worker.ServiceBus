@@ -124,20 +124,14 @@ public static class FunctionsHostBuilderExtensions
             var serverlessTransport = functionEndpointConfiguration.CreateServerlessTransport();
 
             // This has to be done here to allow NServiceBus to register components in the service collection being passed in
-            var startableEndpoint = EndpointWithExternallyManagedContainer.Create(
-                functionEndpointConfiguration.AdvancedConfiguration,
-                services);
+            services.AddNServiceBusEndpoint(functionEndpointConfiguration.AdvancedConfiguration);
 
-            _ = services.AddSingleton(startableEndpoint);
             _ = services.AddSingleton(serverlessTransport);
 
             // we are manually resolving all dependencies of FunctionEndpoint since Serverless transport is internal and we run into constructor selection issues if not
-            _ = services.AddSingleton(sp => new InternalFunctionEndpoint(
-                sp.GetRequiredService<IStartableEndpointWithExternallyManagedContainer>(),
-                sp.GetRequiredService<ServerlessTransport>(),
-                sp));
-
+            _ = services.AddSingleton(sp => new InternalFunctionEndpoint(sp.GetRequiredService<ServerlessTransport>(), sp));
             _ = services.AddSingleton<IFunctionEndpoint>(sp => sp.GetRequiredService<InternalFunctionEndpoint>());
+
             return;
 
             string TryResolveBindingExpression()
