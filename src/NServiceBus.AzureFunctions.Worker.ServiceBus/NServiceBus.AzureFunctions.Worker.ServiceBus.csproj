@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.24.0" />
     <PackageReference Include="NServiceBus" Version="10.2.6" />
-    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="6.3.0" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="6.4.1" />
   </ItemGroup>
 
   <ItemGroup>
