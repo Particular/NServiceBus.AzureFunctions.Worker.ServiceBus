@@ -109,7 +109,9 @@
                                 return Task.CompletedTask;
                             }));
 
+#pragma warning disable CS0618 // Type or member is obsolete
                     endpointConfiguration.RegisterComponents(c => c.AddSingleton(scenarioContext.GetType(), scenarioContext));
+#pragma warning restore CS0618 // Type or member is obsolete
 
                     // enable installers to auto-create the input queue for tests
                     // in real Azure functions the input queue is assumed to exist

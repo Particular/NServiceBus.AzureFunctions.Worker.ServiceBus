@@ -87,10 +87,14 @@ public class PipelineInvokingMessageProcessorTests
         Assert.Multiple(() =>
         {
             Assert.That(errorContext.Exception, Is.SameAs(pipelineException));
+#pragma warning disable CS0618 // Type or member is obsolete
             Assert.That(errorContext.Message.NativeMessageId, Is.SameAs(messageId));
             Assert.That(errorContext.Message.Body.ToArray(), Is.EqualTo(body.ToArray()));
+#pragma warning restore CS0618 // Type or member is obsolete
         });
+#pragma warning disable CS0618 // Type or member is obsolete
         Assert.That(userProperties, Is.SubsetOf(errorContext.Message.Headers)); // the IncomingMessage has an additional MessageId header
+#pragma warning restore CS0618 // Type or member is obsolete
         Assert.Multiple(() =>
         {
             Assert.That(messageContext.TransportTransaction.TryGet(out AzureServiceBusTransportTransaction messageContextTransaction), Is.True);
