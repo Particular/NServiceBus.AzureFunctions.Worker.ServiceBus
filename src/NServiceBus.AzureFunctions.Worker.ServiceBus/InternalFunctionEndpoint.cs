@@ -9,11 +9,15 @@ using Microsoft.Azure.Functions.Worker;
 
 sealed class InternalFunctionEndpoint : IFunctionEndpoint
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     internal InternalFunctionEndpoint(IStartableEndpointWithExternallyManagedContainer externallyManagedContainerEndpoint, ServerlessTransport serverlessTransport, IServiceProvider serviceProvider)
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         this.serverlessTransport = serverlessTransport;
         this.serverlessTransport.ServiceProvider = serviceProvider;
+#pragma warning disable CS0618 // Type or member is obsolete
         endpointFactory = () => externallyManagedContainerEndpoint.Start(serviceProvider);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <inheritdoc />
@@ -128,11 +132,15 @@ sealed class InternalFunctionEndpoint : IFunctionEndpoint
     public Task Unsubscribe(Type eventType, FunctionContext functionContext, CancellationToken cancellationToken = default)
         => Unsubscribe(eventType, new UnsubscribeOptions(), functionContext, cancellationToken);
 
+#pragma warning disable CS0618 // Type or member is obsolete
     readonly Func<Task<IEndpointInstance>> endpointFactory;
+#pragma warning restore CS0618 // Type or member is obsolete
 
     readonly SemaphoreSlim semaphoreLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
     readonly ServerlessTransport serverlessTransport;
 
     IMessageProcessor messageProcessor;
+#pragma warning disable CS0618 // Type or member is obsolete
     IEndpointInstance endpoint;
+#pragma warning restore CS0618 // Type or member is obsolete
 }

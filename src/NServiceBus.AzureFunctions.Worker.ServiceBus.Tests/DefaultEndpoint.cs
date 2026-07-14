@@ -20,8 +20,10 @@ class DefaultEndpoint : IEndpointSetupTemplate
 
         configuration.EnableInstallers();
 
+#pragma warning disable CS0618 // Type or member is obsolete
         configuration.RegisterComponents(c => c
             .AddSingleton(runDescriptor.ScenarioContext.GetType(), runDescriptor.ScenarioContext));
+#pragma warning restore CS0618 // Type or member is obsolete
 
         var recoverability = configuration.Recoverability();
         recoverability.Delayed(delayed => delayed.NumberOfRetries(0));
