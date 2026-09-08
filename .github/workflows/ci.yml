@@ -56,4 +56,4 @@ jobs:
           azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           tag: ASBWorkerFunctions
       - name: Run tests
-        uses: Particular/run-tests-action@v1.7.0
+        uses: Particular/run-tests-action@v1.8.0
